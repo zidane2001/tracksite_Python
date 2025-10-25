@@ -1,0 +1,110 @@
+## Structure Complète du Projet
+
+### Description du Projet
+Il s'agit d'un système de gestion d'expédition full-stack appelé "Shipping Management System". L'application permet de gérer les emplacements d'expédition, les zones, les tarifs d'expédition, les tarifs de ramassage, et les envois avec calculs de poids. Elle comprend une interface utilisateur React avec TypeScript et un backend Python (Flask) avec une base de données SQLite.
+
+**Fonctionnalités principales :**
+- Gestion des emplacements et zones d'expédition
+- Configuration des tarifs d'expédition (plats ou basés sur le poids)
+- Gestion des envois avec calculs de poids volumétrique
+- Import/export CSV pour les opérations en masse
+- Interface responsive pour desktop et mobile
+- Authentification admin/utilisateur
+- Tableaux de bord pour l'administration
+- Gestion internationale, factures, rapports, paramètres personnalisés
+
+**Pile technologique :**
+- **Frontend :** React 18 + TypeScript, Vite, Tailwind CSS, DaisyUI, Lucide React
+- **Backend :** Python (Flask), SQLite
+- **Outils :** ESLint, PostCSS, Docker
+
+### Arborescence Complète du Projet
+
+```
+TracsitePython/
+├── .eslintrc.cjs                    # Configuration ESLint
+├── .gitignore                       # Fichiers ignorés par Git
+├── .netlify/                        # Configuration Netlify (déploiement)
+├── Dockerfile                       # Configuration Docker
+├── get-docker.sh                    # Script pour Docker
+├── index.html                       # Point d'entrée HTML
+├── package-lock.json                # Verrouillage des dépendances npm
+├── package.json                     # Configuration npm frontend
+├── postcss.config.js                # Configuration PostCSS
+├── README.md                        # Documentation du projet
+├── tailwind.config.js               # Configuration Tailwind CSS
+├── tsconfig.json                    # Configuration TypeScript
+├── tsconfig.node.json               # Configuration TypeScript pour Node
+├── vite.config.ts                   # Configuration Vite
+├── backend/                         # Dossier backend Python
+│   ├── app.py                       # Application Flask principale
+│   ├── database.db                  # Base de données SQLite
+│   └── requirements.txt             # Dépendances Python
+└── src/                             # Code source frontend
+    ├── App.tsx                      # Composant principal React
+    ├── AppRouter.tsx                # Configuration du routage
+    ├── index.css                    # Styles CSS globaux
+    └── index.tsx                    # Point d'entrée React
+    ├── components/                  # Composants React
+    │   ├── auth/                    # Composants d'authentification
+    │   │   ├── AdminLogin.tsx       # Connexion admin
+    │   │   ├── UserLogin.tsx        # Connexion utilisateur
+    │   │   └── UserRegister.tsx     # Inscription utilisateur
+    │   ├── dashboard/               # Composants tableau de bord
+    │   │   ├── AdminDashboard.tsx   # Dashboard admin
+    │   │   └── Dashboard.tsx        # Dashboard utilisateur
+    │   ├── deliveries/              # Gestion des livraisons
+    │   │   └── DeliveriesManagement.tsx
+    │   ├── international/           # Gestion internationale
+    │   │   └── InternationalManagement.tsx
+    │   ├── invoices/                # Gestion des factures
+    │   │   └── InvoicesManagement.tsx
+    │   ├── layout/                  # Layouts
+    │   │   └── AdminLayout.tsx      # Layout admin
+    │   ├── rates/                   # Gestion des tarifs
+    │   │   ├── LocationsManagement.tsx    # Gestion emplacements
+    │   │   ├── PickupRatesManagement.tsx # Tarifs ramassage
+    │   │   ├── ShippingRatesManagement.tsx # Tarifs expédition
+    │   │   └── ZonesManagement.tsx        # Gestion zones
+    │   ├── reports/                 # Rapports
+    │   │   └── ReportsManagement.tsx
+    │   ├── settings/                # Paramètres
+    │   │   ├── CustomFieldsManager.tsx   # Champs personnalisés
+    │   │   ├── GeneralSettings.tsx       # Paramètres généraux
+    │   │   └── MapSettings.tsx           # Paramètres carte
+    │   ├── shipments/               # Gestion des envois
+    │   │   ├── AddressAutocomplete.tsx   # Autocomplétion adresses
+    │   │   ├── ShipmentManagement.tsx    # Gestion envois
+    │   │   └── TrackingHistoryManagement.tsx # Historique tracking
+    │   ├── ui/                      # Composants UI réutilisables
+    │   │   ├── AnimatedButton.tsx   # Bouton animé
+    │   │   └── LanguageSelector.tsx # Sélecteur de langue
+    │   └── users/                   # Gestion utilisateurs
+    │       └── UserManagement.tsx
+    ├── layouts/                     # Layouts de page
+    │   └── UserLayout.tsx           # Layout utilisateur
+    ├── pages/                       # Pages de l'application
+    │   ├── ContactPage.tsx          # Page contact
+    │   ├── HomePage.tsx             # Page d'accueil
+    │   ├── QuotePage.tsx            # Page devis
+    │   ├── TrackingPage.tsx         # Page tracking
+    │   └── services/                # Pages services
+    │       ├── AirServicePage.tsx   # Service aérien
+    │       ├── DeliveryServicePage.tsx # Service livraison
+    │       └── SpecialServicePage.tsx   # Service spécial
+    └── utils/                       # Utilitaires
+        ├── animation.ts             # Animations
+        ├── api.ts                   # Configuration API
+        ├── csv.ts                   # Gestion CSV
+        ├── i18n.ts                  # Internationalisation
+        ├── storage.ts               # Stockage local
+        └── weight.ts                # Calculs de poids
+```
+
+### Points d'Entrée et Configuration
+- **Frontend :** Démarre avec `npm run dev` (port 5173)
+- **Backend :** Démarre avec `cd backend && python3 app.py` (port 3001)
+- **Base de données :** SQLite (`backend/database.db`) créée automatiquement
+- **Déploiement :** Support pour Netlify (frontend) et services Node.js (backend mentionné mais utilise Python)
+
+L'application est actuellement en cours d'exécution avec le backend Python et le frontend en développement.

@@ -70,11 +70,11 @@ export const ContactPage: React.FC = () => {
       <div className="bg-primary text-primary-content py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Contactez-nous
+            Contact Us
           </h1>
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-            Nous sommes là pour répondre à toutes vos questions. N'hésitez pas à
-            nous contacter.
+            We are here to answer all your questions. Don't hesitate to
+            contact us.
           </p>
         </div>
       </div>
@@ -84,7 +84,7 @@ export const ContactPage: React.FC = () => {
             <div>
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  Nos coordonnées
+                  Our Contact Details
                 </h2>
                 <div className="space-y-6">
                   <div className="flex items-start">
@@ -92,7 +92,7 @@ export const ContactPage: React.FC = () => {
                       <MapPinIcon className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800">Adresse</h3>
+                      <h3 className="font-medium text-gray-800">Address</h3>
                       <p className="text-gray-600 mt-1">
                         123 Rue de la Logistique
                         <br />
@@ -105,7 +105,7 @@ export const ContactPage: React.FC = () => {
                       <PhoneIcon className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800">Téléphone</h3>
+                      <h3 className="font-medium text-gray-800">Phone</h3>
                       <p className="text-gray-600 mt-1">
                         <a
                           href="tel:+33123456789"
@@ -138,14 +138,14 @@ export const ContactPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-800">
-                        Heures d'ouverture
+                        Opening Hours
                       </h3>
                       <p className="text-gray-600 mt-1">
-                        Lundi - Vendredi: 8h30 - 18h00
+                        Monday - Friday: 8:30 AM - 6:00 PM
                         <br />
-                        Samedi: 9h00 - 12h00
+                        Saturday: 9:00 AM - 12:00 PM
                         <br />
-                        Dimanche: Fermé
+                        Sunday: Closed
                       </p>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export const ContactPage: React.FC = () => {
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Envoyez-nous un message
+                Send us a message
               </h2>
               {submitSuccess ? (
                 <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
@@ -196,12 +196,12 @@ export const ContactPage: React.FC = () => {
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-green-800">
-                        Message envoyé avec succès
+                        Message sent successfully
                       </h3>
                       <div className="mt-2 text-sm text-green-700">
                         <p>
-                          Merci de nous avoir contactés. Nous vous répondrons
-                          dans les plus brefs délais.
+                          Thank you for contacting us. We will respond to you
+                          as soon as possible.
                         </p>
                       </div>
                     </div>
@@ -215,14 +215,14 @@ export const ContactPage: React.FC = () => {
                         htmlFor="name"
                         className="block text-gray-700 text-sm font-medium mb-2 label-text"
                       >
-                        Nom complet <span className="text-red-500">*</span>
+                        Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="name"
                         name="name"
                         className="input input-bordered input-primary w-full"
-                        placeholder="Votre nom"
+                        placeholder="Your name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
@@ -240,7 +240,7 @@ export const ContactPage: React.FC = () => {
                         id="email"
                         name="email"
                         className="input input-bordered input-primary w-full"
-                        placeholder="votre.email@exemple.com"
+                        placeholder="your.email@example.com"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
@@ -253,14 +253,14 @@ export const ContactPage: React.FC = () => {
                         htmlFor="phone"
                         className="block text-gray-700 text-sm font-medium mb-2 label-text"
                       >
-                        Téléphone
+                        Phone
                       </label>
                       <input
                         type="tel"
                         id="phone"
                         name="phone"
                         className="input input-bordered input-primary w-full"
-                        placeholder="Votre numéro de téléphone"
+                        placeholder="Your phone number"
                         value={formData.phone}
                         onChange={handleInputChange}
                       />
@@ -270,7 +270,7 @@ export const ContactPage: React.FC = () => {
                         htmlFor="subject"
                         className="block text-gray-700 text-sm font-medium mb-2 label-text"
                       >
-                        Sujet <span className="text-red-500">*</span>
+                        Subject <span className="text-red-500">*</span>
                       </label>
                       <select
                         id="subject"
@@ -280,12 +280,12 @@ export const ContactPage: React.FC = () => {
                         onChange={handleInputChange}
                         required
                       >
-                        <option value="">Sélectionnez un sujet</option>
-                        <option value="quote">Demande de devis</option>
-                        <option value="tracking">Suivi de colis</option>
-                        <option value="complaint">Réclamation</option>
-                        <option value="info">Demande d'information</option>
-                        <option value="other">Autre</option>
+                        <option value="">Select a subject</option>
+                        <option value="quote">Quote request</option>
+                        <option value="tracking">Package tracking</option>
+                        <option value="complaint">Complaint</option>
+                        <option value="info">Information request</option>
+                        <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
@@ -301,7 +301,7 @@ export const ContactPage: React.FC = () => {
                       name="message"
                       rows={5}
                       className="textarea textarea-bordered textarea-primary w-full"
-                      placeholder="Votre message"
+                      placeholder="Your message"
                       value={formData.message}
                       onChange={handleInputChange}
                       required
@@ -326,7 +326,7 @@ export const ContactPage: React.FC = () => {
                         </div>
                         <div className="ml-3">
                           <h3 className="text-sm font-medium text-red-800">
-                            Une erreur est survenue
+                            An error occurred
                           </h3>
                           <div className="mt-2 text-sm text-red-700">
                             <p>{submitError}</p>
@@ -362,12 +362,12 @@ export const ContactPage: React.FC = () => {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        Envoi en cours...
+                        Sending...
                       </>
                     ) : (
                       <>
                         <SendIcon size={18} className="mr-2" />
-                        Envoyer le message
+                        Send message
                       </>
                     )}
                   </button>
@@ -383,58 +383,54 @@ export const ContactPage: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Questions fréquentes
+                Frequently Asked Questions
               </h2>
               <p className="text-gray-600">
-                Consultez nos réponses aux questions les plus fréquemment posées
+                Check our answers to the most frequently asked questions
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="divide-y divide-gray-200">
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    Comment puis-je suivre mon colis ?
+                    How can I track my package?
                   </h3>
                   <p className="text-gray-600">
-                    Vous pouvez suivre votre colis en utilisant le numéro de
-                    suivi qui vous a été fourni lors de l'expédition.
-                    Rendez-vous sur notre page de suivi et entrez ce numéro pour
-                    voir l'état actuel de votre envoi.
+                    You can track your package using the tracking number
+                    provided during shipment. Go to our tracking page and enter
+                    this number to see the current status of your shipment.
                   </p>
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    Quels sont vos délais de livraison ?
+                    What are your delivery times?
                   </h3>
                   <p className="text-gray-600">
-                    Nos délais de livraison varient en fonction du service
-                    choisi et de la destination. En général, les livraisons
-                    nationales prennent 1 à 3 jours ouvrables, tandis que les
-                    livraisons internationales peuvent prendre de 3 à 10 jours
-                    ouvrables.
+                    Our delivery times vary depending on the service chosen
+                    and the destination. Generally, domestic deliveries take
+                    1 to 3 business days, while international deliveries can
+                    take 3 to 10 business days.
                   </p>
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    Comment puis-je obtenir un devis pour mon envoi ?
+                    How can I get a quote for my shipment?
                   </h3>
                   <p className="text-gray-600">
-                    Vous pouvez obtenir un devis instantané en utilisant notre
-                    calculateur de tarifs en ligne. Il vous suffit de fournir
-                    les détails de votre envoi, notamment l'origine, la
-                    destination, le poids et les dimensions du colis.
+                    You can get an instant quote using our online rate
+                    calculator. Simply provide the details of your shipment,
+                    including origin, destination, weight and package dimensions.
                   </p>
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    Que faire en cas de colis endommagé ou perdu ?
+                    What to do if my package is damaged or lost?
                   </h3>
                   <p className="text-gray-600">
-                    Si votre colis est endommagé ou perdu, veuillez nous
-                    contacter dès que possible. Nous vous demanderons de fournir
-                    le numéro de suivi et des détails sur le problème. Notre
-                    équipe de service client traitera votre réclamation dans les
-                    plus brefs délais.
+                    If your package is damaged or lost, please contact us as
+                    soon as possible. We will ask you to provide the tracking
+                    number and details about the issue. Our customer service
+                    team will process your claim as soon as possible.
                   </p>
                 </div>
               </div>

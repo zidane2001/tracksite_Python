@@ -102,13 +102,7 @@ export const HomePage: React.FC = () => {
               {t('home.hero.badge')}
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              {t('home.hero.title').split(' ')[0]} {t('home.hero.title').split(' ')[1]}{' '}
-              <span className="text-warning relative">
-                {t('home.hero.title').split(' ').slice(2).join(' ')}
-                <svg className="absolute -bottom-2 left-0 w-full h-3 text-warning opacity-50" viewBox="0 0 100 12" preserveAspectRatio="none">
-                  <path d="M0,0 Q50,12 100,0" fill="currentColor" />
-                </svg>
-              </span>
+              {t('home.hero.title')}
             </h1>
             <p className="text-lg sm:text-xl mb-8 text-base-content/90 leading-relaxed">
               {t('home.hero.subtitle')}
@@ -158,7 +152,7 @@ export const HomePage: React.FC = () => {
               </h2>
               <div className="mb-4">
                 <label htmlFor="tracking-number" className="block text-base-content/70 text-sm font-medium mb-2">
-                  {t('home.hero.trackingPlaceholder').split(':')[0]}
+                  Numéro de suivi
                 </label>
                 <div className="relative">
                   <input type="text" id="tracking-number" className="input input-bordered w-full pr-10" placeholder={t('home.hero.trackingPlaceholder')} />
@@ -233,11 +227,10 @@ export const HomePage: React.FC = () => {
               <GlobeIcon className="h-8 w-8 text-warning" />
             </div>
             <h3 className="text-xl font-bold text-base-content mb-3">
-              Couverture mondiale
+              {t('home.features.global')}
             </h3>
             <p className="text-base-content/60 mb-4">
-              Expédiez vos colis partout dans le monde grâce à notre réseau
-              logistique international couvrant plus de 200 pays.
+              {t('home.features.globalDesc')}
             </p>
           </motion.div>
           <motion.div className="bg-base-100 dark:bg-base-100/80 rounded-xl shadow-lg p-6 border-t-4 border-primary" initial={{
@@ -259,11 +252,10 @@ export const HomePage: React.FC = () => {
               <BarChart4Icon className="h-8 w-8 text-primary" />
             </div>
             <h3 className="text-xl font-bold text-base-content mb-3">
-              Tarifs compétitifs
+              {t('home.features.competitive')}
             </h3>
             <p className="text-base-content/60 mb-4">
-              Bénéficiez des meilleurs prix du marché grâce à notre système de
-              comparaison instantanée entre transporteurs.
+              {t('home.features.competitiveDesc')}
             </p>
           </motion.div>
           <motion.div className="bg-base-100 dark:bg-base-100/80 rounded-xl shadow-lg p-6 border-t-4 border-success" initial={{
@@ -285,11 +277,10 @@ export const HomePage: React.FC = () => {
               <HeadphonesIcon className="h-8 w-8 text-success" />
             </div>
             <h3 className="text-xl font-bold text-base-content mb-3">
-              Support 24/7
+              {t('home.features.support')}
             </h3>
             <p className="text-base-content/60 mb-4">
-              Notre équipe de support client est disponible 24h/24 et 7j/7
-              pour répondre à toutes vos questions et résoudre vos problèmes.
+              {t('home.features.supportDesc')}
             </p>
           </motion.div>
         </div>
@@ -315,12 +306,11 @@ export const HomePage: React.FC = () => {
             Nos Solutions
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
-            Services d'Expédition Premium
+            {t('home.services.title')}
           </h2>
           <div className="w-24 h-1 bg-warning mx-auto mb-6"></div>
           <p className="text-base-content/60 max-w-2xl mx-auto text-lg">
-            Découvrez nos différentes solutions d'expédition adaptées à tous
-            vos besoins, que ce soit par voie maritime, aérienne ou terrestre.
+            {t('home.services.subtitle')}
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
@@ -346,11 +336,10 @@ export const HomePage: React.FC = () => {
                 <ShipIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
-                Expédition Maritime
+                {t('home.services.maritime')}
               </h3>
               <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
-                Solution économique pour les envois volumineux sans contrainte
-                de temps.
+                {t('home.services.maritimeDesc')}
               </p>
               <Link to="/services/shipping" className="inline-flex items-center text-warning/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
                 <span>En savoir plus</span>
@@ -380,11 +369,10 @@ export const HomePage: React.FC = () => {
                 <PlaneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
-                Fret Aérien
+                {t('home.services.air')}
               </h3>
               <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
-                Livraison rapide pour les envois urgents et documents
-                importants.
+                {t('home.services.airDesc')}
               </p>
               <Link to="/services/air" className="inline-flex items-center text-primary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
                 <span>En savoir plus</span>
@@ -414,10 +402,10 @@ export const HomePage: React.FC = () => {
                 <TruckIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
-                Livraison Porte-à-Porte
+                {t('home.services.door')}
               </h3>
               <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
-                Service complet de ramassage et livraison à domicile.
+                {t('home.services.doorDesc')}
               </p>
               <Link to="/services/delivery" className="inline-flex items-center text-success/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
                 <span>En savoir plus</span>
@@ -447,10 +435,10 @@ export const HomePage: React.FC = () => {
                 <PackageIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
-                Colis Spéciaux
+                {t('home.services.special')}
               </h3>
               <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
-                Transport sécurisé d'objets fragiles, précieux ou hors-normes.
+                {t('home.services.specialDesc')}
               </p>
               <Link to="/services/special" className="inline-flex items-center text-secondary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
                 <span>En savoir plus</span>
@@ -485,12 +473,11 @@ export const HomePage: React.FC = () => {
             Processus Simple
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
-            Comment ça marche
+            {t('home.howItWorks.title')}
           </h2>
           <div className="w-24 h-1 bg-warning mx-auto mb-6"></div>
           <p className="text-base-content/60 max-w-2xl mx-auto text-lg">
-            Expédier un colis avec ColisSelect est simple et rapide. Suivez
-            ces étapes pour envoyer votre colis en toute sécurité.
+            {t('home.howItWorks.subtitle')}
           </p>
         </motion.div>
         <div className="relative">
@@ -521,11 +508,10 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-base-content mb-4">
-                Demandez un devis
+                {t('home.howItWorks.step1')}
               </h3>
               <p className="text-base-content/60">
-                Remplissez notre formulaire en ligne pour obtenir un devis
-                instantané basé sur votre envoi.
+                {t('home.howItWorks.step1Desc')}
               </p>
             </motion.div>
             <motion.div className="bg-base-100 dark:bg-base-100/80 rounded-xl shadow-lg p-6 sm:p-8 text-center relative z-10" initial={{
@@ -553,11 +539,10 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-base-content mb-4">
-                Préparez votre colis
+                {t('home.howItWorks.step2')}
               </h3>
               <p className="text-base-content/60">
-                Emballez soigneusement votre colis et préparez les documents
-                nécessaires à l'expédition.
+                {t('home.howItWorks.step2Desc')}
               </p>
             </motion.div>
             <motion.div className="bg-base-100 dark:bg-base-100/80 rounded-xl shadow-lg p-6 sm:p-8 text-center relative z-10" initial={{
@@ -585,11 +570,10 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-base-content mb-4">
-                Collecte ou dépôt
+                {t('home.howItWorks.step3')}
               </h3>
               <p className="text-base-content/60">
-                Choisissez entre la collecte à domicile ou le dépôt dans l'un
-                de nos points relais.
+                {t('home.howItWorks.step3Desc')}
               </p>
             </motion.div>
             <motion.div className="bg-base-100 dark:bg-base-100/80 rounded-xl shadow-lg p-6 sm:p-8 text-center relative z-10" initial={{
@@ -617,11 +601,10 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-base-content mb-4">
-                Suivez votre envoi
+                {t('home.howItWorks.step4')}
               </h3>
               <p className="text-base-content/60">
-                Recevez un numéro de suivi pour surveiller l'avancement de
-                votre colis en temps réel.
+                {t('home.howItWorks.step4Desc')}
               </p>
             </motion.div>
           </div>
@@ -645,7 +628,7 @@ export const HomePage: React.FC = () => {
             scale: 0.95
           }}>
             <Link to="/quote" className="btn btn-primary btn-lg px-8 py-4">
-              Commencer maintenant
+              {t('home.howItWorks.start')}
             </Link>
           </motion.div>
         </motion.div>
@@ -671,12 +654,11 @@ export const HomePage: React.FC = () => {
             Témoignages
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
-            Ce que disent nos clients
+            {t('home.testimonials.title')}
           </h2>
           <div className="w-24 h-1 bg-warning mx-auto mb-6"></div>
           <p className="text-base-content/60 max-w-2xl mx-auto text-lg">
-            Découvrez les témoignages de nos clients satisfaits qui font
-            confiance à ColisSelect pour leurs besoins d'expédition.
+            {t('home.testimonials.subtitle')}
           </p>
         </motion.div>
         <div className="max-w-4xl mx-auto">
@@ -741,7 +723,9 @@ export const HomePage: React.FC = () => {
                       <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
                     </svg>
                     <p className="text-base-content text-base sm:text-lg leading-relaxed mb-6">
-                      {testimonials[currentTestimonial].text}
+                      {currentTestimonial === 0 ? t('home.testimonials.text1') :
+                       currentTestimonial === 1 ? t('home.testimonials.text2') :
+                       t('home.testimonials.text3')}
                     </p>
                     <div className="flex justify-center md:justify-start">
                       {testimonials.map((_, index) => <button key={index} onClick={() => setCurrentTestimonial(index)} className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mx-1 ${index === currentTestimonial ? 'bg-warning' : 'bg-base-content/20'}`} aria-label={`Voir témoignage ${index + 1}`} />)}
@@ -791,17 +775,16 @@ export const HomePage: React.FC = () => {
             duration: 0.6
           }}>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-base-100">
-              Prêt à expédier votre colis ?
+              {t('home.cta.title')}
             </h2>
             <p className="text-lg sm:text-xl text-base-100/95 mb-8 sm:mb-10">
-              Obtenez un devis instantané et commencez votre expédition dès
-              aujourd'hui avec ColisSelect.
+              {t('home.cta.subtitle')}
             </p>
             <div className="bg-base-100/15 dark:bg-base-100/10 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="flex flex-col">
                   <label className="text-sm mb-2 text-base-100/95">
-                    Pays d'origine
+                    {t('home.cta.origin')}
                   </label>
                   <select className="select select-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
                     <option value="france">France</option>
@@ -811,7 +794,7 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                   <label className="text-sm mb-2 text-base-100/95">
-                    Pays de destination
+                    {t('home.cta.destination')}
                   </label>
                   <select className="select select-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
                     <option value="usa">États-Unis</option>
@@ -821,9 +804,9 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                   <label className="text-sm mb-2 text-base-100/95">
-                    Poids (kg)
+                    {t('home.cta.weight')}
                   </label>
-                  <input type="number" placeholder="Ex: 5" className="input input-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full" />
+                  <input type="number" placeholder={t('home.cta.weightPlaceholder')} className="input input-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full" />
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
@@ -833,7 +816,7 @@ export const HomePage: React.FC = () => {
                   scale: 0.95
                 }}>
                   <Link to="/quote" className="btn btn-warning w-full sm:w-auto">
-                    Obtenir un devis
+                    {t('home.cta.getQuote')}
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{
@@ -842,7 +825,7 @@ export const HomePage: React.FC = () => {
                   scale: 0.95
                 }}>
                   <Link to="/contact" className="btn btn-ghost border-2 border-base-100 w-full sm:w-auto">
-                    Contactez-nous
+                    {t('home.cta.contact')}
                   </Link>
                 </motion.div>
               </div>
@@ -874,10 +857,10 @@ export const HomePage: React.FC = () => {
               <div className="text-2xl sm:text-4xl font-bold text-warning">15+</div>
             </div>
             <div className="font-semibold text-base-content mb-1">
-              Années d'expérience
+              {t('home.trust.experience')}
             </div>
             <p className="text-base-content/60 text-sm">
-              Expertise logistique confirmée
+              {t('home.trust.experienceDesc')}
             </p>
           </motion.div>
           <motion.div className="text-center" initial={{
@@ -898,9 +881,9 @@ export const HomePage: React.FC = () => {
               <div className="text-2xl sm:text-4xl font-bold text-primary">50k+</div>
             </div>
             <div className="font-semibold text-base-content mb-1">
-              Colis livrés
+              {t('home.trust.packages')}
             </div>
-            <p className="text-base-content/60 text-sm">Chaque mois dans le monde</p>
+            <p className="text-base-content/60 text-sm">{t('home.trust.packagesDesc')}</p>
           </motion.div>
           <motion.div className="text-center" initial={{
             opacity: 0,
@@ -920,9 +903,9 @@ export const HomePage: React.FC = () => {
               <div className="text-2xl sm:text-4xl font-bold text-success">200+</div>
             </div>
             <div className="font-semibold text-base-content mb-1">
-              Destinations
+              {t('home.trust.destinations')}
             </div>
-            <p className="text-base-content/60 text-sm">Couverture mondiale</p>
+            <p className="text-base-content/60 text-sm">{t('home.trust.destinationsDesc')}</p>
           </motion.div>
           <motion.div className="text-center" initial={{
             opacity: 0,
@@ -942,9 +925,9 @@ export const HomePage: React.FC = () => {
               <div className="text-2xl sm:text-4xl font-bold text-secondary">99%</div>
             </div>
             <div className="font-semibold text-base-content mb-1">
-              Clients satisfaits
+              {t('home.trust.satisfaction')}
             </div>
-            <p className="text-base-content/60 text-sm">Service client premium</p>
+            <p className="text-base-content/60 text-sm">{t('home.trust.satisfactionDesc')}</p>
           </motion.div>
         </div>
       </div>
@@ -965,11 +948,10 @@ export const HomePage: React.FC = () => {
           duration: 0.6
         }}>
           <h3 className="text-xl sm:text-2xl font-bold text-base-content mb-2">
-            Nos Partenaires de Confiance
+            {t('home.partners.title')}
           </h3>
           <p className="text-base-content/60">
-            Nous collaborons avec les meilleurs transporteurs mondiaux pour
-            vous offrir un service optimal
+            {t('home.partners.subtitle')}
           </p>
         </motion.div>
         <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 md:gap-16">

@@ -21,7 +21,7 @@ export const TrackingPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim()) {
-      setError('Veuillez entrer un numéro de suivi');
+      setError('Please enter a tracking number');
       return;
     }
     setIsLoading(true);
@@ -31,7 +31,7 @@ export const TrackingPage: React.FC = () => {
       const result = await trackingApi.track(trackingNumber.trim());
       setTrackingResult(result);
     } catch (err) {
-      setError('Numéro de suivi non trouvé. Veuillez vérifier et réessayer.');
+      setError('Tracking number not found. Please check and try again.');
       setTrackingResult(null);
     } finally {
       setIsLoading(false);
@@ -113,12 +113,12 @@ export const TrackingPage: React.FC = () => {
               </div>
               {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
               <p className="mt-1 text-xs text-gray-500">
-                Pour tester, utilisez le numéro de suivi: SHIP065364729622-COLISSELECT
+                For testing, use tracking number: SHIP065364729622-COLISSELECT
               </p>
             </div>
             <div className="md:self-end">
               <button type="submit" className={`btn btn-primary ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`} disabled={isLoading}>
-                {isLoading ? 'Chargement...' : 'Suivre'}
+                {isLoading ? 'Loading...' : 'Track'}
               </button>
             </div>
           </div>
@@ -141,10 +141,10 @@ export const TrackingPage: React.FC = () => {
               </div>
               <div className="mt-4 md:mt-0">
                 <p className="text-sm text-gray-600">
-                  Date de livraison estimée:
+                  Estimated delivery date:
                 </p>
                 <p className="text-lg font-medium text-gray-800">
-                  {trackingResult.shipment.expected_delivery || 'À déterminer'}
+                  {trackingResult.shipment.expected_delivery || 'To be determined'}
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipper Information */}
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Informations Expéditeur</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Shipper Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.shipper_name}</p>
@@ -165,7 +165,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Receiver Information */}
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Informations Destinataire</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Receiver Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.receiver_name}</p>
@@ -178,14 +178,14 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipment Status */}
           <div className="p-6 border-b bg-gray-50">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Statut de l'expédition</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Shipment Status</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Origine</p>
+                <p className="text-sm text-gray-500">Origin</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.origin}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Statut</p>
+                <p className="text-sm text-gray-500">Status</p>
                 <p className="font-medium text-gray-800">{getStatusText(trackingResult.shipment.status)}</p>
               </div>
               <div>
@@ -197,32 +197,32 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipment Information */}
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Informations de l'expédition</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Shipment Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Produit</p>
+                <p className="text-sm text-gray-500">Product</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.product || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Quantité</p>
+                <p className="text-sm text-gray-500">Quantity</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.quantity || 1}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Poids</p>
+                <p className="text-sm text-gray-500">Weight</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.total_weight}kg</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Frais de port</p>
+                <p className="text-sm text-gray-500">Shipping Cost</p>
                 <p className="font-medium text-gray-800">€{trackingResult.shipment.total_freight || 0}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <p className="text-sm text-gray-500">Mode de paiement</p>
+                <p className="text-sm text-gray-500">Payment Mode</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.payment_mode || 'Cash'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Date de ramassage</p>
+                <p className="text-sm text-gray-500">Pickup Date</p>
                 <p className="font-medium text-gray-800">{trackingResult.shipment.pickup_date || 'N/A'}</p>
               </div>
             </div>
@@ -230,24 +230,24 @@ export const TrackingPage: React.FC = () => {
 
           {/* Packages Table */}
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Colis</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Packages</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left">Qté</th>
-                    <th className="px-4 py-2 text-left">Type de pièce</th>
+                    <th className="px-4 py-2 text-left">Qty</th>
+                    <th className="px-4 py-2 text-left">Type</th>
                     <th className="px-4 py-2 text-left">Description</th>
-                    <th className="px-4 py-2 text-left">Longueur(cm)</th>
-                    <th className="px-4 py-2 text-left">Largeur(cm)</th>
-                    <th className="px-4 py-2 text-left">Hauteur(cm)</th>
-                    <th className="px-4 py-2 text-left">Poids (kg)</th>
+                    <th className="px-4 py-2 text-left">Length(cm)</th>
+                    <th className="px-4 py-2 text-left">Width(cm)</th>
+                    <th className="px-4 py-2 text-left">Height(cm)</th>
+                    <th className="px-4 py-2 text-left">Weight (kg)</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="px-4 py-2">{trackingResult.shipment.quantity || 1}</td>
-                    <td className="px-4 py-2">Colis</td>
+                    <td className="px-4 py-2">Package</td>
                     <td className="px-4 py-2">{trackingResult.shipment.product || 'N/A'}</td>
                     <td className="px-4 py-2">-</td>
                     <td className="px-4 py-2">-</td>
@@ -268,17 +268,17 @@ export const TrackingPage: React.FC = () => {
         {/* Tracking History */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Historique de l'expédition</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Shipment History</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="px-4 py-2 text-left">Date</th>
-                    <th className="px-4 py-2 text-left">Heure</th>
-                    <th className="px-4 py-2 text-left">Lieu</th>
-                    <th className="px-4 py-2 text-left">Statut</th>
-                    <th className="px-4 py-2 text-left">Mis à jour par</th>
-                    <th className="px-4 py-2 text-left">Remarques</th>
+                    <th className="px-4 py-2 text-left">Time</th>
+                    <th className="px-4 py-2 text-left">Location</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Updated by</th>
+                    <th className="px-4 py-2 text-left">Remarks</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -306,7 +306,7 @@ export const TrackingPage: React.FC = () => {
           <div className="p-6 border-b">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <MapIcon className="h-5 w-5 mr-2" />
-              Suivi de l'itinéraire
+              Route Tracking
             </h3>
           </div>
           <div className="p-6">
@@ -345,12 +345,11 @@ export const TrackingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Besoin d'aide ?
+              Need Help?
             </h2>
             <p className="text-gray-600 mb-4">
-              Si vous avez des questions concernant votre colis ou si vous
-              rencontrez des problèmes avec le suivi, notre équipe de service
-              client est là pour vous aider.
+              If you have questions about your package or encounter issues with
+              tracking, our customer service team is here to help you.
             </p>
             <div className="space-y-3">
               <div className="flex items-center">
@@ -367,41 +366,39 @@ export const TrackingPage: React.FC = () => {
               </div>
             </div>
             <button className="mt-6 bg-blue-600 text-white font-medium px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-              Contacter le support
+              Contact Support
             </button>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              FAQ sur le suivi
+              Tracking FAQ
             </h2>
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium text-gray-800">
-                  Combien de temps faut-il pour mettre à jour le statut ?
+                  How long does it take to update the status?
                 </h3>
                 <p className="text-gray-600 text-sm mt-1">
-                  Les mises à jour de statut sont généralement effectuées dans
-                  les 2-4 heures suivant chaque étape du processus
-                  d'expédition.
+                  Status updates are generally performed within 2-4 hours
+                  following each step of the shipping process.
                 </p>
               </div>
               <div>
                 <h3 className="font-medium text-gray-800">
-                  Que faire si mon colis est marqué comme "Retardé" ?
+                  What to do if my package is marked as "Delayed"?
                 </h3>
                 <p className="text-gray-600 text-sm mt-1">
-                  Un retard peut être dû à diverses raisons. Veuillez attendre
-                  24 heures pour une mise à jour ou contacter notre service
-                  client.
+                  A delay can be due to various reasons. Please wait 24 hours
+                  for an update or contact our customer service.
                 </p>
               </div>
               <div>
                 <h3 className="font-medium text-gray-800">
-                  Comment puis-je vérifier plusieurs colis à la fois ?
+                  How can I track multiple packages at once?
                 </h3>
                 <p className="text-gray-600 text-sm mt-1">
-                  Pour suivre plusieurs colis, veuillez vous connecter à votre
-                  compte client ou contacter notre service client.
+                  To track multiple packages, please log into your customer
+                  account or contact our customer service.
                 </p>
               </div>
             </div>

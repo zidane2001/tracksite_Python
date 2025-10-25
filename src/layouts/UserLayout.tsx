@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { PhoneIcon, MailIcon, MapPinIcon, Package, TruckIcon, DollarSignIcon, MenuIcon, XIcon, ChevronDownIcon, GlobeIcon, ClockIcon, ShieldIcon, ShipIcon, PlaneIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n, LANGUAGES } from '../utils/i18n';
+import LanguageSelector from '../components/ui/LanguageSelector';
 export const UserLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -58,32 +59,7 @@ export const UserLayout: React.FC = () => {
           </div>
           <div className="hidden md:flex items-center space-x-3 pl-4 border-l border-indigo-500">
             <GlobeIcon size={14} />
-            <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="btn btn-ghost btn-sm px-2 py-1 text-xs font-medium rounded-full border border-gray-300 hover:border-gray-400 transition-colors cursor-pointer">
-                <span className="flex items-center">
-                  {LANGUAGES.find(lang => lang.code === language)?.flag || '🌐'}
-                  <span className="ml-1 uppercase">{language}</span>
-                </span>
-              </label>
-              <ul tabIndex={0} className="dropdown-content z-[50] menu p-2 shadow bg-white dark:bg-gray-800 rounded-box w-52 border border-gray-200 dark:border-gray-700">
-                {LANGUAGES.map((lang) => (
-                  <li key={lang.code}>
-                    <a
-                      onClick={() => setLanguage(lang.code)}
-                      className={`flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
-                        language === lang.code
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-l-4 border-blue-500'
-                          : 'text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      <span className="mr-3 text-lg">{lang.flag}</span>
-                      <span className="font-medium">{lang.nativeName}</span>
-                      <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">({lang.name})</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <LanguageSelector />
           </div>
         </div>
       </div>
@@ -145,10 +121,10 @@ export const UserLayout: React.FC = () => {
               {/* Services Dropdown */}
               <div className="relative group">
                 <button className={`flex items-center px-3 py-2 rounded-md ${isActive('/services')} transition-colors duration-200 relative group`} onClick={() => setServicesOpen(!servicesOpen)}>
-                  <span>Services</span>
-                  <ChevronDownIcon size={16} className={`ml-1 transform transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 transition-all duration-300 group-hover:w-full"></span>
-                </button>
+                   <span>{t('services.shipping')}</span>
+                   <ChevronDownIcon size={16} className={`ml-1 transform transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
+                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 transition-all duration-300 group-hover:w-full"></span>
+                 </button>
                 <AnimatePresence>
                   {servicesOpen && <motion.div className="absolute top-full left-0 mt-1 w-64 rounded-md shadow-xl bg-white overflow-hidden z-50" initial={{
                     opacity: 0,
@@ -237,7 +213,7 @@ export const UserLayout: React.FC = () => {
                 scale: 0.95
               }}>
                 <Link to="/quote" className="btn btn-primary">
-                  <span className="relative">Demander un devis</span>
+                  <span className="relative">{t('nav.getQuote')}</span>
                 </Link>
               </motion.div>
             </div>
@@ -295,7 +271,7 @@ export const UserLayout: React.FC = () => {
                 e.preventDefault();
                 setServicesOpen(!servicesOpen);
               }}>
-                <span>Services</span>
+                <span>{t('services.shipping')}</span>
                 <ChevronDownIcon size={16} className={`transform transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
@@ -512,7 +488,7 @@ export const UserLayout: React.FC = () => {
               delay: 0.3
             }}>
               <h3 className="text-lg font-semibold mb-4 relative inline-block">
-                Nos Services
+                {t('footer.services')}
                 <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-amber-500"></span>
               </h3>
               <ul className="space-y-3">
@@ -563,7 +539,7 @@ export const UserLayout: React.FC = () => {
               delay: 0.4
             }}>
               <h3 className="text-lg font-semibold mb-4 relative inline-block">
-                Liens Rapides
+                {t('footer.quickLinks')}
                 <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-amber-500"></span>
               </h3>
               <ul className="space-y-3">
@@ -613,7 +589,7 @@ export const UserLayout: React.FC = () => {
               delay: 0.5
             }}>
               <h3 className="text-lg font-semibold mb-4 relative inline-block">
-                Contact
+                {t('footer.contact')}
                 <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-amber-500"></span>
               </h3>
               <div className="bg-gray-800 rounded-lg p-5 shadow-inner">
@@ -647,7 +623,7 @@ export const UserLayout: React.FC = () => {
                 </ul>
                 <div className="mt-5 pt-5 border-t border-gray-700">
                   <h4 className="text-sm font-medium text-gray-300 mb-3">
-                    Newsletter
+                    {t('footer.newsletter')}
                   </h4>
                   <div className="join w-full">
                     <input type="email" placeholder="Votre email" className="input input-bordered join-item w-full" />
@@ -669,8 +645,7 @@ export const UserLayout: React.FC = () => {
           delay: 0.6
         }}>
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} ColisSelect. Tous droits
-            réservés.
+            {t('footer.copyright')}
           </p>
           <div className="flex flex-wrap gap-4">
             <Link to="/privacy" className="text-gray-400 hover:text-amber-400 text-sm transition-colors">

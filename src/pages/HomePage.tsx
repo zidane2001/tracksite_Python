@@ -74,7 +74,7 @@ export const HomePage: React.FC = () => {
           y: [0, 15, 0]
         }} transition={{
           repeat: Infinity,
-          duration: 8,
+          duration: 4,
           ease: 'easeInOut'
         }}></motion.div>
         <motion.div className="absolute top-64 -left-20 w-32 h-32 md:w-64 md:h-64 rounded-full bg-primary mix-blend-multiply opacity-30" animate={{
@@ -82,7 +82,7 @@ export const HomePage: React.FC = () => {
           y: [0, 20, 0]
         }} transition={{
           repeat: Infinity,
-          duration: 10,
+          duration: 5,
           ease: 'easeInOut'
         }}></motion.div>
       </div>
@@ -95,7 +95,7 @@ export const HomePage: React.FC = () => {
             opacity: 1,
             x: 0
           }} transition={{
-            duration: 0.8,
+            duration: 0.4,
             ease: 'easeOut'
           }}>
             <div className="badge badge-warning badge-lg px-6 py-3 mb-6">
@@ -136,9 +136,9 @@ export const HomePage: React.FC = () => {
             opacity: 1,
             x: 0
           }} transition={{
-            duration: 0.8,
+            duration: 0.4,
             ease: 'easeOut',
-            delay: 0.2
+            delay: 0.1
           }}>
             <div className="bg-base-100 p-4 sm:p-6 rounded-lg shadow-2xl relative">
               <div className="absolute -top-4 -right-4 w-12 h-12 sm:w-20 sm:h-20">
@@ -219,7 +219,7 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5
+            duration: 0.3
           }} whileHover={{
             y: -10
           }}>
@@ -243,8 +243,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.2
+            duration: 0.3,
+            delay: 0.1
           }} whileHover={{
             y: -10
           }}>
@@ -268,8 +268,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.4
+            duration: 0.3,
+            delay: 0.2
           }} whileHover={{
             y: -10
           }}>
@@ -324,8 +324,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.1
+            duration: 0.3,
+            delay: 0.05
           }} whileHover={{
             y: -10
           }}>
@@ -357,8 +357,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.2
+            duration: 0.3,
+            delay: 0.1
           }} whileHover={{
             y: -10
           }}>
@@ -390,8 +390,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.3
+            duration: 0.3,
+            delay: 0.15
           }} whileHover={{
             y: -10
           }}>
@@ -423,8 +423,8 @@ export const HomePage: React.FC = () => {
             once: true,
             margin: '-100px'
           }} transition={{
-            duration: 0.5,
-            delay: 0.4
+            duration: 0.3,
+            delay: 0.2
           }} whileHover={{
             y: -10
           }}>
@@ -467,7 +467,7 @@ export const HomePage: React.FC = () => {
           once: true,
           margin: '-100px'
         }} transition={{
-          duration: 0.6
+          duration: 0.3
         }}>
           <div className="inline-block badge badge-primary text-sm px-3 py-1 mb-3">
             {t('home.badges.process')}
@@ -493,8 +493,8 @@ export const HomePage: React.FC = () => {
               once: true,
               margin: '-100px'
             }} transition={{
-              duration: 0.5,
-              delay: 0.1
+              duration: 0.3,
+              delay: 0.05
             }} whileHover={{
               y: -10,
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
@@ -524,8 +524,8 @@ export const HomePage: React.FC = () => {
               once: true,
               margin: '-100px'
             }} transition={{
-              duration: 0.5,
-              delay: 0.3
+              duration: 0.3,
+              delay: 0.15
             }} whileHover={{
               y: -10,
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
@@ -555,8 +555,8 @@ export const HomePage: React.FC = () => {
               once: true,
               margin: '-100px'
             }} transition={{
-              duration: 0.5,
-              delay: 0.5
+              duration: 0.3,
+              delay: 0.25
             }} whileHover={{
               y: -10,
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
@@ -586,8 +586,8 @@ export const HomePage: React.FC = () => {
               once: true,
               margin: '-100px'
             }} transition={{
-              duration: 0.5,
-              delay: 0.7
+              duration: 0.3,
+              delay: 0.35
             }} whileHover={{
               y: -10,
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
@@ -619,8 +619,8 @@ export const HomePage: React.FC = () => {
           once: true,
           margin: '-100px'
         }} transition={{
-          duration: 0.6,
-          delay: 0.8
+          duration: 0.3,
+          delay: 0.4
         }}>
           <motion.div whileHover={{
             scale: 1.05
@@ -648,7 +648,7 @@ export const HomePage: React.FC = () => {
           once: true,
           margin: '-100px'
         }} transition={{
-          duration: 0.6
+          duration: 0.3
         }}>
           <div className="inline-block badge badge-success text-sm px-3 py-1 mb-3">
             {t('home.badges.testimonials')}
@@ -690,7 +690,7 @@ export const HomePage: React.FC = () => {
                 opacity: 0,
                 x: -100
               }} transition={{
-                duration: 0.5
+                duration: 0.3
               }} className="bg-base-100 dark:bg-base-100/80 rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 relative">
                 <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-12 h-12 sm:w-16 sm:h-16">
                   <div className="absolute inset-0 bg-warning rounded-xl transform rotate-6"></div>
@@ -747,7 +747,7 @@ export const HomePage: React.FC = () => {
           y: [0, 15, 0]
         }} transition={{
           repeat: Infinity,
-          duration: 8,
+          duration: 4,
           ease: 'easeInOut'
         }}></motion.div>
         <motion.div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-primary/30 mix-blend-multiply opacity-20" animate={{
@@ -755,7 +755,7 @@ export const HomePage: React.FC = () => {
           y: [0, 20, 0]
         }} transition={{
           repeat: Infinity,
-          duration: 10,
+          duration: 5,
           ease: 'easeInOut'
         }}></motion.div>
       </div>
@@ -846,8 +846,8 @@ export const HomePage: React.FC = () => {
           }} viewport={{
             once: true
           }} transition={{
-            duration: 0.4,
-            delay: 0.1
+            duration: 0.2,
+            delay: 0.05
           }} whileHover={{
             y: -5
           }}>
@@ -870,8 +870,8 @@ export const HomePage: React.FC = () => {
           }} viewport={{
             once: true
           }} transition={{
-            duration: 0.4,
-            delay: 0.2
+            duration: 0.2,
+            delay: 0.1
           }} whileHover={{
             y: -5
           }}>
@@ -892,8 +892,8 @@ export const HomePage: React.FC = () => {
           }} viewport={{
             once: true
           }} transition={{
-            duration: 0.4,
-            delay: 0.3
+            duration: 0.2,
+            delay: 0.15
           }} whileHover={{
             y: -5
           }}>
@@ -914,8 +914,8 @@ export const HomePage: React.FC = () => {
           }} viewport={{
             once: true
           }} transition={{
-            duration: 0.4,
-            delay: 0.4
+            duration: 0.2,
+            delay: 0.2
           }} whileHover={{
             y: -5
           }}>

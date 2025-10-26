@@ -1,5 +1,5 @@
 // API client for backend communication
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://your-render-backend-url.onrender.com';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://tracksite-python-backend.onrender.com';
 export const BACKEND_PORT = 3005;
 export interface Location {
   id: number;

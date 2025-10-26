@@ -383,7 +383,35 @@ export const UserLayout: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="pt-2">
+
+              {/* Login/Register Section */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-500 text-center px-2">Accès à votre compte</p>
+                  <div className="login-register-buttons flex flex-col space-y-2">
+                    <Link
+                      to="/login"
+                      className="btn btn-outline btn-sm w-full text-sm font-medium py-2 px-4 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      </svg>
+                      Se connecter
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="btn btn-primary btn-sm w-full text-sm font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                      </svg>
+                      S'inscrire
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-gray-100">
                 <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-6 py-4 rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-300 text-base">
                   {t('nav.getQuote')}
                 </Link>

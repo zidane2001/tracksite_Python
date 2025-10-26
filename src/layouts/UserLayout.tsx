@@ -37,8 +37,24 @@ export const UserLayout: React.FC = () => {
   // Close mobile menu when location changes
   useEffect(() => {
     setMobileMenuOpen(false);
+    // Remove body overflow hidden when navigating
+    document.body.classList.remove('navigating');
   }, [location]);
-  return <div className="min-h-screen flex flex-col bg-gray-50">
+
+  // Handle mobile menu open/close with body overflow
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add('navigating');
+    } else {
+      document.body.classList.remove('navigating');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('navigating');
+    };
+  }, [mobileMenuOpen]);
+  return <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
     {/* Top Info Bar */}
     <div className="bg-neutral text-neutral-content py-2 px-4">
       <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center text-sm">
@@ -57,7 +73,7 @@ export const UserLayout: React.FC = () => {
             <MapPinIcon size={14} className="mr-1" />
             123 Rue de la Logistique, 75001 Paris, France
           </div>
-          <div className="hidden md:flex items-center space-x-3 pl-4 border-l border-indigo-500">
+          <div className="hidden lg:flex items-center space-x-3 pl-4 border-l border-indigo-500">
             <GlobeIcon size={14} />
             <LanguageSelector />
           </div>
@@ -220,7 +236,7 @@ export const UserLayout: React.FC = () => {
           </nav>
           {/* Theme toggle + Mobile menu button */}
           <button
-            className="btn btn-sm btn-ghost mr-2 px-3 py-1 text-xs font-medium rounded-full border border-gray-300 hover:border-gray-400 transition-colors"
+            className="hidden lg:flex btn btn-sm btn-ghost mr-2 px-3 py-1 text-xs font-medium rounded-full border border-gray-300 hover:border-gray-400 transition-colors"
             onClick={toggleTheme}
             aria-label="Toggle theme"
           >
@@ -249,33 +265,38 @@ export const UserLayout: React.FC = () => {
           </motion.button>
         </div>
         {/* Mobile Navigation */}
-        <AnimatePresence>
-          {mobileMenuOpen && <motion.nav className="md:hidden mt-4 pb-4 space-y-2 border-t border-gray-100 pt-4" initial={{
-            opacity: 0,
-            height: 0
-          }} animate={{
-            opacity: 1,
-            height: 'auto'
-          }} exit={{
-            opacity: 0,
-            height: 0
-          }} transition={{
-            duration: 0.3
-          }}>
-            <Link to="/" className={`block px-4 py-2.5 rounded-md ${isActive('/')} transition-all duration-200 hover:bg-amber-50`}>
+      <AnimatePresence>
+        {mobileMenuOpen && <motion.nav className="hamburger-menu md:hidden fixed inset-x-0 top-full mt-2 mx-4 bg-base-100 rounded-xl shadow-2xl border border-base-200 z-50 max-h-[80vh] overflow-y-auto" initial={{
+          opacity: 0,
+          y: -20,
+          scale: 0.95
+        }} animate={{
+          opacity: 1,
+          y: 0,
+          scale: 1
+        }} exit={{
+          opacity: 0,
+          y: -20,
+          scale: 0.95
+        }} transition={{
+          duration: 0.2,
+          ease: 'easeOut'
+        }}>
+          <div className="p-4 space-y-3">
+            <Link to="/" className={`block px-4 py-3 rounded-lg ${isActive('/')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
               {t('nav.home')}
             </Link>
             {/* Mobile Services Dropdown */}
             <div className="relative">
-              <button className={`flex items-center w-full px-4 py-2.5 rounded-md ${isActive('/services')} justify-between transition-all duration-200 hover:bg-amber-50`} onClick={e => {
+              <button className={`flex items-center w-full px-4 py-3 rounded-lg ${isActive('/services')} justify-between transition-all duration-200 hover:bg-amber-50 text-base font-medium`} onClick={e => {
                 e.preventDefault();
                 setServicesOpen(!servicesOpen);
               }}>
                 <span>{t('services.shipping')}</span>
-                <ChevronDownIcon size={16} className={`transform transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDownIcon size={18} className={`transform transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
-                {servicesOpen && <motion.div className="mt-1 space-y-1 pl-4 border-l-2 border-amber-200 ml-4" initial={{
+                {servicesOpen && <motion.div className="mt-2 ml-4 space-y-1 pl-4 border-l-2 border-amber-200" initial={{
                   opacity: 0,
                   height: 0
                 }} animate={{
@@ -306,22 +327,57 @@ export const UserLayout: React.FC = () => {
                 </motion.div>}
               </AnimatePresence>
             </div>
-          <Link to="/tracking" className={`block px-4 py-2.5 rounded-md ${isActive('/tracking')} transition-all duration-200 hover:bg-amber-50`}>
-            {t('nav.tracking')}
-          </Link>
-          <Link to="/quote" className={`block px-4 py-2.5 rounded-md ${isActive('/quote')} transition-all duration-200 hover:bg-amber-50`}>
-            {t('nav.quote')}
-          </Link>
-          <Link to="/contact" className={`block px-4 py-2.5 rounded-md ${isActive('/contact')} transition-all duration-200 hover:bg-amber-50`}>
-            {t('nav.contact')}
-          </Link>
-            <div className="pt-2 mt-2 border-t border-gray-100">
-              <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-4 py-3 rounded-md text-center shadow-md">
+            <Link to="/tracking" className={`block px-4 py-3 rounded-lg ${isActive('/tracking')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
+              {t('nav.tracking')}
+            </Link>
+            <Link to="/quote" className={`block px-4 py-3 rounded-lg ${isActive('/quote')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
+              {t('nav.quote')}
+            </Link>
+            <Link to="/contact" className={`block px-4 py-3 rounded-lg ${isActive('/contact')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
+              {t('nav.contact')}
+            </Link>
+
+            {/* Mobile Settings */}
+            <div className="pt-4 mt-4 border-t border-gray-200 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Langue</span>
+                  <LanguageSelector />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Thème</span>
+                  <button
+                    className="btn btn-sm btn-ghost px-4 py-2 text-sm font-medium rounded-full border border-gray-300 hover:border-gray-400 transition-colors"
+                    onClick={toggleTheme}
+                    aria-label="Toggle theme"
+                  >
+                    <span className="flex items-center">
+                      {theme === 'light' ? (
+                        <>
+                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                          </svg>
+                          Dark
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"/>
+                          </svg>
+                          Light
+                        </>
+                      )}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-6 py-4 rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-300 text-base">
                 {t('nav.getQuote')}
               </Link>
             </div>
-          </motion.nav>}
-        </AnimatePresence>
+          </div>
+        </motion.nav>}
+      </AnimatePresence>
       </div>
     </motion.header>
     {/* Main Content */}

@@ -66,7 +66,7 @@ export const ContactPage: React.FC = () => {
     }, 1500)
   }
   return (
-    <div className="w-full bg-gray-50">
+    <div className="w-full bg-gray-50 overflow-x-hidden">
       <div className="bg-primary text-primary-content py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
@@ -337,7 +337,7 @@ export const ContactPage: React.FC = () => {
                   )}
                   <button
                     type="submit"
-                    className={`btn btn-primary w-full ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    className={`btn btn-primary w-full px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (

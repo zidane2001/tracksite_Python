@@ -62,7 +62,7 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  return <div className="w-full min-h-screen bg-base-100 dark:bg-base-100 text-base-content">
+  return <div className="w-full min-h-screen bg-base-100 dark:bg-base-100 text-base-content overflow-x-hidden">
 
     {/* Hero Section - ULTRA SOMBRE */}
     <section className="relative bg-base-100 text-base-content overflow-hidden">
@@ -113,8 +113,8 @@ export const HomePage: React.FC = () => {
               }} whileTap={{
                 scale: 0.95
               }}>
-                <Link to="/quote" className="btn btn-lg shadow-lg border-0 bg-gradient-to-r from-warning to-orange-600 hover:from-orange-500 hover:to-warning text-base font-bold px-8 py-4 transform hover:scale-105 transition-all duration-300">
-                  <TruckIcon className="w-5 h-5 mr-2" />
+                <Link to="/quote" className="btn btn-lg shadow-lg border-0 bg-gradient-to-r from-warning to-orange-600 hover:from-orange-500 hover:to-warning text-base font-bold px-6 sm:px-8 py-3 sm:py-4 transform hover:scale-105 transition-all duration-300 text-sm sm:text-base">
+                  <TruckIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   {t('home.hero.cta')}
                 </Link>
               </motion.div>
@@ -123,7 +123,7 @@ export const HomePage: React.FC = () => {
               }} whileTap={{
                 scale: 0.95
               }}>
-                <button onClick={() => scrollToSection(servicesRef)} className="btn btn-accent border-0 bg-gradient-to-r from-warning to-orange-500 btn-lg text-base font-bold px-8 py-4 flex items-center justify-center hover:bg-base-200/50 transition-all duration-300">
+                <button onClick={() => scrollToSection(servicesRef)} className="btn btn-accent border-0 bg-gradient-to-r from-warning to-orange-500 btn-lg text-base font-bold px-6 sm:px-8 py-3 sm:py-4 flex items-center justify-center hover:bg-base-200/50 transition-all duration-300 text-sm sm:text-base">
                   {t('home.hero.discover')}
                 </button>
               </motion.div>
@@ -627,7 +627,7 @@ export const HomePage: React.FC = () => {
           }} whileTap={{
             scale: 0.95
           }}>
-            <Link to="/quote" className="btn btn-primary btn-lg px-8 py-4">
+            <Link to="/quote" className="btn btn-primary btn-lg px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
               {t('home.howItWorks.start')}
             </Link>
           </motion.div>
@@ -809,13 +809,13 @@ export const HomePage: React.FC = () => {
                   <input type="number" placeholder={t('home.cta.weightPlaceholder')} className="input input-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full" />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+              <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <motion.div whileHover={{
                   scale: 1.05
                 }} whileTap={{
                   scale: 0.95
                 }}>
-                  <Link to="/quote" className="btn btn-warning w-full sm:w-auto">
+                  <Link to="/quote" className="btn btn-warning w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
                     {t('home.cta.getQuote')}
                   </Link>
                 </motion.div>
@@ -824,7 +824,7 @@ export const HomePage: React.FC = () => {
                 }} whileTap={{
                   scale: 0.95
                 }}>
-                  <Link to="/contact" className="btn btn-ghost border-2 border-base-100 w-full sm:w-auto">
+                  <Link to="/contact" className="btn btn-ghost border-2 border-base-100 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base">
                     {t('home.cta.contact')}
                   </Link>
                 </motion.div>

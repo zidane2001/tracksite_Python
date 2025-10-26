@@ -85,7 +85,7 @@ export const TrackingPage: React.FC = () => {
         return 'badge';
     }
   };
-  return <div className="w-full bg-gray-50">
+  return <div className="w-full bg-gray-50 overflow-x-hidden">
     <div className="bg-primary text-primary-content py-12">
       <div className="container mx-auto px-4 text-center">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
@@ -117,7 +117,7 @@ export const TrackingPage: React.FC = () => {
               </p>
             </div>
             <div className="md:self-end">
-              <button type="submit" className={`btn btn-primary ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`} disabled={isLoading}>
+              <button type="submit" className={`btn btn-primary px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`} disabled={isLoading}>
                 {isLoading ? 'Loading...' : 'Track'}
               </button>
             </div>
@@ -365,7 +365,7 @@ export const TrackingPage: React.FC = () => {
                 <span className="text-gray-800">support@colisselect.com</span>
               </div>
             </div>
-            <button className="mt-6 bg-blue-600 text-white font-medium px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+            <button className="mt-6 bg-blue-600 text-white font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base">
               Contact Support
             </button>
           </div>

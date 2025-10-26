@@ -5,7 +5,7 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, origins=["https://celebrated-lebkuchen-e43638.netlify.app", "http://localhost:5173"], supports_credentials=True, allow_headers=["*"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+CORS(app, origins=["https://celebrated-lebkuchen-e43638.netlify.app"])
 
 DATABASE = 'database.db'
 

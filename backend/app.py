@@ -5,16 +5,24 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": "*"}})
 
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        response = app.make_response("")
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        response.headers.add("Access-Control-Allow-Headers", "*")
-        return response
+# CORS configuration for all routes
+CORS(app, resources={
+    r"/*": {
+        "origins": ["https://celebrated-lebkuchen-e43638.netlify.app", "http://localhost:5173", "http://localhost:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Admin-Request"],
+        "supports_credentials": True
+    }
+})
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Admin-Request')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 DATABASE = 'database.db'
 

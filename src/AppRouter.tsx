@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { I18nProvider } from './utils/i18n';
+import { API_BASE_URL } from './utils/api';
 import { App } from './App';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { AdminLogin } from './components/auth/AdminLogin';

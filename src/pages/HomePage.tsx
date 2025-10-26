@@ -178,21 +178,21 @@ export const HomePage: React.FC = () => {
           </motion.div>
         </div>
         <div className="mt-12 sm:mt-16 text-center">
-          <p className="bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent font-bold mb-6">Ils nous font confiance</p>
+          <p className="bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent font-bold mb-6">{t('home.badges.trust')}</p>
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 md:gap-16">
-            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" alt="Google" className="h-6 sm:h-8 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
+            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" alt="Google" className="h-6 sm:h-8 opacity-70 grayscale-0 sm:grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
               scale: 1.1
             }} />
-            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png" alt="Amazon" className="h-6 sm:h-8 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
+            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png" alt="Amazon" className="h-6 sm:h-8 opacity-70 grayscale-0 sm:grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
               scale: 1.1
             }} />
-            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/2560px-Netflix_2015_logo.svg.png" alt="Netflix" className="h-5 sm:h-7 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
+            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/2560px-Netflix_2015_logo.svg.png" alt="Netflix" className="h-5 sm:h-7 opacity-70 grayscale-0 sm:grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
               scale: 1.1
             }} />
-            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1200px-Logo_NIKE.svg.png" alt="Nike" className="h-5 sm:h-6 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
+            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1200px-Logo_NIKE.svg.png" alt="Nike" className="h-5 sm:h-6 opacity-70 grayscale-0 sm:grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
               scale: 1.1
             }} />
-            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Apple_logo_grey.svg/1724px-Apple_logo_grey.svg.png" alt="Apple" className="h-6 sm:h-8 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
+            <motion.img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Apple_logo_grey.svg/1724px-Apple_logo_grey.svg.png" alt="Apple" className="h-6 sm:h-8 opacity-70 grayscale-0 sm:grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" whileHover={{
               scale: 1.1
             }} />
           </div>
@@ -303,7 +303,7 @@ export const HomePage: React.FC = () => {
           duration: 0.6
         }}>
           <div className="inline-block badge badge-warning text-sm px-3 py-1 mb-3">
-            Nos Solutions
+            {t('home.badges.services')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
             {t('home.services.title')}
@@ -338,11 +338,11 @@ export const HomePage: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
                 {t('home.services.maritime')}
               </h3>
-              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
+              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100 dark:text-orange-300">
                 {t('home.services.maritimeDesc')}
               </p>
-              <Link to="/services/shipping" className="inline-flex items-center text-warning/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
-                <span>En savoir plus</span>
+              <Link to="/services/shipping" className="inline-flex items-center text-warning/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150 dark:text-orange-400">
+                <span>{t('home.badges.learnMore')}</span>
                 <ArrowRightIcon size={14} className="ml-2 transform group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
@@ -371,11 +371,11 @@ export const HomePage: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
                 {t('home.services.air')}
               </h3>
-              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
+              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100 dark:text-orange-300">
                 {t('home.services.airDesc')}
               </p>
-              <Link to="/services/air" className="inline-flex items-center text-primary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
-                <span>En savoir plus</span>
+              <Link to="/services/air" className="inline-flex items-center text-primary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150 dark:text-orange-400">
+                <span>{t('home.badges.learnMore')}</span>
                 <ArrowRightIcon size={14} className="ml-2 transform group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
@@ -404,11 +404,11 @@ export const HomePage: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
                 {t('home.services.door')}
               </h3>
-              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
+              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100 dark:text-orange-300">
                 {t('home.services.doorDesc')}
               </p>
-              <Link to="/services/delivery" className="inline-flex items-center text-success/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
-                <span>En savoir plus</span>
+              <Link to="/services/delivery" className="inline-flex items-center text-success/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150 dark:text-orange-400">
+                <span>{t('home.badges.learnMore')}</span>
                 <ArrowRightIcon size={14} className="ml-2 transform group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
@@ -437,11 +437,11 @@ export const HomePage: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:translate-x-2 transition-transform duration-300">
                 {t('home.services.special')}
               </h3>
-              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100">
+              <p className="text-base-100/90 mb-4 text-sm group-hover:translate-x-2 transition-transform duration-300 delay-100 dark:text-orange-300">
                 {t('home.services.specialDesc')}
               </p>
-              <Link to="/services/special" className="inline-flex items-center text-secondary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150">
-                <span>En savoir plus</span>
+              <Link to="/services/special" className="inline-flex items-center text-secondary/90 font-medium group-hover:translate-x-2 transition-transform duration-300 delay-150 dark:text-orange-400">
+                <span>{t('home.badges.learnMore')}</span>
                 <ArrowRightIcon size={14} className="ml-2 transform group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
@@ -470,7 +470,7 @@ export const HomePage: React.FC = () => {
           duration: 0.6
         }}>
           <div className="inline-block badge badge-primary text-sm px-3 py-1 mb-3">
-            Processus Simple
+            {t('home.badges.process')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
             {t('home.howItWorks.title')}
@@ -651,7 +651,7 @@ export const HomePage: React.FC = () => {
           duration: 0.6
         }}>
           <div className="inline-block badge badge-success text-sm px-3 py-1 mb-3">
-            Témoignages
+            {t('home.badges.testimonials')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
             {t('home.testimonials.title')}
@@ -723,9 +723,7 @@ export const HomePage: React.FC = () => {
                       <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
                     </svg>
                     <p className="text-base-content text-base sm:text-lg leading-relaxed mb-6">
-                      {currentTestimonial === 0 ? t('home.testimonials.text1') :
-                       currentTestimonial === 1 ? t('home.testimonials.text2') :
-                       t('home.testimonials.text3')}
+                      {testimonials[currentTestimonial].text}
                     </p>
                     <div className="flex justify-center md:justify-start">
                       {testimonials.map((_, index) => <button key={index} onClick={() => setCurrentTestimonial(index)} className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full mx-1 ${index === currentTestimonial ? 'bg-warning' : 'bg-base-content/20'}`} aria-label={`Voir témoignage ${index + 1}`} />)}
@@ -774,7 +772,7 @@ export const HomePage: React.FC = () => {
           }} transition={{
             duration: 0.6
           }}>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-base-100">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
               {t('home.cta.title')}
             </h2>
             <p className="text-lg sm:text-xl text-base-100/95 mb-8 sm:mb-10">
@@ -786,7 +784,7 @@ export const HomePage: React.FC = () => {
                   <label className="text-sm mb-2 text-base-100/95">
                     {t('home.cta.origin')}
                   </label>
-                  <select className="select select-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
+                  <select className="select select-bordered bg-transparent text-white border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
                     <option value="france">France</option>
                     <option value="germany">Allemagne</option>
                     <option value="spain">Espagne</option>
@@ -796,7 +794,7 @@ export const HomePage: React.FC = () => {
                   <label className="text-sm mb-2 text-base-100/95">
                     {t('home.cta.destination')}
                   </label>
-                  <select className="select select-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
+                  <select className="select select-bordered bg-transparent text-white border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full">
                     <option value="usa">États-Unis</option>
                     <option value="uk">Royaume-Uni</option>
                     <option value="canada">Canada</option>
@@ -806,7 +804,7 @@ export const HomePage: React.FC = () => {
                   <label className="text-sm mb-2 text-base-100/95">
                     {t('home.cta.weight')}
                   </label>
-                  <input type="number" placeholder={t('home.cta.weightPlaceholder')} className="input input-bordered bg-base-100/25 dark:bg-base-100/15 text-base-100 border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full" />
+                  <input type="number" placeholder={t('home.cta.weightPlaceholder')} className="input input-bordered bg-transparent text-white border-base-100/40 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-warning w-full" />
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">

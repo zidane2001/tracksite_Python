@@ -91,24 +91,26 @@ export const SpecialServicePage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Services Spécialisés
-          </h1>
-          <p className="text-xl text-purple-100 max-w-3xl mx-auto mb-8">
-            Solutions de transport sur mesure pour vos besoins les plus exigeants.
-            Sécurité, rapidité et expertise pour tous types de marchandises spéciales.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors">
-              Demander un devis spécial
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
-              Nos certifications
-            </button>
+      <div className="hero bg-gradient-to-r from-secondary to-accent text-primary-content py-20">
+        <div className="hero-content text-center">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Services Spécialisés
+            </h1>
+            <p className="text-xl text-primary-content/80 max-w-3xl mx-auto mb-8">
+              Solutions de transport sur mesure pour vos besoins les plus exigeants.
+              Sécurité, rapidité et expertise pour tous types de marchandises spéciales.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="btn btn-outline btn-primary">
+                Demander un devis spécial
+              </button>
+              <button className="btn btn-outline btn-secondary">
+                Nos certifications
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -117,10 +119,10 @@ export const SpecialServicePage: React.FC = () => {
       <div className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-base-content mb-4">
               Nos Services Spécialisés
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base-content/70 max-w-2xl mx-auto">
               Expertise et équipements adaptés pour transporter vos marchandises
               les plus sensibles en toute sécurité.
             </p>
@@ -128,24 +130,26 @@ export const SpecialServicePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {specialServices.map((service, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex justify-center mb-4">
-                  {service.icon}
+              <div key={index} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="card-body">
+                  <div className="flex justify-center mb-4">
+                    {service.icon}
+                  </div>
+                  <h3 className="card-title justify-center">
+                    {service.title}
+                  </h3>
+                  <p className="text-base-content/70 mb-4 text-center">
+                    {service.description}
+                  </p>
+                  <ul className="space-y-2">
+                    {service.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center text-sm">
+                        <CheckCircleIcon className="h-4 w-4 text-success mr-2 flex-shrink-0" />
+                        <span className="text-base-content">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 mb-4 text-center">
-                  {service.description}
-                </p>
-                <ul className="space-y-2">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-sm">
-                      <CheckCircleIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
@@ -153,50 +157,46 @@ export const SpecialServicePage: React.FC = () => {
       </div>
 
       {/* Pricing Section */}
-      <div className="py-16 bg-white">
+      <div className="py-16 bg-base-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-base-content mb-4">
               Tarifs Services Spécialisés
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base-content/70 max-w-2xl mx-auto">
               Tarifs adaptés selon la nature et les exigences de votre marchandise
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {pricing.map((plan, index) => (
-              <div key={index} className={`relative bg-white border rounded-lg p-6 shadow-md ${plan.popular ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'}`}>
+              <div key={index} className={`card bg-base-100 shadow-lg ${plan.popular ? 'border-secondary border-2' : ''}`}>
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Premium
-                    </span>
+                  <div className="badge badge-secondary absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    Premium
                   </div>
                 )}
 
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">{plan.name}</h3>
-                  <div className="text-2xl font-bold text-purple-600 mb-1">{plan.price}</div>
-                  <div className="text-sm text-gray-600">{plan.weight}</div>
+                <div className="card-body text-center">
+                  <h3 className="card-title justify-center">{plan.name}</h3>
+                  <div className="text-2xl font-bold text-secondary mb-1">{plan.price}</div>
+                  <div className="text-sm text-base-content/70">{plan.weight}</div>
+
+                  <ul className="space-y-2 mb-6">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center text-sm">
+                        <CheckCircleIcon className="h-4 w-4 text-success mr-2 flex-shrink-0" />
+                        <span className="text-base-content">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="card-actions justify-end">
+                    <button className={`btn w-full ${plan.popular ? 'btn-secondary' : 'btn-outline'}`}>
+                      Demander devis
+                    </button>
+                  </div>
                 </div>
-
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-sm">
-                      <CheckCircleIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
-                  plan.popular
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}>
-                  Demander devis
-                </button>
               </div>
             ))}
           </div>
@@ -207,10 +207,10 @@ export const SpecialServicePage: React.FC = () => {
       <div className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-base-content mb-4">
               Processus de Transport Spécialisé
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base-content/70 max-w-2xl mx-auto">
               Un processus rigoureux pour garantir la sécurité de vos marchandises spéciales
             </p>
           </div>
@@ -224,13 +224,15 @@ export const SpecialServicePage: React.FC = () => {
               { step: "5", title: "Livraison", desc: "Remise contrôlée et confirmation de réception" }
             ].map((item, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {item.step}
+                <div className="avatar mb-4">
+                  <div className="w-16 rounded-full bg-secondary text-primary-content flex items-center justify-center text-xl font-bold">
+                    {item.step}
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
+                <h3 className="text-lg font-semibold text-base-content mb-2">{item.title}</h3>
+                <p className="text-base-content/70 text-sm">{item.desc}</p>
                 {index < 4 && (
-                  <ArrowRightIcon className="h-6 w-6 text-gray-400 mx-auto mt-4 hidden md:block" />
+                  <ArrowRightIcon className="h-6 w-6 text-base-content/40 mx-auto mt-4 hidden md:block" />
                 )}
               </div>
             ))}
@@ -239,13 +241,13 @@ export const SpecialServicePage: React.FC = () => {
       </div>
 
       {/* Certifications */}
-      <div className="py-16 bg-gray-100">
+      <div className="py-16 bg-base-200">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-base-content mb-4">
               Nos Certifications
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base-content/70 max-w-2xl mx-auto">
               Certifications et agréments pour garantir la conformité
               et la sécurité de vos transports spécialisés
             </p>
@@ -258,12 +260,16 @@ export const SpecialServicePage: React.FC = () => {
               { name: "TAPA", desc: "Sécurité des transports de valeur" },
               { name: "ISO 9001", desc: "Management de la qualité" }
             ].map((cert, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ShieldIcon className="h-8 w-8 text-purple-600" />
+              <div key={index} className="card bg-base-100 shadow-lg text-center">
+                <div className="card-body">
+                  <div className="avatar mb-4">
+                    <div className="w-16 rounded-full bg-secondary/10">
+                      <ShieldIcon className="h-8 w-8 text-secondary" />
+                    </div>
+                  </div>
+                  <h3 className="card-title justify-center">{cert.name}</h3>
+                  <p className="text-sm text-base-content/70">{cert.desc}</p>
                 </div>
-                <h3 className="font-bold text-gray-800 mb-1">{cert.name}</h3>
-                <p className="text-sm text-gray-600">{cert.desc}</p>
               </div>
             ))}
           </div>
@@ -274,25 +280,27 @@ export const SpecialServicePage: React.FC = () => {
       <div className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-base-content mb-4">
               Avis de nos clients spécialisés
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base-content/70 max-w-2xl mx-auto">
               Découvrez ce que disent nos clients satisfaits de nos services spécialisés
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
+              <div key={index} className="card bg-base-100 shadow-lg">
+                <div className="card-body">
+                  <div className="flex items-center mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <StarIcon key={i} className="h-5 w-5 text-warning fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-base-content mb-4 italic">"{testimonial.text}"</p>
+                  <div className="font-semibold text-base-content">{testimonial.name}</div>
+                  <div className="text-sm text-base-content/70">{testimonial.company}</div>
                 </div>
-                <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
-                <div className="font-semibold text-gray-800">{testimonial.name}</div>
-                <div className="text-sm text-gray-600">{testimonial.company}</div>
               </div>
             ))}
           </div>
@@ -300,20 +308,20 @@ export const SpecialServicePage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-16 bg-purple-600 text-white">
+      <div className="py-16 bg-secondary text-primary-content">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Transport spécialisé ?
           </h2>
-          <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-primary-content/80 mb-8 max-w-2xl mx-auto">
             Contactez notre équipe d'experts pour une solution de transport
             adaptée à vos besoins spécifiques.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors">
+            <button className="btn btn-outline btn-primary">
               Consultation gratuite
             </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
+            <button className="btn btn-outline btn-accent">
               Devis personnalisé
             </button>
           </div>

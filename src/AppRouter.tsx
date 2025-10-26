@@ -20,20 +20,60 @@ function AnimatedRoutes() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Always require authentication - no persistent sessions
-    setIsAuthenticated(false);
-    setIsLoading(false);
+    // Check for stored authentication - session persists until logout
+    const checkAuth = () => {
+      try {
+        const storedAuth = localStorage.getItem('adminAuthenticated');
+        console.log('Checking stored auth:', storedAuth);
+        if (storedAuth === 'true') {
+          setIsAuthenticated(true);
+          console.log('User authenticated from localStorage');
+        } else {
+          setIsAuthenticated(false);
+          console.log('No stored authentication found');
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        setIsAuthenticated(false);
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const handleLogin = (code: string) => {
-    if (code === '22022017') {
-      setIsAuthenticated(true);
-      // No persistent storage - authentication lost on page refresh
+  const handleLogin = async (code: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: 'admin@colisselect.com', password: code }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Login successful, setting authentication');
+        setIsAuthenticated(true);
+        localStorage.setItem('adminAuthenticated', 'true');
+        localStorage.setItem('adminUser', JSON.stringify(data));
+        console.log('Authentication stored in localStorage');
+      } else {
+        console.log('Login failed - invalid credentials');
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
   const handleLogout = () => {
+    console.log('Logging out user');
     setIsAuthenticated(false);
+    localStorage.removeItem('adminAuthenticated');
+    console.log('Authentication removed from localStorage');
   };
 
   // Show loading while checking authentication

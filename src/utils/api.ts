@@ -1,5 +1,5 @@
 // API client for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
 export const BACKEND_PORT = 3005;
 export interface Location {
   id: number;

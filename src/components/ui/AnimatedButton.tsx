@@ -21,16 +21,16 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   const getButtonStyles = () => {
     switch (variant) {
       case 'primary':
-        return 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800';
+        return 'btn btn-primary';
       case 'secondary':
-        return 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800';
+        return 'btn btn-secondary';
       case 'outline':
-        return 'bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-50';
+        return 'btn btn-outline btn-primary';
       default:
-        return 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800';
+        return 'btn btn-primary';
     }
   };
-  const buttonClasses = `px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-md ${getButtonStyles()} ${className}`;
+  const buttonClasses = `${getButtonStyles()} ${className}`;
   // Render either a Link or a button
   if (to) {
     return <motion.div whileHover={{

@@ -202,7 +202,18 @@ export const QuotePage: React.FC = () => {
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
-  const [userShipments, setUserShipments] = useState<UserShipment[]>([]);
+  const [userShipments, setUserShipments] = useState<UserShipment[]>(() => {
+    // Load user shipments from localStorage on component initialization
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user?.email) {
+        const storedShipments = localStorage.getItem(`userShipments_${user.email}`);
+        return storedShipments ? JSON.parse(storedShipments) : [];
+      }
+    }
+    return [];
+  });
   const [showDashboard, setShowDashboard] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
   const [userEmailForHistory, setUserEmailForHistory] = useState('');
@@ -210,33 +221,32 @@ export const QuotePage: React.FC = () => {
   const [showHistoryBeforeSubmit, setShowHistoryBeforeSubmit] = useState(false);
   const [allShipments, setAllShipments] = useState<UserShipment[]>([]);
   const [userSessionShipments, setUserSessionShipments] = useState<UserShipment[]>([]);
-  const [currentUser, setCurrentUser] = useState<AuthResponse | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthResponse | null>(() => {
+    // Check if user is already logged in on page load
+    const storedUser = localStorage.getItem('currentUser');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  // Load user shipments when component mounts and user is logged in
+  useEffect(() => {
+    // Check if user is already logged in from localStorage
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user?.email) {
+        loadUserShipments(user.email);
+      }
+    }
+  }, []); // Empty dependency array to run only once on mount
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Load user's session shipments (only those created in this session)
+  // Load user's shipments history when logged in
   useEffect(() => {
-    const loadUserSessionShipments = async () => {
-      try {
-        const shipments = await shipmentsApi.getAll();
-        // Filter only shipments created by this user in this session (confirmed ones)
-        const sessionShipments = shipments.filter(shipment =>
-          shipment.status !== 'pending_confirmation' &&
-          shipment.status !== 'cancelled' &&
-          shipment.status !== 'rejected' &&
-          shipment.shipper_email === formData.shipperEmail &&
-          userSessionShipments.some(sessionShipment => sessionShipment.id === shipment.id)
-        );
-        setAllShipments(sessionShipments);
-      } catch (error) {
-        console.error('Failed to load shipments:', error);
-      }
-    };
-    // Only load if user has provided email and has session shipments
-    if (formData.shipperEmail && userSessionShipments.length > 0) {
-      loadUserSessionShipments();
+    if (currentUser?.email) {
+      loadUserShipments(currentUser.email);
     }
-  }, [formData.shipperEmail, userSessionShipments]);
+  }, [currentUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const {
@@ -406,6 +416,7 @@ export const QuotePage: React.FC = () => {
 
   const handleLogin = (user: AuthResponse) => {
     setCurrentUser(user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
     setShowAuth(false);
     setNotification({type: 'success', message: `Bienvenue ${user.name} !`});
     setTimeout(() => setNotification(null), 3000);
@@ -420,12 +431,20 @@ export const QuotePage: React.FC = () => {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('currentUser');
     setUserShipments([]);
     setAllShipments([]);
     setUserSessionShipments([]);
     setNotification({type: 'success', message: 'Vous avez été déconnecté.'});
     setTimeout(() => setNotification(null), 3000);
   };
+
+  // Update localStorage whenever userShipments changes
+  useEffect(() => {
+    if (currentUser?.email && userShipments.length > 0) {
+      localStorage.setItem(`userShipments_${currentUser.email}`, JSON.stringify(userShipments));
+    }
+  }, [userShipments, currentUser]);
 
   const loadUserShipments = async (email: string) => {
     try {
@@ -434,8 +453,19 @@ export const QuotePage: React.FC = () => {
       setUserShipments(userShipments);
       setHasHistory(userShipments.length > 0);
       setUserEmailForHistory(email);
+
+      // Save to localStorage for persistence
+      localStorage.setItem(`userShipments_${email}`, JSON.stringify(userShipments));
     } catch (error) {
       console.error('Failed to load user shipments:', error);
+      // Fallback to localStorage if API fails
+      const storedShipments = localStorage.getItem(`userShipments_${email}`);
+      if (storedShipments) {
+        const parsedShipments = JSON.parse(storedShipments);
+        setUserShipments(parsedShipments);
+        setHasHistory(parsedShipments.length > 0);
+        setUserEmailForHistory(email);
+      }
     }
   };
 
@@ -518,41 +548,41 @@ export const QuotePage: React.FC = () => {
 
     {!showDashboard ? (
       <>
-        <div className="bg-primary text-primary-content py-12">
+        <div className="bg-primary text-primary-content py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center">
-              <div className="text-center flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div className="text-center lg:text-left flex-1">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
                   Créer une demande d'expédition
                 </h1>
-                <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto lg:mx-0">
                   Remplissez le formulaire ci-dessous pour créer votre demande d'expédition.
                   Elle sera examinée par notre équipe avant confirmation.
                 </p>
               </div>
-              <div className="ml-8">
+              <div className="flex-shrink-0">
                 {currentUser ? (
-                  <div className="flex items-center space-x-4">
-                    <span className="text-blue-100">Bienvenue, {currentUser.name}</span>
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <span className="text-blue-100 text-center sm:text-left">Bienvenue, {currentUser.name}</span>
                     <button
                       onClick={handleLogout}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm w-full sm:w-auto"
                     >
                       Déconnexion
                     </button>
                   </div>
                 ) : (
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     <button
                       onClick={() => { setShowAuth(true); setAuthMode('login'); }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center text-sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm"
                     >
                       <LogInIcon size={16} className="mr-2" />
                       Connexion
                     </button>
                     <button
                       onClick={() => { setShowAuth(true); setAuthMode('register'); }}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center text-sm"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm"
                     >
                       <UserPlusIcon size={16} className="mr-2" />
                       Inscription
@@ -564,10 +594,10 @@ export const QuotePage: React.FC = () => {
           </div>
         </div>
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden -mt-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden -mt-8 md:-mt-16">
             {/* Progress Steps */}
             <div className="p-4 bg-gray-50 border-b">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
                 <div className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                     1
@@ -578,7 +608,7 @@ export const QuotePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="w-12 h-0.5 bg-gray-200 mx-2"></div>
+                <div className="hidden sm:block w-12 h-0.5 bg-gray-200 mx-2"></div>
                 <div className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                     2
@@ -587,7 +617,7 @@ export const QuotePage: React.FC = () => {
                     <div className="text-sm font-medium">Informations personnelles</div>
                   </div>
                 </div>
-                <div className="w-12 h-0.5 bg-gray-200 mx-2"></div>
+                <div className="hidden sm:block w-12 h-0.5 bg-gray-200 mx-2"></div>
                 <div className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                     3
@@ -596,7 +626,7 @@ export const QuotePage: React.FC = () => {
                     <div className="text-sm font-medium">Détails du colis</div>
                   </div>
                 </div>
-                <div className="w-12 h-0.5 bg-gray-200 mx-2"></div>
+                <div className="hidden sm:block w-12 h-0.5 bg-gray-200 mx-2"></div>
                 <div className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 4 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                     4
@@ -613,19 +643,18 @@ export const QuotePage: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
                   Origine et Destination
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="form-control">
-                    <label htmlFor="origin" className="block text-gray-700 text-sm font-medium mb-2">
-                      Adresse d'origine <span className="text-red-500">*</span>
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Adresse d'origine <span className="text-error">*</span></span>
                     </label>
-                    <input type="text" id="origin" name="origin" className="input input-bordered input-primary w-full text-lg py-3" placeholder="Ex: 123 Rue de Paris, 75001 Paris" value={formData.origin} onChange={handleInputChange} required />
+                    <input type="text" name="origin" className="input input-bordered input-primary w-full" placeholder="Ex: 123 Rue de Paris, 75001 Paris" value={formData.origin} onChange={handleInputChange} required />
                   </div>
-                  <div className="form-control">
-                    <label htmlFor="destination" className="block text-gray-700 text-sm font-medium mb-2">
-                      Adresse de destination{' '}
-                      <span className="text-red-500">*</span>
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Adresse de destination <span className="text-error">*</span></span>
                     </label>
-                    <input type="text" id="destination" name="destination" className="input input-bordered input-primary w-full text-lg py-3" placeholder="Ex: 456 Avenue de Lyon, 69001 Lyon" value={formData.destination} onChange={handleInputChange} required />
+                    <input type="text" name="destination" className="input input-bordered input-primary w-full" placeholder="Ex: 456 Avenue de Lyon, 69001 Lyon" value={formData.destination} onChange={handleInputChange} required />
                   </div>
                 </div>
                 <div className="flex justify-end mt-8">
@@ -642,38 +671,44 @@ export const QuotePage: React.FC = () => {
                     <UserIcon size={20} className="mr-2" />
                     Informations de l'expéditeur
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm text-gray-700 mb-1">Nom complet <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Nom complet <span className="text-error">*</span></span>
+                      </label>
                       <input
                         type="text"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.shipperName}
                         onChange={(e) => setFormData({...formData, shipperName: e.target.value})}
                         placeholder="Votre nom complet"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1 flex items-center">
-                        <PhoneIcon size={16} className="mr-1" />
-                        Téléphone <span className="text-red-500">*</span>
+                      <label className="label">
+                        <span className="label-text flex items-center">
+                          <PhoneIcon size={16} className="mr-1" />
+                          Téléphone <span className="text-error">*</span>
+                        </span>
                       </label>
                       <input
                         type="tel"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.shipperPhone}
                         onChange={(e) => setFormData({...formData, shipperPhone: e.target.value})}
                         placeholder="+33 1 23 45 67 89"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1 flex items-center">
-                        <MailIcon size={16} className="mr-1" />
-                        Email <span className="text-red-500">*</span>
+                      <label className="label">
+                        <span className="label-text flex items-center">
+                          <MailIcon size={16} className="mr-1" />
+                          Email <span className="text-error">*</span>
+                        </span>
                       </label>
                       <input
                         type="email"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.shipperEmail}
                         onChange={(e) => setFormData({...formData, shipperEmail: e.target.value})}
                         placeholder="votre.email@exemple.com"
@@ -688,48 +723,56 @@ export const QuotePage: React.FC = () => {
                     <UserIcon size={20} className="mr-2" />
                     Informations du destinataire
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm text-gray-700 mb-1">Nom complet <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Nom complet <span className="text-error">*</span></span>
+                      </label>
                       <input
                         type="text"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.receiverName}
                         onChange={(e) => setFormData({...formData, receiverName: e.target.value})}
                         placeholder="Nom du destinataire"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1 flex items-center">
-                        <PhoneIcon size={16} className="mr-1" />
-                        Téléphone
+                      <label className="label">
+                        <span className="label-text flex items-center">
+                          <PhoneIcon size={16} className="mr-1" />
+                          Téléphone
+                        </span>
                       </label>
                       <input
                         type="tel"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.receiverPhone}
                         onChange={(e) => setFormData({...formData, receiverPhone: e.target.value})}
                         placeholder="+33 6 12 34 56 78"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1 flex items-center">
-                        <MailIcon size={16} className="mr-1" />
-                        Email <span className="text-red-500">*</span>
+                      <label className="label">
+                        <span className="label-text flex items-center">
+                          <MailIcon size={16} className="mr-1" />
+                          Email <span className="text-error">*</span>
+                        </span>
                       </label>
                       <input
                         type="email"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.receiverEmail}
                         onChange={(e) => setFormData({...formData, receiverEmail: e.target.value})}
                         placeholder="destinataire@exemple.com"
                       />
                     </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm text-gray-700 mb-1">Adresse complète</label>
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Adresse complète</span>
+                      </label>
                       <input
                         type="text"
-                        className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                        className="input input-bordered w-full"
                         value={formData.receiverAddress}
                         onChange={(e) => setFormData({...formData, receiverAddress: e.target.value})}
                         placeholder="Adresse de livraison complète"
@@ -737,9 +780,9 @@ export const QuotePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between mt-8">
-                  <button type="button" onClick={handlePrevStep} className="btn">Précédent</button>
-                  <button type="button" onClick={handleNextStep} className="btn btn-primary">Suivant</button>
+                <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
+                  <button type="button" onClick={handlePrevStep} className="btn w-full sm:w-auto">Précédent</button>
+                  <button type="button" onClick={handleNextStep} className="btn btn-primary w-full sm:w-auto">Suivant</button>
                 </div>
               </div>}
               {step === 3 && <div>
@@ -747,38 +790,42 @@ export const QuotePage: React.FC = () => {
                   Détails du colis
                 </h2>
                 <div className="mb-6">
-                  <label className="block text-sm text-gray-700 mb-1">Description du produit</label>
+                  <label className="label">
+                    <span className="label-text">Description du produit</span>
+                  </label>
                   <input
                     type="text"
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                    className="input input-bordered w-full"
                     value={formData.product}
                     onChange={(e) => setFormData({...formData, product: e.target.value})}
                     placeholder="Ex: Téléphone portable, vêtements, etc."
                   />
                 </div>
-                <div className="mb-6 form-control">
-                  <label htmlFor="packageType" className="block text-gray-700 text-sm font-medium mb-2">
-                    Type de colis
+                <div className="mb-6">
+                  <label className="label">
+                    <span className="label-text">Type de colis</span>
                   </label>
-                  <select id="packageType" name="packageType" className="select select-bordered select-primary w-full" value={formData.packageType} onChange={handleInputChange}>
+                  <select className="select select-bordered select-primary w-full" value={formData.packageType} onChange={handleInputChange} name="packageType">
                     <option value="package">Colis standard</option>
                     <option value="document">Document</option>
                     <option value="fragile">Colis fragile</option>
                     <option value="heavy">Colis lourd</option>
                   </select>
                 </div>
-                <div className="mb-6 form-control">
-                  <label htmlFor="weight" className="block text-gray-700 text-sm font-medium mb-2">
-                    Poids (kg) <span className="text-red-500">*</span>
+                <div className="mb-6">
+                  <label className="label">
+                    <span className="label-text">Poids (kg) <span className="text-error">*</span></span>
                   </label>
-                  <input type="number" id="weight" name="weight" min="0.1" step="0.1" className="input input-bordered input-primary w-full text-lg py-3" value={formData.weight} onChange={handleInputChange} required />
+                  <input type="number" min="0.1" step="0.1" className="input input-bordered input-primary w-full" value={formData.weight} onChange={handleInputChange} name="weight" required />
                 </div>
                 <div className="mb-6">
-                  <label className="block text-sm text-gray-700 mb-1">Quantité</label>
+                  <label className="label">
+                    <span className="label-text">Quantité</span>
+                  </label>
                   <input
                     type="number"
                     min="1"
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                    className="input input-bordered w-full"
                     value={formData.quantity}
                     onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})}
                   />
@@ -787,32 +834,32 @@ export const QuotePage: React.FC = () => {
                   <h3 className="text-gray-700 text-sm font-medium mb-2">
                     Dimensions (cm)
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="form-control">
-                      <label htmlFor="length" className="block text-gray-700 text-xs mb-1">
-                        Longueur
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="label">
+                        <span className="label-text text-xs">Longueur</span>
                       </label>
-                      <input type="number" id="length" name="length" min="1" className="input input-bordered input-primary w-full text-lg py-3" value={formData.length} onChange={handleInputChange} />
+                      <input type="number" min="1" className="input input-bordered input-primary w-full" value={formData.length} onChange={handleInputChange} name="length" />
                     </div>
-                    <div className="form-control">
-                      <label htmlFor="width" className="block text-gray-700 text-xs mb-1">
-                        Largeur
+                    <div>
+                      <label className="label">
+                        <span className="label-text text-xs">Largeur</span>
                       </label>
-                      <input type="number" id="width" name="width" min="1" className="input input-bordered input-primary w-full text-lg py-3" value={formData.width} onChange={handleInputChange} />
+                      <input type="number" min="1" className="input input-bordered input-primary w-full" value={formData.width} onChange={handleInputChange} name="width" />
                     </div>
-                    <div className="form-control">
-                      <label htmlFor="height" className="block text-gray-700 text-xs mb-1">
-                        Hauteur
+                    <div>
+                      <label className="label">
+                        <span className="label-text text-xs">Hauteur</span>
                       </label>
-                      <input type="number" id="height" name="height" min="1" className="input input-bordered input-primary w-full text-lg py-3" value={formData.height} onChange={handleInputChange} />
+                      <input type="number" min="1" className="input input-bordered input-primary w-full" value={formData.height} onChange={handleInputChange} name="height" />
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between mt-8">
-                  <button type="button" onClick={handlePrevStep} className="btn">
+                <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
+                  <button type="button" onClick={handlePrevStep} className="btn w-full sm:w-auto">
                     Précédent
                   </button>
-                  <button type="button" onClick={handleNextStep} className="btn btn-primary">Suivant</button>
+                  <button type="button" onClick={handleNextStep} className="btn btn-primary w-full sm:w-auto">Suivant</button>
                 </div>
               </div>}
               {step === 4 && <div>
@@ -820,37 +867,41 @@ export const QuotePage: React.FC = () => {
                   Confirmation de la demande
                 </h2>
                 <div className="mb-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-                    <h3 className="text-blue-800 font-medium mb-2">
-                      Récapitulatif de votre demande
-                    </h3>
-                    <div className="text-blue-700 text-sm space-y-1">
-                      <p><strong>De:</strong> {formData.origin}</p>
-                      <p><strong>À:</strong> {formData.destination}</p>
-                      <p><strong>Expéditeur:</strong> {formData.shipperName} ({formData.shipperEmail})</p>
-                      <p><strong>Destinataire:</strong> {formData.receiverName} ({formData.receiverEmail})</p>
-                      <p><strong>Produit:</strong> {formData.product || 'Non spécifié'}</p>
-                      <p><strong>Poids:</strong> {formData.weight} kg</p>
-                      <p><strong>Dimensions:</strong> {formData.length} × {formData.width} × {formData.height} cm</p>
-                      <p><strong>Type:</strong> {formData.packageType}</p>
+                  <div className="alert alert-info mb-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <div>
+                        <h3 className="font-bold">Récapitulatif de votre demande</h3>
+                        <div className="text-sm space-y-1">
+                          <p><strong>De:</strong> {formData.origin}</p>
+                          <p><strong>À:</strong> {formData.destination}</p>
+                          <p><strong>Expéditeur:</strong> {formData.shipperName} ({formData.shipperEmail})</p>
+                          <p><strong>Destinataire:</strong> {formData.receiverName} ({formData.receiverEmail})</p>
+                          <p><strong>Produit:</strong> {formData.product || 'Non spécifié'}</p>
+                          <p><strong>Poids:</strong> {formData.weight} kg</p>
+                          <p><strong>Dimensions:</strong> {formData.length} × {formData.width} × {formData.height} cm</p>
+                          <p><strong>Type:</strong> {formData.packageType}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                    <h4 className="text-yellow-800 font-medium mb-2">Important :</h4>
-                    <ul className="text-yellow-700 text-sm space-y-1">
-                      <li>• Votre demande sera examinée par notre équipe administrative</li>
-                      <li>• Vous recevrez un email de confirmation avec votre numéro de suivi</li>
-                      <li>• Les frais de port définitifs seront communiqués lors de la confirmation</li>
-                      <li>• Vous pouvez suivre l'état de votre colis via notre page de suivi</li>
-                    </ul>
-                  </div>
+ 
+                    <div className="alert alert-warning">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                      <div>
+                        <h4 className="font-bold">Important :</h4>
+                        <ul className="text-sm space-y-1">
+                          <li>• Votre demande sera examinée par notre équipe administrative</li>
+                          <li>• Vous recevrez un email de confirmation avec votre numéro de suivi</li>
+                          <li>• Les frais de port définitifs seront communiqués lors de la confirmation</li>
+                          <li>• Vous pouvez suivre l'état de votre colis via notre page de suivi</li>
+                        </ul>
+                      </div>
+                    </div>
                 </div>
-                <div className="flex justify-between mt-8">
-                  <button type="button" onClick={handlePrevStep} className="btn">
+                <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
+                  <button type="button" onClick={handlePrevStep} className="btn w-full sm:w-auto">
                     Précédent
                   </button>
-                  <button type="button" onClick={handleSubmit} className="btn btn-primary">
+                  <button type="button" onClick={handleSubmit} className="btn btn-primary w-full sm:w-auto">
                     Soumettre la demande
                   </button>
                 </div>
@@ -858,14 +909,14 @@ export const QuotePage: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Recent Confirmed Shipments Section - Always visible */}
-        {allShipments.length > 0 && (
+        {/* User Shipments History Section - Always visible when logged in */}
+        {currentUser && userShipments.length > 0 && (
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
                   <HistoryIcon size={24} className="mr-2 text-blue-600" />
-                  Expéditions récentes confirmées ({allShipments.length})
+                  Historique de vos demandes ({userShipments.length})
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -875,10 +926,11 @@ export const QuotePage: React.FC = () => {
                         <th className="px-4 py-2 border-b font-medium">Origine → Destination</th>
                         <th className="px-4 py-2 border-b font-medium">Statut</th>
                         <th className="px-4 py-2 border-b font-medium">Date</th>
+                        <th className="px-4 py-2 border-b font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {allShipments.slice(0, 5).map(shipment => (
+                      {userShipments.slice(0, 5).map(shipment => (
                         <tr key={shipment.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 border-b font-medium text-blue-600">
                             {shipment.tracking_number || 'En attente de confirmation'}
@@ -892,17 +944,33 @@ export const QuotePage: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-3 border-b">{shipment.date_created}</td>
+                          <td className="px-4 py-3 border-b">
+                            <div className="flex space-x-2">
+                              <button className="text-blue-600 hover:text-blue-800 p-1" title="Voir détails">
+                                <EyeIcon size={16} />
+                              </button>
+                              {shipment.status === 'pending_confirmation' && (
+                                <button
+                                  className="text-red-600 hover:text-red-800 p-1"
+                                  title="Annuler"
+                                  onClick={() => handleCancelShipment(shipment.id)}
+                                >
+                                  <XIcon size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {allShipments.length > 5 && (
+                  {userShipments.length > 5 && (
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => setShowDashboard(true)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        Voir toutes les expéditions ({allShipments.length})
+                        Voir tout l'historique ({userShipments.length})
                       </button>
                     </div>
                   )}

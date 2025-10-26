@@ -45,23 +45,16 @@ export const UserLayout: React.FC = () => {
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.classList.add('navigating');
-      // Prevent scroll on iOS devices
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
     } else {
       document.body.classList.remove('navigating');
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
     }
 
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('navigating');
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
     };
   }, [mobileMenuOpen]);
   return <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
@@ -276,7 +269,7 @@ export const UserLayout: React.FC = () => {
         </div>
         {/* Mobile Navigation */}
       <AnimatePresence>
-        {mobileMenuOpen && <motion.nav className="hamburger-menu md:hidden fixed inset-x-0 top-full mt-2 mx-4 bg-base-100 rounded-xl shadow-2xl border border-base-200 z-50 max-h-[80vh] overflow-y-auto" initial={{
+        {mobileMenuOpen && <motion.nav className="hamburger-menu md:hidden fixed inset-x-0 top-16 mt-2 mx-2 bg-base-100 rounded-xl shadow-2xl border border-base-200 z-[100] max-h-[80vh] overflow-y-auto overflow-x-hidden" initial={{
           opacity: 0,
           y: -20,
           scale: 0.95
@@ -292,10 +285,14 @@ export const UserLayout: React.FC = () => {
           duration: 0.2,
           ease: 'easeOut'
         }}>
-          <div className="p-4 space-y-4" style={{ minHeight: 'fit-content' }}>
-            <Link to="/" className={`block px-4 py-3 rounded-lg ${isActive('/')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
-              {t('nav.home')}
-            </Link>
+          <div className="p-4 space-y-6 relative" style={{ minHeight: 'fit-content' }}>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Close menu"
+            >
+              <XIcon size={20} className="text-gray-600" />
+            </button>
             {/* Mobile Services Dropdown */}
             <div className="relative">
               <button className={`flex items-center w-full px-4 py-3 rounded-lg ${isActive('/services')} justify-between transition-all duration-200 hover:bg-amber-50 text-base font-medium`} onClick={e => {
@@ -337,15 +334,20 @@ export const UserLayout: React.FC = () => {
                 </motion.div>}
               </AnimatePresence>
             </div>
-            <Link to="/tracking" className={`block px-4 py-3 rounded-lg ${isActive('/tracking')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
-              {t('nav.tracking')}
-            </Link>
-            <Link to="/quote" className={`block px-4 py-3 rounded-lg ${isActive('/quote')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
-              {t('nav.quote')}
-            </Link>
-            <Link to="/contact" className={`block px-4 py-3 rounded-lg ${isActive('/contact')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
-              {t('nav.contact')}
-            </Link>
+            <div className="grid grid-cols-1 gap-3">
+              <Link to="/tracking" className="btn btn-outline btn-sm w-full text-sm font-medium py-3 px-4 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-center">
+                <Package className="mr-2" size={16} />
+                <span className="flex-1 text-right">{t('nav.tracking')}</span>
+              </Link>
+              <Link to="/quote" className="btn btn-outline btn-sm w-full text-sm font-medium py-3 px-4 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-center">
+                <DollarSignIcon className="mr-2" size={16} />
+                <span className="flex-1 text-right">{t('nav.quote')}</span>
+              </Link>
+              <Link to="/contact" className="btn btn-outline btn-sm w-full text-sm font-medium py-3 px-4 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-center">
+                <MailIcon className="mr-2" size={16} />
+                <span className="flex-1 text-right">{t('nav.contact')}</span>
+              </Link>
+            </div>
 
             {/* Mobile Settings */}
             <div className="pt-4 mt-4 border-t border-gray-200 space-y-4">
@@ -369,14 +371,14 @@ export const UserLayout: React.FC = () => {
                           <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                           </svg>
-                          Dark
+                          <span className="flex-1 text-right">Dark</span>
                         </>
                       ) : (
                         <>
                           <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"/>
                           </svg>
-                          Light
+                          <span className="flex-1 text-right">Light</span>
                         </>
                       )}
                     </span>
@@ -384,36 +386,10 @@ export const UserLayout: React.FC = () => {
                 </div>
               </div>
 
-              {/* Login/Register Section */}
-              <div className="pt-2 border-t border-gray-100">
-                <div className="space-y-3">
-                  <p className="text-xs text-gray-500 text-center px-2">Accès à votre compte</p>
-                  <div className="login-register-buttons flex flex-col space-y-2">
-                    <Link
-                      to="/login"
-                      className="btn btn-outline btn-sm w-full text-sm font-medium py-2 px-4 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                      </svg>
-                      Se connecter
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="btn btn-primary btn-sm w-full text-sm font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                      </svg>
-                      S'inscrire
-                    </Link>
-                  </div>
-                </div>
-              </div>
 
               <div className="pt-2 border-t border-gray-100">
-                <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-6 py-4 rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-300 text-base">
-                  {t('nav.getQuote')}
+                <Link to="/quote" className="btn btn-primary btn-sm w-full text-sm font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center">
+                  <span className="flex-1 text-right">{t('nav.getQuote')}</span>
                 </Link>
               </div>
             </div>

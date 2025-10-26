@@ -67,7 +67,7 @@ const TRANSLATIONS: Record<string, Translations> = {
     },
     home: {
       hero: {
-        badge: 'Reliable Transport & Logistics',
+        badge: 'Transport & Logistics Fiables',
         title: 'Fast and reliable package shipping',
         subtitle: 'Economic shipping solutions for individuals and businesses. Send your packages safely anywhere in France and internationally.',
         cta: 'Get a Quote',
@@ -140,6 +140,13 @@ const TRANSLATIONS: Record<string, Translations> = {
       partners: {
         title: 'Our Trusted Partners',
         subtitle: 'We collaborate with the best global carriers to offer you optimal service'
+      },
+      badges: {
+        trust: 'Ils nous font confiance',
+        services: 'Nos Solutions',
+        process: 'Processus Simple',
+        testimonials: 'Témoignages',
+        learnMore: 'En savoir plus'
       }
     }
   },
@@ -266,6 +273,90 @@ const TRANSLATIONS: Record<string, Translations> = {
       contact: 'संपर्क',
       newsletter: 'न्यूज़लेटर',
       copyright: '© 2025 ColisSelect। सभी अधिकार सुरक्षित।'
+    },
+    home: {
+      hero: {
+        badge: 'विश्वसनीय परिवहन और लॉजिस्टिक्स',
+        title: 'तेज और विश्वसनीय पैकेज शिपिंग',
+        subtitle: 'व्यक्तियों और व्यवसायों के लिए आर्थिक शिपिंग समाधान। फ्रांस और अंतरराष्ट्रीय स्तर पर अपनी पैकेज सुरक्षित रूप से भेजें।',
+        cta: 'कोट प्राप्त करें',
+        discover: 'हमारी सेवाएं खोजें',
+        tracking: 'अपना पैकेज ट्रैक करें',
+        trackingPlaceholder: 'उदाहरण: CS-12345678',
+        trackingButton: 'मेरा पैकेज ट्रैक करें',
+        secure: 'सुरक्षित रीयल-टाइम ट्रैकिंग'
+      },
+      features: {
+        global: 'वैश्विक कवरेज',
+        globalDesc: 'हमारे अंतरराष्ट्रीय लॉजिस्टिक्स नेटवर्क के माध्यम से 200 से अधिक देशों में अपनी पैकेज भेजें।',
+        competitive: 'प्रतिस्पर्धी दरें',
+        competitiveDesc: 'कैरियर के बीच हमारे तत्काल तुलना प्रणाली के माध्यम से बाजार की सर्वोत्तम कीमतों का लाभ उठाएं।',
+        support: '24/7 सहायता',
+        supportDesc: 'आपके प्रश्नों के उत्तर देने और आपकी समस्याओं को हल करने के लिए हमारी ग्राहक सेवा टीम 24/7 उपलब्ध है।'
+      },
+      services: {
+        title: 'प्रीमियम शिपिंग सेवाएं',
+        subtitle: 'समुद्र, हवा या भूमि द्वारा हो, अपनी सभी आवश्यकताओं के अनुकूल हमारी विभिन्न शिपिंग समाधान खोजें।',
+        maritime: 'समुद्री शिपिंग',
+        maritimeDesc: 'बड़े शिपमेंट के लिए समय की कोई सीमा के बिना आर्थिक समाधान।',
+        air: 'एयर फ्रेट',
+        airDesc: 'तत्काल शिपमेंट और महत्वपूर्ण दस्तावेजों के लिए तेज डिलीवरी।',
+        door: 'दरवाजे से दरवाजे डिलीवरी',
+        doorDesc: 'घर से पिकअप और डिलीवरी की पूरी सेवा।',
+        special: 'विशेष पैकेज',
+        specialDesc: 'नाजुक, मूल्यवान या असामान्य आकार की वस्तुओं का सुरक्षित परिवहन।'
+      },
+      howItWorks: {
+        title: 'यह कैसे काम करता है',
+        subtitle: 'ColisSelect के साथ एक पैकेज भेजना आसान और तेज है। अपनी पैकेज को सुरक्षित रूप से भेजने के लिए इन चरणों का पालन करें।',
+        step1: 'कोट प्राप्त करें',
+        step1Desc: 'अपने शिपमेंट के आधार पर तत्काल कोट प्राप्त करने के लिए हमारा ऑनलाइन फॉर्म भरें।',
+        step2: 'अपनी पैकेज तैयार करें',
+        step2Desc: 'सावधानी से अपनी पैकेज पैक करें और शिपिंग के लिए आवश्यक दस्तावेज तैयार करें।',
+        step3: 'पिकअप या ड्रॉप-ऑफ',
+        step3Desc: 'घर से पिकअप या हमारे किसी रिले पॉइंट पर ड्रॉप-ऑफ चुनें।',
+        step4: 'अपने शिपमेंट को ट्रैक करें',
+        step4Desc: 'रीयल-टाइम में अपनी पैकेज की प्रगति की निगरानी के लिए ट्रैकिंग नंबर प्राप्त करें।',
+        start: 'अभी शुरू करें'
+      },
+      testimonials: {
+        title: 'हमारे ग्राहक क्या कहते हैं',
+        subtitle: 'हमारे संतुष्ट ग्राहकों की सिफारिशें खोजें जो अपनी शिपिंग आवश्यकताओं के लिए ColisSelect पर भरोसा करते हैं।',
+        text1: 'असाधारण सेवा! मेरी नाजुक पैकेज समय पर और अंतरराष्ट्रीय यात्रा के बावजूद बिल्कुल सही स्थिति में पहुंची। ColisSelect टीम बहुत सक्रिय थी और मुझे हर चरण में अपडेट रखा।',
+        text2: 'एसएमई के रूप में, हमें एक विश्वसनीय शिपिंग सेवा और किफायती की आवश्यकता है। ColisSelect प्रतिस्पर्धी दरों और असाधारण ग्राहक सेवा के साथ हमारी अपेक्षाओं को पूरी तरह से पूरा करता है।',
+        text3: 'मैं विशेष रूप से कीमतों की पारदर्शिता और रीयल-टाइम में अपनी पैकेज को ट्रैक करने की क्षमता पसंद करता हूं। ColisSelect ने मेरे व्यवसाय के लिए अंतरराष्ट्रीय शिपिंग को आसान और किफायती बना दिया है।'
+      },
+      cta: {
+        title: 'अपनी पैकेज भेजने के लिए तैयार हैं?',
+        subtitle: 'तत्काल कोट प्राप्त करें और आज ही ColisSelect के साथ अपनी शिपिंग शुरू करें।',
+        origin: 'मूल देश',
+        destination: 'गंतव्य देश',
+        weight: 'वजन (किग्रा)',
+        weightPlaceholder: 'उदाहरण: 5',
+        getQuote: 'कोट प्राप्त करें',
+        contact: 'हमसे संपर्क करें'
+      },
+      trust: {
+        experience: 'अनुभव के वर्ष',
+        experienceDesc: 'सिद्ध लॉजिस्टिक्स विशेषज्ञता',
+        packages: 'डिलीवर किए गए पैकेज',
+        packagesDesc: 'हर महीने दुनिया भर में',
+        destinations: 'गंतव्य',
+        destinationsDesc: 'वैश्विक कवरेज',
+        satisfaction: 'संतुष्ट ग्राहक',
+        satisfactionDesc: 'प्रीमियम ग्राहक सेवा'
+      },
+      partners: {
+        title: 'हमारे विश्वसनीय भागीदार',
+        subtitle: 'आपको सर्वोत्तम सेवा प्रदान करने के लिए हम दुनिया के सर्वश्रेष्ठ कैरियर के साथ सहयोग करते हैं'
+      },
+      badges: {
+        trust: 'वे हमें भरोसा करते हैं',
+        services: 'हमारे समाधान',
+        process: 'सरल प्रक्रिया',
+        testimonials: 'प्रशंसापत्र',
+        learnMore: 'और जानें'
+      }
     }
   },
   es: {
@@ -391,6 +482,90 @@ const TRANSLATIONS: Record<string, Translations> = {
       contact: 'Contact',
       newsletter: 'Newsletter',
       copyright: '© 2025 ColisSelect. Tous droits réservés.'
+    },
+    home: {
+      hero: {
+        badge: 'Transport & Logistique Fiables',
+        title: 'Expédition de colis rapide et fiable',
+        subtitle: 'Solutions économiques d\'expédition pour particuliers et entreprises. Envoyez vos colis en toute sécurité partout en France et à l\'international.',
+        cta: 'Obtenir un devis',
+        discover: 'Découvrez nos services',
+        tracking: 'Suivez votre colis',
+        trackingPlaceholder: 'Ex: CS-12345678',
+        trackingButton: 'Suivre mon colis',
+        secure: 'Suivi sécurisé en temps réel'
+      },
+      features: {
+        global: 'Couverture Mondiale',
+        globalDesc: 'Envoyez vos colis partout dans le monde grâce à notre réseau logistique international couvrant plus de 200 pays.',
+        competitive: 'Tarifs Compétitifs',
+        competitiveDesc: 'Bénéficiez des meilleurs prix du marché grâce à notre système de comparaison instantanée entre transporteurs.',
+        support: 'Support 24/7',
+        supportDesc: 'Notre équipe de service client est disponible 24/7 pour répondre à vos questions et résoudre vos problèmes.'
+      },
+      services: {
+        title: 'Services d\'Expédition Premium',
+        subtitle: 'Découvrez nos différentes solutions d\'expédition adaptées à tous vos besoins, que ce soit par mer, air ou terre.',
+        maritime: 'Expédition Maritime',
+        maritimeDesc: 'Solution économique pour les expéditions volumineuses sans contraintes de temps.',
+        air: 'Fret Aérien',
+        airDesc: 'Livraison rapide pour les expéditions urgentes et documents importants.',
+        door: 'Livraison Porte-à-Porte',
+        doorDesc: 'Service complet de ramassage et livraison à domicile.',
+        special: 'Colis Spéciaux',
+        specialDesc: 'Transport sécurisé d\'objets fragiles, précieux ou de taille non standard.'
+      },
+      howItWorks: {
+        title: 'Comment ça marche',
+        subtitle: 'Expédier un colis avec ColisSelect est simple et rapide. Suivez ces étapes pour envoyer votre colis en toute sécurité.',
+        step1: 'Obtenir un devis',
+        step1Desc: 'Remplissez notre formulaire en ligne pour obtenir un devis instantané basé sur votre expédition.',
+        step2: 'Préparer votre colis',
+        step2Desc: 'Emballez soigneusement votre colis et préparez les documents nécessaires à l\'expédition.',
+        step3: 'Ramassage ou dépôt',
+        step3Desc: 'Choisissez entre le ramassage à domicile ou le dépôt dans l\'un de nos points relais.',
+        step4: 'Suivez votre expédition',
+        step4Desc: 'Recevez un numéro de suivi pour surveiller la progression de votre colis en temps réel.',
+        start: 'Commencer maintenant'
+      },
+      testimonials: {
+        title: 'Ce que disent nos clients',
+        subtitle: 'Découvrez les témoignages de nos clients satisfaits qui font confiance à ColisSelect pour leurs besoins d\'expédition.',
+        text1: 'Service exceptionnel ! Mon colis fragile est arrivé dans les délais et en parfait état malgré un trajet international. L\'équipe de ColisSelect a été proactive et m\'a tenu informé à chaque étape.',
+        text2: 'En tant que PME, nous avons besoin d\'un service d\'expédition fiable et économique. ColisSelect répond parfaitement à nos attentes avec des tarifs compétitifs et un service client exceptionnel.',
+        text3: 'J\'apprécie particulièrement la transparence des prix et la possibilité de suivre mon colis en temps réel. ColisSelect a rendu l\'expédition internationale simple et abordable pour mon entreprise.'
+      },
+      cta: {
+        title: 'Prêt à expédier votre colis ?',
+        subtitle: 'Obtenez un devis instantané et commencez votre expédition dès aujourd\'hui avec ColisSelect.',
+        origin: 'Pays d\'origine',
+        destination: 'Pays de destination',
+        weight: 'Poids (kg)',
+        weightPlaceholder: 'Ex: 5',
+        getQuote: 'Obtenir un devis',
+        contact: 'Nous contacter'
+      },
+      trust: {
+        experience: 'Années d\'expérience',
+        experienceDesc: 'Expertise logistique éprouvée',
+        packages: 'Colis livrés',
+        packagesDesc: 'Chaque mois dans le monde entier',
+        destinations: 'Destinations',
+        destinationsDesc: 'Couverture mondiale',
+        satisfaction: 'Clients satisfaits',
+        satisfactionDesc: 'Service client premium'
+      },
+      partners: {
+        title: 'Nos Partenaires de Confiance',
+        subtitle: 'Nous collaborons avec les meilleurs transporteurs mondiaux pour vous offrir un service optimal'
+      },
+      badges: {
+        trust: 'Ils nous font confiance',
+        services: 'Nos Solutions',
+        process: 'Processus Simple',
+        testimonials: 'Témoignages',
+        learnMore: 'En savoir plus'
+      }
     }
   },
   ar: {
@@ -735,8 +910,8 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
       if (value && typeof value === 'object') {
         value = value[k];
       } else {
-        // Fallback to English if translation not found
-        value = TRANSLATIONS.en;
+        // Fallback to French if translation not found in current language
+        value = TRANSLATIONS.fr;
         for (const fallbackKey of keys) {
           if (value && typeof value === 'object') {
             value = value[fallbackKey];

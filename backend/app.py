@@ -5,7 +5,7 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+CORS(app, origins="*", supports_credentials=True, allow_headers=["*"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 DATABASE = 'database.db'
 
@@ -59,7 +59,7 @@ def init_db():
         # Shipments table
         db.execute('''CREATE TABLE IF NOT EXISTS shipments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tracking_number TEXT UNIQUE NOT NULL,
+            tracking_number TEXT UNIQUE,
             shipper_name TEXT NOT NULL,
             shipper_address TEXT NOT NULL,
             shipper_phone TEXT NOT NULL,
@@ -374,9 +374,21 @@ def create_shipment():
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
-    # Generate tracking number immediately for user shipments
-    import random
-    tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
+    # For admin-created shipments, set status directly to 'processing' without confirmation needed
+    # For user-created shipments, set to 'pending_confirmation'
+    # Check if this is an admin request (you might want to add authentication later)
+    is_admin_request = request.headers.get('X-Admin-Request', 'false').lower() == 'true'
+
+    if is_admin_request:
+        # Admin can create shipments directly as 'processing'
+        status = 'processing'
+        # Generate tracking number immediately
+        import random
+        tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
+    else:
+        # User shipments need confirmation
+        status = 'pending_confirmation'
+        tracking_number = None  # Will be generated upon confirmation
 
     db = get_db()
     cursor = db.execute('''INSERT INTO shipments (
@@ -389,7 +401,7 @@ def create_shipment():
     (
         tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
         data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
-        data['origin'], data['destination'], 'pending_confirmation', data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
+        data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
         data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
         data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
         datetime.now().strftime('%Y-%m-%d')
@@ -399,13 +411,17 @@ def create_shipment():
     db.commit()
 
     # Add initial tracking history
-    db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-               (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Origin Facility', 'processing', 'Package received and being processed', 48.8566, 2.3522))
+    if is_admin_request:
+        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment created by admin and ready for processing', 48.8566, 2.3522))
+    else:
+        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Origin Facility', 'pending_confirmation', 'Package received and awaiting admin confirmation', 48.8566, 2.3522))
     db.commit()
 
     return jsonify({
         'id': shipment_id,
-        'tracking_number': tracking_number,  # Will be None for pending shipments
+        'tracking_number': tracking_number,
         'shipper_name': data['shipper_name'],
         'shipper_address': data.get('shipper_address', ''),
         'shipper_phone': data.get('shipper_phone', ''),
@@ -415,8 +431,8 @@ def create_shipment():
         'receiver_phone': data.get('receiver_phone', ''),
         'receiver_email': data.get('receiver_email', ''),
         'origin': data['origin'],
-        'destination': data['destination'],
-        'status': 'pending_confirmation',
+        'destination': data.get('destination', ''),
+        'status': status,
         'packages': data.get('packages', 1),
         'total_weight': data.get('total_weight', 0),
         'product': data.get('product', ''),

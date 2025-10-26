@@ -16,6 +16,17 @@ CORS(app, resources={
     }
 })
 
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = app.make_response("")
+        response.status_code = 200
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Admin-Request")
+        response.headers.add("Access-Control-Max-Age", "86400")  # Cache for 24 hours
+        return response
+
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')

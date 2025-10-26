@@ -6,27 +6,30 @@ const LanguageSelector: React.FC = () => {
 
   return (
     <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-        <div className="w-8 rounded-full">
-          <span className="text-lg">
+      <div tabIndex={0} role="button" className="btn btn-ghost btn-sm px-2 py-1 h-auto min-h-0">
+        <div className="flex items-center gap-1">
+          <span className="text-base">
             {LANGUAGES.find(lang => lang.code === language)?.flag || '🌐'}
+          </span>
+          <span className="text-xs hidden sm:inline">
+            {LANGUAGES.find(lang => lang.code === language)?.code?.toUpperCase() || 'EN'}
           </span>
         </div>
       </div>
-      <ul tabIndex={0} className={`menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow bg-base-100 rounded-box w-52 ${isRTL ? 'text-right' : ''}`}>
+      <ul tabIndex={0} className={`menu menu-sm dropdown-content mt-2 z-[100] p-2 shadow-lg bg-base-100 rounded-lg w-48 border ${isRTL ? 'text-right' : ''}`}>
         {LANGUAGES.map((lang) => (
           <li key={lang.code}>
             <a
               onClick={() => setLanguage(lang.code)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors cursor-pointer ${
                 language === lang.code
                   ? 'bg-blue-600 text-white'
                   : 'hover:bg-gray-100 text-gray-700'
               }`}
             >
-              <span className="text-lg">{lang.flag}</span>
+              <span className="text-base">{lang.flag}</span>
               <div>
-                <div className="font-medium">{lang.nativeName}</div>
+                <div className="font-medium text-sm">{lang.nativeName}</div>
                 <div className="text-xs opacity-70">{lang.name}</div>
               </div>
             </a>

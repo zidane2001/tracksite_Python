@@ -45,13 +45,23 @@ export const UserLayout: React.FC = () => {
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.classList.add('navigating');
+      // Prevent scroll on iOS devices
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     } else {
       document.body.classList.remove('navigating');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
 
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('navigating');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [mobileMenuOpen]);
   return <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
@@ -282,7 +292,7 @@ export const UserLayout: React.FC = () => {
           duration: 0.2,
           ease: 'easeOut'
         }}>
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-4" style={{ minHeight: 'fit-content' }}>
             <Link to="/" className={`block px-4 py-3 rounded-lg ${isActive('/')} transition-all duration-200 hover:bg-amber-50 text-base font-medium`}>
               {t('nav.home')}
             </Link>
@@ -339,15 +349,17 @@ export const UserLayout: React.FC = () => {
 
             {/* Mobile Settings */}
             <div className="pt-4 mt-4 border-t border-gray-200 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Langue</span>
-                  <LanguageSelector />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-sm font-medium text-gray-700 flex-shrink-0">Langue</span>
+                  <div className="flex-shrink-0">
+                    <LanguageSelector />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Thème</span>
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-sm font-medium text-gray-700 flex-shrink-0">Thème</span>
                   <button
-                    className="btn btn-sm btn-ghost px-4 py-2 text-sm font-medium rounded-full border border-gray-300 hover:border-gray-400 transition-colors"
+                    className="btn btn-sm btn-ghost px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-gray-400 transition-colors flex-shrink-0"
                     onClick={toggleTheme}
                     aria-label="Toggle theme"
                   >
@@ -371,9 +383,11 @@ export const UserLayout: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-6 py-4 rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-300 text-base">
-                {t('nav.getQuote')}
-              </Link>
+              <div className="pt-2">
+                <Link to="/quote" className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-6 py-4 rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-300 text-base">
+                  {t('nav.getQuote')}
+                </Link>
+              </div>
             </div>
           </div>
         </motion.nav>}

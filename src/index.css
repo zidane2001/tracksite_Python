@@ -26,6 +26,7 @@ html {
   /* Ensure no horizontal scroll */
   * {
     max-width: 100vw;
+    box-sizing: border-box;
   }
 
   /* Better touch targets */
@@ -44,6 +45,32 @@ html {
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  /* Fix button alignment issues */
+  .btn {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Ensure dropdowns don't overflow */
+  .dropdown-content {
+    max-width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Fix navigation fluidity */
+  .hamburger-menu {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Prevent content overflow */
+  .overflow-x-hidden {
+    overflow-x: hidden !important;
   }
 }
 

@@ -809,6 +809,43 @@ def hello():
         return jsonify({'status': 'success'}), 200
     return {"message": "Hello from Flask!"}
 
+# Routes explicites pour forcer le routage SPA - méthode archaïque mais efficace
+@app.route('/quote')
+def serve_quote():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/contact')
+def serve_contact():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/tracking')
+def serve_tracking():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/services/shipping')
+def serve_services_shipping():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/services/air')
+def serve_services_air():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/services/delivery')
+def serve_services_delivery():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/services/special')
+def serve_services_special():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/admin')
+def serve_admin():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route('/admin/<path:subpath>')
+def serve_admin_subpath(subpath):
+    return send_from_directory(app.static_folder, "index.html")
+
 # Route pour servir le frontend buildé - Gestion SPA améliorée
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -837,7 +874,7 @@ def serve_frontend(path):
         if os.path.exists(index_path):
             return send_from_directory(static_file_path, 'index.html')
 
-    # Pour toutes les autres routes (comme /quote), servir index.html (SPA)
+    # Pour toutes les autres routes, servir index.html (SPA)
     return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':

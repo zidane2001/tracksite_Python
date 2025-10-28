@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import os
 from flask_cors import CORS
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../dist", static_url_path="/")
 
 # CORS configuration for all routes
 CORS(app, resources={
@@ -715,11 +715,20 @@ def reject_shipment(id):
     return jsonify({'message': 'Shipment rejected'})
 
 
-@app.route('/', methods=['GET'])
-def health_check():
-    return jsonify({'message': '🚚 COLISSELECT BACKEND OK !', 'port': 3005})
+@app.route('/api/hello')
+def hello():
+    return {"message": "Hello from Flask!"}
+
+# Route pour servir le frontend buildé
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     init_db()
-    port = int(os.environ.get("PORT", 3005))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)

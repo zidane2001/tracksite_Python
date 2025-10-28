@@ -809,21 +809,37 @@ def hello():
         return jsonify({'status': 'success'}), 200
     return {"message": "Hello from Flask!"}
 
-# Route pour servir le frontend buildé - Gestion SPA
+# Route pour servir le frontend buildé - Gestion SPA améliorée
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    # Si la route commence par api/, retourner 404
-    if path.startswith("api/"):
+    # Liste des routes API connues
+    api_routes = [
+        'api/', 'auth/', 'login', 'register', 'track/',
+        'shipments', 'users', 'locations', 'zones',
+        'shipping-rates', 'pickup-rates', 'tracking-history',
+        'quote'  # Ajoutez 'quote' ici si c'est une route frontend
+    ]
+
+    # Si la route commence par un chemin API connu, retourner 404
+    if any(path.startswith(route) for route in api_routes):
         return jsonify({"error": "API route not found"}), 404
 
     # Vérifier si le fichier existe dans le dossier static
     static_file_path = os.path.join(app.static_folder, path) if path else app.static_folder
+
+    # Si le chemin existe et c'est un fichier, le servir
     if path and os.path.exists(static_file_path) and os.path.isfile(static_file_path):
         return send_from_directory(app.static_folder, path)
-    else:
-        # Pour toutes les autres routes, servir index.html (SPA)
-        return send_from_directory(app.static_folder, "index.html")
+
+    # Si c'est un dossier qui existe, vérifier s'il contient index.html
+    if path and os.path.exists(static_file_path) and os.path.isdir(static_file_path):
+        index_path = os.path.join(static_file_path, 'index.html')
+        if os.path.exists(index_path):
+            return send_from_directory(static_file_path, 'index.html')
+
+    # Pour toutes les autres routes (comme /quote), servir index.html (SPA)
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     init_db()

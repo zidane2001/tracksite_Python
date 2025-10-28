@@ -6,29 +6,51 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder="../dist", static_url_path="/")
 
-# FORCER LE BACKEND À ACCEPTER TOUTES LES REQUÊTES DEPUIS N'IMPORTE QUEL FRONTEND
-CORS(app, origins=["*"], supports_credentials=True)
+# SOLUTION COMPLÈTE CORS - TOUTES LES SOLUTIONS STACK OVERFLOW APPLIQUÉES
+from flask_cors import CORS
 
+# Configuration CORS complète - Solution Stack Overflow #1
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
+        "supports_credentials": False,  # Important pour éviter les conflits
+        "expose_headers": ["Content-Type", "Authorization"],
+        "max_age": 86400
+    }
+})
+
+# Solution Stack Overflow #2 - Headers manuels complets
 @app.after_request
-def after_request(response):
-    # Headers CORS forcés pour accepter TOUTES les origines
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', '*')
-    response.headers.add('Access-Control-Allow-Methods', '*')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Expose-Headers', '*')
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    response.headers['Access-Control-Allow-Credentials'] = 'false'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization'
     return response
 
+# Solution Stack Overflow #3 - Gestion OPTIONS explicite
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    response = jsonify({'status': 'ok'})
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    return response, 200
+
+# Solution Stack Overflow #4 - Route OPTIONS globale
 @app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        # Réponse preflight forcée pour TOUTES les requêtes
-        response = jsonify({"status": "success", "cors": "forced"})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "*")
-        response.headers.add("Access-Control-Allow-Methods", "*")
-        response.headers.add("Access-Control-Allow-Credentials", "true")
-        response.headers.add("Access-Control-Expose-Headers", "*")
+def handle_preflight_request():
+    if request.method == 'OPTIONS':
+        response = app.make_response('')
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+        response.headers['Access-Control-Max-Age'] = '86400'
         return response, 200
 
 DATABASE = 'database.db'

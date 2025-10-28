@@ -817,8 +817,7 @@ def serve_frontend(path):
     api_routes = [
         'api/', 'auth/', 'login', 'register', 'track/',
         'shipments', 'users', 'locations', 'zones',
-        'shipping-rates', 'pickup-rates', 'tracking-history',
-        'quote'  # Ajoutez 'quote' ici si c'est une route frontend
+        'shipping-rates', 'pickup-rates', 'tracking-history'
     ]
 
     # Si la route commence par un chemin API connu, retourner 404

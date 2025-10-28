@@ -1,7 +1,7 @@
 services:
   # Full-stack application (Backend + Frontend)
   - type: web
-    name: tracksite-python
+    name: tracksite-python5
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free

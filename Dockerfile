@@ -20,6 +20,9 @@ COPY backend ./backend
 # Copier le build frontend
 COPY --from=frontend-builder /app/dist ./dist
 
+# Copier le fichier _redirects pour le SPA routing
+COPY --from=frontend-builder /app/public/_redirects ./dist/_redirects
+
 # Exposer le port Flask
 EXPOSE 5000
 

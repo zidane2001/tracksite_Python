@@ -9,7 +9,7 @@ app = Flask(__name__, static_folder="../dist", static_url_path="/")
 # CORS configuration for all routes
 CORS(app, resources={
     r"/*": {
-        "origins": ["https://celebrated-lebkuchen-e43638.netlify.app", "http://localhost:5173", "http://localhost:3000", "https://tracksite-python-4.onrender.com"],
+        "origins": "*",
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "X-Admin-Request"],
         "supports_credentials": True

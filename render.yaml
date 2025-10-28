@@ -1,15 +1,7 @@
 services:
-  # Backend API
+  # Full-stack application (Backend + Frontend)
   - type: web
-    name: tracksite-python-backend
+    name: tracksite-python
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free
-
-  # Frontend
-  - type: web
-    name: tracksite-python-frontend
-    runtime: node
-    buildCommand: npm run build
-    startCommand: npm run preview
     plan: free

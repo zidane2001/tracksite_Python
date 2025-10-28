@@ -1,6 +1,6 @@
 // API client for backend communication
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://tracksite-python-backend.onrender.com';
-export const BACKEND_PORT = 5000;
+
 export interface Location {
   id: number;
   name: string;
@@ -100,22 +100,31 @@ export interface AuthResponse {
   status: string;
 }
 
-// Generic API functions
+// Generic API functions with better error handling
 async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
+  
+  const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
     },
     ...options,
-  });
+  };
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  try {
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('API request error:', error);
+    throw error;
   }
-
-  return response.json();
 }
 
 // Locations API
@@ -188,10 +197,21 @@ export const shipmentsApi = {
     const query = status && status !== 'all' ? `?status=${status}` : '';
     return apiRequest<Shipment[]>(`/api/shipments${query}`);
   },
-  create: (data: Omit<Shipment, 'id'>) => apiRequest<Shipment>('/api/shipments', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
+  create: (data: Omit<Shipment, 'id'>, isAdmin: boolean = false) => {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (isAdmin) {
+      headers['X-Admin-Request'] = 'true';
+    }
+    
+    return apiRequest<Shipment>('/api/shipments', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+  },
   update: (id: number, data: Partial<Shipment>) => apiRequest<{ message: string }>(`/api/shipments/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
@@ -199,6 +219,16 @@ export const shipmentsApi = {
   delete: (id: number) => apiRequest<{ message: string }>(`/api/shipments/${id}`, {
     method: 'DELETE',
   }),
+  confirm: (id: number, data: { total_freight?: number; expected_delivery?: string; comments?: string }) => 
+    apiRequest<{ message: string; tracking_number: string }>(`/api/shipments/${id}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  reject: (id: number, data: { reason: string }) => 
+    apiRequest<{ message: string }>(`/api/shipments/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 // Users API
@@ -232,8 +262,13 @@ export const authApi = {
 // Tracking API
 export const trackingApi = {
   track: async (trackingNumber: string): Promise<TrackingResult> => {
-    const response = await fetch(`${API_BASE_URL}/api/track/${trackingNumber}`); // ✅ FIXÉ : 3003 via config
-    if (!response.ok) throw new Error('Colis non trouvé');
+    const response = await fetch(`${API_BASE_URL}/api/track/${trackingNumber}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Colis non trouvé');
+      }
+      throw new Error(`Erreur de tracking: ${response.status}`);
+    }
     return response.json();
   }
 };

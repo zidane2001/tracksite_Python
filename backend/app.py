@@ -6,42 +6,26 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder="../dist", static_url_path="/")
 
-# CORS configuration for all routes
-CORS(app, resources={
-    r"/*": {
-        "origins": [
-            "https://tracksite-python-4.onrender.com",
-            "https://celebrated-lebkuchen-e43638.netlify.app",
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "http://localhost:5000",
-            "*"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Admin-Request", "Accept", "Origin", "X-Requested-With"],
-        "supports_credentials": True,
-        "expose_headers": ["Content-Type", "Authorization"]
-    }
-})
+# CORS configuration simplifiée et plus permissive
+CORS(app, origins=["*"])
+
+# Configuration CORS manuelle pour toutes les routes
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Admin-Request')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS":
-        response = app.make_response("")
-        response.status_code = 200
+        response = jsonify({"status": "success"})
         response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Admin-Request")
-        response.headers.add("Access-Control-Max-Age", "86400")  # Cache for 24 hours
-        return response
-
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Admin-Request')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+        response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+        return response, 200
 
 DATABASE = 'database.db'
 
@@ -106,7 +90,7 @@ def init_db():
             receiver_email TEXT NOT NULL,
             origin TEXT NOT NULL,
             destination TEXT NOT NULL,
-            status TEXT NOT NULL CHECK(status IN ('pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected')),
+            status TEXT NOT NULL CHECK(status IN ('pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected', 'cancelled')),
             packages INTEGER NOT NULL DEFAULT 1,
             total_weight REAL NOT NULL,
             product TEXT,
@@ -235,13 +219,20 @@ def insert_default_data(db):
 
 # API Routes
 
-@app.route('/api/locations', methods=['GET'])
+@app.route('/api/locations', methods=['GET', 'POST', 'OPTIONS'])
+def handle_locations():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_locations()
+    elif request.method == 'POST':
+        return create_location()
+
 def get_locations():
     db = get_db()
     locations = db.execute('SELECT * FROM locations ORDER BY name').fetchall()
     return jsonify([dict(row) for row in locations])
 
-@app.route('/api/locations', methods=['POST'])
 def create_location():
     data = request.get_json()
     name = data.get('name')
@@ -259,7 +250,15 @@ def create_location():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Location with this slug already exists'}), 400
 
-@app.route('/api/locations/<int:id>', methods=['PUT'])
+@app.route('/api/locations/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_location(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_location(id)
+    elif request.method == 'DELETE':
+        return delete_location(id)
+
 def update_location(id):
     data = request.get_json()
     db = get_db()
@@ -268,20 +267,26 @@ def update_location(id):
     db.commit()
     return jsonify({'message': 'Location updated'})
 
-@app.route('/api/locations/<int:id>', methods=['DELETE'])
 def delete_location(id):
     db = get_db()
     db.execute('DELETE FROM locations WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Location deleted'})
 
-@app.route('/api/zones', methods=['GET'])
+@app.route('/api/zones', methods=['GET', 'POST', 'OPTIONS'])
+def handle_zones():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_zones()
+    elif request.method == 'POST':
+        return create_zone()
+
 def get_zones():
     db = get_db()
     zones = db.execute('SELECT * FROM zones ORDER BY name').fetchall()
     return jsonify([dict(row) for row in zones])
 
-@app.route('/api/zones', methods=['POST'])
 def create_zone():
     data = request.get_json()
     name = data.get('name')
@@ -301,7 +306,15 @@ def create_zone():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Zone with this slug already exists'}), 400
 
-@app.route('/api/zones/<int:id>', methods=['PUT'])
+@app.route('/api/zones/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_zone(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_zone(id)
+    elif request.method == 'DELETE':
+        return delete_zone(id)
+
 def update_zone(id):
     data = request.get_json()
     db = get_db()
@@ -310,20 +323,26 @@ def update_zone(id):
     db.commit()
     return jsonify({'message': 'Zone updated'})
 
-@app.route('/api/zones/<int:id>', methods=['DELETE'])
 def delete_zone(id):
     db = get_db()
     db.execute('DELETE FROM zones WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Zone deleted'})
 
-@app.route('/api/shipping-rates', methods=['GET'])
+@app.route('/api/shipping-rates', methods=['GET', 'POST', 'OPTIONS'])
+def handle_shipping_rates():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_shipping_rates()
+    elif request.method == 'POST':
+        return create_shipping_rate()
+
 def get_shipping_rates():
     db = get_db()
     rates = db.execute('SELECT * FROM shipping_rates ORDER BY name').fetchall()
     return jsonify([dict(row) for row in rates])
 
-@app.route('/api/shipping-rates', methods=['POST'])
 def create_shipping_rate():
     data = request.get_json()
     name = data.get('name')
@@ -338,7 +357,15 @@ def create_shipping_rate():
     db.commit()
     return jsonify({'id': cursor.lastrowid, 'name': name, 'type': data.get('type', 'flat'), 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'insurance': data.get('insurance', 0), 'description': data.get('description')})
 
-@app.route('/api/shipping-rates/<int:id>', methods=['PUT'])
+@app.route('/api/shipping-rates/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_shipping_rate(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_shipping_rate(id)
+    elif request.method == 'DELETE':
+        return delete_shipping_rate(id)
+
 def update_shipping_rate(id):
     data = request.get_json()
     db = get_db()
@@ -347,20 +374,26 @@ def update_shipping_rate(id):
     db.commit()
     return jsonify({'message': 'Shipping rate updated'})
 
-@app.route('/api/shipping-rates/<int:id>', methods=['DELETE'])
 def delete_shipping_rate(id):
     db = get_db()
     db.execute('DELETE FROM shipping_rates WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Shipping rate deleted'})
 
-@app.route('/api/pickup-rates', methods=['GET'])
+@app.route('/api/pickup-rates', methods=['GET', 'POST', 'OPTIONS'])
+def handle_pickup_rates():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_pickup_rates()
+    elif request.method == 'POST':
+        return create_pickup_rate()
+
 def get_pickup_rates():
     db = get_db()
     rates = db.execute('SELECT * FROM pickup_rates ORDER BY zone').fetchall()
     return jsonify([dict(row) for row in rates])
 
-@app.route('/api/pickup-rates', methods=['POST'])
 def create_pickup_rate():
     data = request.get_json()
     zone = data.get('zone')
@@ -375,7 +408,15 @@ def create_pickup_rate():
     db.commit()
     return jsonify({'id': cursor.lastrowid, 'zone': zone, 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'description': data.get('description')})
 
-@app.route('/api/pickup-rates/<int:id>', methods=['PUT'])
+@app.route('/api/pickup-rates/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_pickup_rate(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_pickup_rate(id)
+    elif request.method == 'DELETE':
+        return delete_pickup_rate(id)
+
 def update_pickup_rate(id):
     data = request.get_json()
     db = get_db()
@@ -384,14 +425,21 @@ def update_pickup_rate(id):
     db.commit()
     return jsonify({'message': 'Pickup rate updated'})
 
-@app.route('/api/pickup-rates/<int:id>', methods=['DELETE'])
 def delete_pickup_rate(id):
     db = get_db()
     db.execute('DELETE FROM pickup_rates WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Pickup rate deleted'})
 
-@app.route('/api/shipments', methods=['GET'])
+@app.route('/api/shipments', methods=['GET', 'POST', 'OPTIONS'])
+def handle_shipments():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_shipments()
+    elif request.method == 'POST':
+        return create_shipment()
+
 def get_shipments():
     status = request.args.get('status')
     db = get_db()
@@ -401,7 +449,6 @@ def get_shipments():
         shipments = db.execute('SELECT * FROM shipments ORDER BY date_created DESC').fetchall()
     return jsonify([dict(row) for row in shipments])
 
-@app.route('/api/shipments', methods=['POST'])
 def create_shipment():
     data = request.get_json()
 
@@ -410,21 +457,15 @@ def create_shipment():
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
-    # For admin-created shipments, set status directly to 'processing' without confirmation needed
-    # For user-created shipments, set to 'pending_confirmation'
-    # Check if this is an admin request (you might want to add authentication later)
     is_admin_request = request.headers.get('X-Admin-Request', 'false').lower() == 'true'
 
     if is_admin_request:
-        # Admin can create shipments directly as 'processing'
         status = 'processing'
-        # Generate tracking number immediately
         import random
         tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
     else:
-        # User shipments need confirmation
         status = 'pending_confirmation'
-        tracking_number = None  # Will be generated upon confirmation
+        tracking_number = None
 
     db = get_db()
     cursor = db.execute('''INSERT INTO shipments (
@@ -446,7 +487,6 @@ def create_shipment():
     shipment_id = cursor.lastrowid
     db.commit()
 
-    # Add initial tracking history
     if is_admin_request:
         db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
                    (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment created by admin and ready for processing', 48.8566, 2.3522))
@@ -483,7 +523,15 @@ def create_shipment():
         'date_created': datetime.now().strftime('%Y-%m-%d')
     })
 
-@app.route('/api/shipments/<int:id>', methods=['PUT'])
+@app.route('/api/shipments/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_shipment(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_shipment(id)
+    elif request.method == 'DELETE':
+        return delete_shipment(id)
+
 def update_shipment(id):
     data = request.get_json()
     db = get_db()
@@ -504,20 +552,26 @@ def update_shipment(id):
     db.commit()
     return jsonify({'message': 'Shipment updated'})
 
-@app.route('/api/shipments/<int:id>', methods=['DELETE'])
 def delete_shipment(id):
     db = get_db()
     db.execute('DELETE FROM shipments WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Shipment deleted'})
 
-@app.route('/api/users', methods=['GET'])
+@app.route('/api/users', methods=['GET', 'POST', 'OPTIONS'])
+def handle_users():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_users()
+    elif request.method == 'POST':
+        return create_user()
+
 def get_users():
     db = get_db()
     users = db.execute('SELECT * FROM users ORDER BY name').fetchall()
     return jsonify([dict(row) for row in users])
 
-@app.route('/api/users', methods=['POST'])
 def create_user():
     data = request.get_json()
     name = data.get('name')
@@ -536,7 +590,15 @@ def create_user():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'User with this email already exists'}), 400
 
-@app.route('/api/users/<int:id>', methods=['PUT'])
+@app.route('/api/users/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_user(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_user(id)
+    elif request.method == 'DELETE':
+        return delete_user(id)
+
 def update_user(id):
     data = request.get_json()
     db = get_db()
@@ -545,15 +607,17 @@ def update_user(id):
     db.commit()
     return jsonify({'message': 'User updated'})
 
-@app.route('/api/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     db = get_db()
     db.execute('DELETE FROM users WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'User deleted'})
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
@@ -565,7 +629,6 @@ def login():
     user = db.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password)).fetchone()
 
     if user:
-        # Update last login
         db.execute('UPDATE users SET last_login = ? WHERE id = ?', (datetime.now().isoformat(), user['id']))
         db.commit()
         return jsonify({
@@ -579,8 +642,11 @@ def login():
     else:
         return jsonify({'error': 'Invalid credentials'}), 401
 
-@app.route('/api/auth/register', methods=['POST'])
+@app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
@@ -604,8 +670,11 @@ def register():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'User with this email already exists'}), 400
 
-@app.route('/api/track/<tracking_number>', methods=['GET'])
+@app.route('/api/track/<tracking_number>', methods=['GET', 'OPTIONS'])
 def track_shipment(tracking_number):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     db = get_db()
     shipment = db.execute('SELECT * FROM shipments WHERE tracking_number = ?', (tracking_number,)).fetchone()
     if not shipment:
@@ -618,13 +687,20 @@ def track_shipment(tracking_number):
         'history': [dict(row) for row in history]
     })
 
-@app.route('/api/tracking-history/<int:shipment_id>', methods=['GET'])
+@app.route('/api/tracking-history/<int:shipment_id>', methods=['GET', 'POST', 'OPTIONS'])
+def handle_tracking_history(shipment_id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_tracking_history(shipment_id)
+    elif request.method == 'POST':
+        return add_tracking_history(shipment_id)
+
 def get_tracking_history(shipment_id):
     db = get_db()
     history = db.execute('SELECT * FROM tracking_history WHERE shipment_id = ? ORDER BY date_time DESC', (shipment_id,)).fetchall()
     return jsonify([dict(row) for row in history])
 
-@app.route('/api/tracking-history/<int:shipment_id>', methods=['POST'])
 def add_tracking_history(shipment_id):
     data = request.get_json()
     date_time = data.get('date_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -642,14 +718,21 @@ def add_tracking_history(shipment_id):
                         (shipment_id, date_time, location, status, description, latitude, longitude))
     db.commit()
 
-    # Update shipment status if it's a valid status change
     if status in ['pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected']:
         db.execute('UPDATE shipments SET status = ? WHERE id = ?', (status, shipment_id))
         db.commit()
 
     return jsonify({'id': cursor.lastrowid, 'shipment_id': shipment_id, 'date_time': date_time, 'location': location, 'status': status, 'description': description, 'latitude': latitude, 'longitude': longitude})
 
-@app.route('/api/tracking-history/<int:history_id>', methods=['PUT'])
+@app.route('/api/tracking-history/<int:history_id>', methods=['PUT', 'DELETE', 'OPTIONS'])
+def handle_tracking_history_item(history_id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'PUT':
+        return update_tracking_history(history_id)
+    elif request.method == 'DELETE':
+        return delete_tracking_history(history_id)
+
 def update_tracking_history(history_id):
     data = request.get_json()
     db = get_db()
@@ -657,7 +740,6 @@ def update_tracking_history(history_id):
                (data['date_time'], data['location'], data['status'], data['description'], data.get('latitude'), data.get('longitude'), history_id))
     db.commit()
 
-    # Update shipment status if changed
     if 'status' in data and data['status'] in ['pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected']:
         shipment_id = db.execute('SELECT shipment_id FROM tracking_history WHERE id = ?', (history_id,)).fetchone()['shipment_id']
         db.execute('UPDATE shipments SET status = ? WHERE id = ?', (data['status'], shipment_id))
@@ -665,22 +747,23 @@ def update_tracking_history(history_id):
 
     return jsonify({'message': 'Tracking history updated'})
 
-@app.route('/api/tracking-history/<int:history_id>', methods=['DELETE'])
 def delete_tracking_history(history_id):
     db = get_db()
     db.execute('DELETE FROM tracking_history WHERE id = ?', (history_id,))
     db.commit()
     return jsonify({'message': 'Tracking history deleted'})
-@app.route('/api/shipments/<int:id>/confirm', methods=['POST'])
+
+@app.route('/api/shipments/<int:id>/confirm', methods=['POST', 'OPTIONS'])
 def confirm_shipment(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     data = request.get_json()
     db = get_db()
 
-    # Generate tracking number only when confirming
     import random
     tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
 
-    # Update shipment with confirmation details and tracking number
     db.execute('''UPDATE shipments SET
         tracking_number = ?,
         status = 'processing',
@@ -691,53 +774,55 @@ def confirm_shipment(id):
         (tracking_number, data.get('total_freight', 0), data.get('expected_delivery', ''), data.get('comments', ''), id))
     db.commit()
 
-    # Add tracking history for confirmation
     db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
                (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment confirmed and being processed', 48.8566, 2.3522))
     db.commit()
 
-    # Log email notification (in real app, send actual email)
     print(f"EMAIL NOTIFICATION: Shipment {id} confirmed with tracking number {tracking_number}. Email to shipper.")
 
     return jsonify({'message': 'Shipment confirmed', 'tracking_number': tracking_number})
 
-@app.route('/api/shipments/<int:id>/reject', methods=['POST'])
+@app.route('/api/shipments/<int:id>/reject', methods=['POST', 'OPTIONS'])
 def reject_shipment(id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     data = request.get_json()
     reason = data.get('reason', 'No reason provided')
     db = get_db()
 
-    # Update shipment status to rejected
     db.execute('UPDATE shipments SET status = ?, comments = ? WHERE id = ?',
                ('rejected', f'Rejected: {reason}', id))
     db.commit()
 
-    # Add tracking history for rejection
     db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
                (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'rejected', f'Shipment rejected: {reason}', 48.8566, 2.3522))
     db.commit()
 
-    # Log email notification (in real app, send actual email)
     print(f"EMAIL NOTIFICATION: Shipment {id} rejected. Reason: {reason}. Email to shipper.")
 
     return jsonify({'message': 'Shipment rejected'})
 
-
-@app.route('/api/hello')
+@app.route('/api/hello', methods=['GET', 'OPTIONS'])
 def hello():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
     return {"message": "Hello from Flask!"}
 
-# Route pour servir le frontend buildé
+# Route pour servir le frontend buildé - Gestion SPA
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    # Ne pas servir les routes API via le frontend
+    # Si la route commence par api/, retourner 404
     if path.startswith("api/"):
         return jsonify({"error": "API route not found"}), 404
 
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+    # Vérifier si le fichier existe dans le dossier static
+    static_file_path = os.path.join(app.static_folder, path) if path else app.static_folder
+    if path and os.path.exists(static_file_path) and os.path.isfile(static_file_path):
         return send_from_directory(app.static_folder, path)
     else:
+        # Pour toutes les autres routes, servir index.html (SPA)
         return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':

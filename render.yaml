@@ -1,7 +1,6 @@
 services:
   - type: web
     name: tracsitepython
-    env: docker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    buildCommand: docker build -t tracsitepython .
-    startCommand: docker run -p 5000:5000 tracsitepython

@@ -1,5 +1,5 @@
-// API client for backend communication
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://tracksite-python-backend.onrender.com';
+// API client for backend communication - USING CORS PROXY TO BYPASS CORS ISSUES
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://cors-anywhere.herokuapp.com/https://tracksite-python-backend.onrender.com';
 
 export interface Location {
   id: number;

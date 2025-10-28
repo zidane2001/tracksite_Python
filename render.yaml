@@ -1,6 +1,15 @@
 services:
+  # Backend API
   - type: web
-    name: tracsitepython
+    name: tracksite-python-backend
     runtime: docker
     dockerfilePath: ./Dockerfile
+    plan: free
+
+  # Frontend
+  - type: web
+    name: tracksite-python-frontend
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm run preview
     plan: free

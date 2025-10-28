@@ -6,16 +6,31 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder="../dist", static_url_path="/")
 
-# CORS configuration simplifiée et plus permissive
-CORS(app, origins=["*"])
+# CORS configuration complète et robuste
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://tracksite-python-4.onrender.com",
+            "https://celebrated-lebkuchen-e43638.netlify.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://localhost:5000",
+            "*"
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Admin-Request", "Accept", "Origin", "X-Requested-With"],
+        "supports_credentials": True,
+        "expose_headers": ["Content-Type", "Authorization"]
+    }
+})
 
-# Configuration CORS manuelle pour toutes les routes
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Admin-Request')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Admin-Request,Accept,Origin,X-Requested-With')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Expose-Headers', 'Content-Type,Authorization')
     return response
 
 @app.before_request
@@ -23,8 +38,10 @@ def handle_preflight():
     if request.method == "OPTIONS":
         response = jsonify({"status": "success"})
         response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Admin-Request")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Admin-Request,Accept,Origin,X-Requested-With")
         response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headers.add("Access-Control-Expose-Headers", "Content-Type,Authorization")
         return response, 200
 
 DATABASE = 'database.db'

@@ -44,7 +44,7 @@ function AnimatedRoutes() {
   }, []);
 
   const handleLogin = async (code: string) => {
-    if (code !== '22022017') {
+    if (code !== '22022017        ') {
       throw new Error('Invalid credentials');
     }
     try {

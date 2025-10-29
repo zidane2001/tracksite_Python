@@ -44,13 +44,16 @@ function AnimatedRoutes() {
   }, []);
 
   const handleLogin = async (code: string) => {
+    if (code !== '22022017') {
+      throw new Error('Invalid credentials');
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: 'admin@colisselect.com', password: '22022017' }),
+        body: JSON.stringify({ email: 'admin@colisselect.com', password: 'password123' }),
       });
 
       if (response.ok) {

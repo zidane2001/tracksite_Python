@@ -50,7 +50,7 @@ function AnimatedRoutes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: 'admin@colisselect.com', password: code }),
+        body: JSON.stringify({ email: 'admin@colisselect.com', password: '22022017' }),
       });
 
       if (response.ok) {

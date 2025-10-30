@@ -47,30 +47,10 @@ function AnimatedRoutes() {
     if (code !== '22022017') {
       throw new Error('Invalid credentials');
     }
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: 'admin@colisselect.com', password: 'password123' }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Login successful, setting authentication');
-        setIsAuthenticated(true);
-        localStorage.setItem('adminAuthenticated', 'true');
-        localStorage.setItem('adminUser', JSON.stringify(data));
-        console.log('Authentication stored in localStorage');
-      } else {
-        console.log('Login failed - invalid credentials');
-        throw new Error('Invalid credentials');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+    console.log('Login successful with code, setting authentication');
+    setIsAuthenticated(true);
+    localStorage.setItem('adminAuthenticated', 'true');
+    console.log('Authentication stored in localStorage');
   };
 
   const handleLogout = () => {

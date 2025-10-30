@@ -85,8 +85,9 @@ def init_db():
     with app.app_context():
         db = get_db()
         if USE_POSTGRESQL:
-            # PostgreSQL table creation
-            db.execute('''CREATE TABLE IF NOT EXISTS locations (
+            # PostgreSQL table creation - use cursor
+            cursor = db.cursor()
+            cursor.execute('''CREATE TABLE IF NOT EXISTS locations (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 slug TEXT UNIQUE NOT NULL,
@@ -103,7 +104,7 @@ def init_db():
 
         # Zones table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS zones (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS zones (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 slug TEXT UNIQUE NOT NULL,
@@ -121,7 +122,7 @@ def init_db():
 
         # Shipping rates table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS shipping_rates (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS shipping_rates (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 type TEXT NOT NULL CHECK(type IN ('flat', 'weight')),
@@ -145,7 +146,7 @@ def init_db():
 
         # Pickup rates table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS pickup_rates (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS pickup_rates (
                 id SERIAL PRIMARY KEY,
                 zone TEXT NOT NULL,
                 min_weight REAL NOT NULL DEFAULT 0,
@@ -165,7 +166,7 @@ def init_db():
 
         # Shipments table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS shipments (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS shipments (
                 id SERIAL PRIMARY KEY,
                 tracking_number TEXT UNIQUE,
                 shipper_name TEXT NOT NULL,
@@ -223,7 +224,7 @@ def init_db():
 
         # Tracking history table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS tracking_history (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS tracking_history (
                 id SERIAL PRIMARY KEY,
                 shipment_id INTEGER NOT NULL,
                 date_time TEXT NOT NULL,
@@ -249,7 +250,7 @@ def init_db():
 
         # Users table
         if USE_POSTGRESQL:
-            db.execute('''CREATE TABLE IF NOT EXISTS users (
+            cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
@@ -513,7 +514,10 @@ def update_shipping_rate(id):
     db = get_db()
     db.execute('UPDATE shipping_rates SET name = ?, type = ?, min_weight = ?, max_weight = ?, rate = ?, insurance = ?, description = ? WHERE id = ?',
                (data['name'], data['type'], data['min_weight'], data['max_weight'], data['rate'], data['insurance'], data['description'], id))
-    db.commit()
+    if USE_POSTGRESQL:
+        db.commit()
+    else:
+        db.commit()
     return jsonify({'message': 'Shipping rate updated'})
 
 def delete_shipping_rate(id):

@@ -9,4 +9,4 @@ services:
       - key: USE_POSTGRESQL
         value: "true"
       - key: DATABASE_URL
-        value: "postgresql://tracksite_user:simple_password@localhost:5432/tracksite_db"
+        value: "postgresql://tracksite_user:simple_password@ep-round-mode-a5m8qkz9.us-east-2.aws.neon.tech:5432/tracksite_db?sslmode=require"

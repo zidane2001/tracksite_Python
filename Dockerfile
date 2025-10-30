@@ -23,8 +23,14 @@ COPY --from=frontend-builder /app/dist ./dist
 # Copier le fichier _redirects pour le SPA routing
 COPY --from=frontend-builder /app/public/_redirects ./dist/_redirects
 
+# Créer le répertoire pour la base de données
+RUN mkdir -p /app/data
+
 # Exposer le port Flask
 EXPOSE 5000
+
+# Définir la variable d'environnement pour le chemin de la base de données
+ENV DATABASE_PATH=/app/data/database.db
 
 # Lancer Flask
 CMD ["python", "backend/app.py"]

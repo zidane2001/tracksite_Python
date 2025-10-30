@@ -53,7 +53,7 @@ def handle_preflight_request():
         response.headers['Access-Control-Max-Age'] = '86400'
         return response, 200
 
-DATABASE = 'database.db'
+DATABASE = os.environ.get('DATABASE_PATH', 'database.db')
 
 def get_db():
     db = sqlite3.connect(DATABASE)

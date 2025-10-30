@@ -5,3 +5,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
+    disk:
+      name: tracksite-data
+      mountPath: /app/data
+      sizeGB: 1

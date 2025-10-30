@@ -296,8 +296,12 @@ def insert_default_data(db):
 
     for loc in locations:
         try:
-            db.execute('INSERT OR IGNORE INTO locations (name, slug, country) VALUES (?, ?, ?)', loc)
-        except sqlite3.IntegrityError:
+            if USE_POSTGRESQL:
+                cursor = db.cursor()
+                cursor.execute('INSERT INTO locations (name, slug, country) VALUES (%s, %s, %s) ON CONFLICT (slug) DO NOTHING', loc)
+            else:
+                db.execute('INSERT OR IGNORE INTO locations (name, slug, country) VALUES (?, ?, ?)', loc)
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
     # Default zones
@@ -310,8 +314,12 @@ def insert_default_data(db):
 
     for zone in zones:
         try:
-            db.execute('INSERT OR IGNORE INTO zones (name, slug, locations, description) VALUES (?, ?, ?, ?)', zone)
-        except sqlite3.IntegrityError:
+            if USE_POSTGRESQL:
+                cursor = db.cursor()
+                cursor.execute('INSERT INTO zones (name, slug, locations, description) VALUES (%s, %s, %s, %s) ON CONFLICT (slug) DO NOTHING', zone)
+            else:
+                db.execute('INSERT OR IGNORE INTO zones (name, slug, locations, description) VALUES (?, ?, ?, ?)', zone)
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
     # Default shipping rates
@@ -324,8 +332,12 @@ def insert_default_data(db):
 
     for rate in shipping_rates:
         try:
-            db.execute('INSERT OR IGNORE INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (?, ?, ?, ?, ?, ?, ?)', rate)
-        except sqlite3.IntegrityError:
+            if USE_POSTGRESQL:
+                cursor = db.cursor()
+                cursor.execute('INSERT INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING', rate)
+            else:
+                db.execute('INSERT OR IGNORE INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (?, ?, ?, ?, ?, ?, ?)', rate)
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
     # Default pickup rates
@@ -339,8 +351,12 @@ def insert_default_data(db):
 
     for rate in pickup_rates:
         try:
-            db.execute('INSERT OR IGNORE INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (?, ?, ?, ?, ?)', rate)
-        except sqlite3.IntegrityError:
+            if USE_POSTGRESQL:
+                cursor = db.cursor()
+                cursor.execute('INSERT INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING', rate)
+            else:
+                db.execute('INSERT OR IGNORE INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (?, ?, ?, ?, ?)', rate)
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
     # Default users
@@ -354,8 +370,12 @@ def insert_default_data(db):
 
     for user in users:
         try:
-            db.execute('INSERT OR IGNORE INTO users (name, email, password, role, branch, status, last_login, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', user)
-        except sqlite3.IntegrityError:
+            if USE_POSTGRESQL:
+                cursor = db.cursor()
+                cursor.execute('INSERT INTO users (name, email, password, role, branch, status, last_login, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (email) DO NOTHING', user)
+            else:
+                db.execute('INSERT OR IGNORE INTO users (name, email, password, role, branch, status, last_login, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', user)
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
     db.commit()

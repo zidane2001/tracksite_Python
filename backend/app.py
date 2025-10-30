@@ -21,42 +21,52 @@ CORS(app, resources={
     }
 })
 
-# Solution Stack Overflow #2 - Headers manuels complets
+# Solution Stack Overflow #2 - Headers manuels complets - VERSION ULTRA PERMISSIVE
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # Allow all origins dynamically
+    origin = request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Origin'] = origin if origin != 'null' else '*'
+
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Admin-Request'
-    response.headers['Access-Control-Allow-Credentials'] = 'false'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Max-Age'] = '86400'
     response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization'
-    # Additional headers for better CORS support
+
+    # Additional headers for maximum browser compatibility
     response.headers['Access-Control-Allow-Private-Network'] = 'true'
     response.headers['Cross-Origin-Embedder-Policy'] = 'unsafe-none'
     response.headers['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+    response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
+
     return response
 
-# Solution Stack Overflow #3 - Gestion OPTIONS explicite
+# Solution Stack Overflow #3 - Gestion OPTIONS explicite - VERSION ULTRA PERMISSIVE
 @app.route('/<path:path>', methods=['OPTIONS'])
 def handle_options(path):
     response = jsonify({'status': 'ok'})
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    origin = request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Origin'] = origin if origin != 'null' else '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Admin-Request'
     response.headers['Access-Control-Max-Age'] = '86400'
     response.headers['Access-Control-Allow-Private-Network'] = 'true'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response, 200
 
-# Solution Stack Overflow #4 - Route OPTIONS globale
+# Solution Stack Overflow #4 - Route OPTIONS globale - VERSION ULTRA PERMISSIVE
 @app.before_request
 def handle_preflight_request():
     if request.method == 'OPTIONS':
         response = app.make_response('')
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        origin = request.headers.get('Origin', '*')
+        response.headers['Access-Control-Allow-Origin'] = origin if origin != 'null' else '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Admin-Request'
         response.headers['Access-Control-Max-Age'] = '86400'
         response.headers['Access-Control-Allow-Private-Network'] = 'true'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
 # Database configuration - supports both SQLite (local) and PostgreSQL (production)

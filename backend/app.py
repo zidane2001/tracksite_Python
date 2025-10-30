@@ -5,10 +5,8 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__, static_folder="../dist", static_url_path="/")
-
 # SOLUTION COMPLÈTE CORS - TOUTES LES SOLUTIONS STACK OVERFLOW APPLIQUÉES
 from flask_cors import CORS
-
 # Configuration CORS complète - Solution Stack Overflow #1
 CORS(app, resources={
     r"/*": {

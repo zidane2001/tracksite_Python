@@ -12,7 +12,7 @@ from flask_cors import CORS
 # Configuration CORS complète - Solution Stack Overflow #1
 CORS(app, resources={
     r"/*": {
-        "origins": "*",
+        "origins": ["*"],  # Allow all origins explicitly
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers", "X-Admin-Request"],
         "supports_credentials": False,  # Important pour éviter les conflits
@@ -30,6 +30,10 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Credentials'] = 'false'
     response.headers['Access-Control-Max-Age'] = '86400'
     response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Authorization'
+    # Additional headers for better CORS support
+    response.headers['Access-Control-Allow-Private-Network'] = 'true'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'unsafe-none'
+    response.headers['Cross-Origin-Opener-Policy'] = 'unsafe-none'
     return response
 
 # Solution Stack Overflow #3 - Gestion OPTIONS explicite
@@ -40,6 +44,7 @@ def handle_options(path):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Admin-Request'
     response.headers['Access-Control-Max-Age'] = '86400'
+    response.headers['Access-Control-Allow-Private-Network'] = 'true'
     return response, 200
 
 # Solution Stack Overflow #4 - Route OPTIONS globale
@@ -51,6 +56,7 @@ def handle_preflight_request():
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Admin-Request'
         response.headers['Access-Control-Max-Age'] = '86400'
+        response.headers['Access-Control-Allow-Private-Network'] = 'true'
         return response, 200
 
 # Database configuration - supports both SQLite (local) and PostgreSQL (production)

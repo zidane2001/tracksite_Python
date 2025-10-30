@@ -51,7 +51,9 @@ def handle_preflight_request():
         response.headers['Access-Control-Max-Age'] = '86400'
         return response, 200
 
-DATABASE = os.environ.get('DATABASE_PATH', 'database.db')
+# Alternative persistence: Use /tmp for temporary storage (resets on restart)
+# For production persistence, consider upgrading to paid plan or using external database
+DATABASE = os.environ.get('DATABASE_PATH', '/tmp/database.db')
 
 def get_db():
     db = sqlite3.connect(DATABASE)

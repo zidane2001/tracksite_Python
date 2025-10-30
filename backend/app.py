@@ -3,6 +3,8 @@ import sqlite3
 import os
 from flask_cors import CORS
 from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__, static_folder="../dist", static_url_path="/")
 # SOLUTION COMPLÈTE CORS - TOUTES LES SOLUTIONS STACK OVERFLOW APPLIQUÉES
@@ -51,111 +53,219 @@ def handle_preflight_request():
         response.headers['Access-Control-Max-Age'] = '86400'
         return response, 200
 
-# Alternative persistence: Use /tmp for temporary storage (resets on restart)
-# For production persistence, consider upgrading to paid plan or using external database
-DATABASE = os.environ.get('DATABASE_PATH', '/tmp/database.db')
+# Database configuration - supports both SQLite (local) and PostgreSQL (production)
+USE_POSTGRESQL = os.environ.get('USE_POSTGRESQL', 'false').lower() == 'true'
+
+if USE_POSTGRESQL:
+    # PostgreSQL configuration for production
+    DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/tracksite')
+else:
+    # SQLite fallback for local development
+    DATABASE = os.environ.get('DATABASE_PATH', 'database.db')
 
 def get_db():
-    db = sqlite3.connect(DATABASE)
-    db.row_factory = sqlite3.Row
-    return db
+    if USE_POSTGRESQL:
+        # PostgreSQL connection
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.cursor_factory = RealDictCursor
+        return conn
+    else:
+        # SQLite connection (fallback)
+        db = sqlite3.connect(DATABASE)
+        db.row_factory = sqlite3.Row
+        return db
 
 def init_db():
     with app.app_context():
         db = get_db()
-        # Locations table
-        db.execute('''CREATE TABLE IF NOT EXISTS locations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            slug TEXT UNIQUE NOT NULL,
-            country TEXT NOT NULL
-        )''')
+        if USE_POSTGRESQL:
+            # PostgreSQL table creation
+            db.execute('''CREATE TABLE IF NOT EXISTS locations (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                country TEXT NOT NULL
+            )''')
+        else:
+            # SQLite table creation
+            db.execute('''CREATE TABLE IF NOT EXISTS locations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                country TEXT NOT NULL
+            )''')
 
         # Zones table
-        db.execute('''CREATE TABLE IF NOT EXISTS zones (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            slug TEXT UNIQUE NOT NULL,
-            locations TEXT NOT NULL,
-            description TEXT
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS zones (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                locations TEXT NOT NULL,
+                description TEXT
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS zones (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                locations TEXT NOT NULL,
+                description TEXT
+            )''')
 
         # Shipping rates table
-        db.execute('''CREATE TABLE IF NOT EXISTS shipping_rates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            type TEXT NOT NULL CHECK(type IN ('flat', 'weight')),
-            min_weight REAL NOT NULL DEFAULT 0,
-            max_weight REAL NOT NULL DEFAULT 0,
-            rate REAL NOT NULL,
-            insurance REAL NOT NULL DEFAULT 0,
-            description TEXT
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS shipping_rates (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL CHECK(type IN ('flat', 'weight')),
+                min_weight REAL NOT NULL DEFAULT 0,
+                max_weight REAL NOT NULL DEFAULT 0,
+                rate REAL NOT NULL,
+                insurance REAL NOT NULL DEFAULT 0,
+                description TEXT
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS shipping_rates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL CHECK(type IN ('flat', 'weight')),
+                min_weight REAL NOT NULL DEFAULT 0,
+                max_weight REAL NOT NULL DEFAULT 0,
+                rate REAL NOT NULL,
+                insurance REAL NOT NULL DEFAULT 0,
+                description TEXT
+            )''')
 
         # Pickup rates table
-        db.execute('''CREATE TABLE IF NOT EXISTS pickup_rates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            zone TEXT NOT NULL,
-            min_weight REAL NOT NULL DEFAULT 0,
-            max_weight REAL NOT NULL DEFAULT 0,
-            rate REAL NOT NULL,
-            description TEXT
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS pickup_rates (
+                id SERIAL PRIMARY KEY,
+                zone TEXT NOT NULL,
+                min_weight REAL NOT NULL DEFAULT 0,
+                max_weight REAL NOT NULL DEFAULT 0,
+                rate REAL NOT NULL,
+                description TEXT
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS pickup_rates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                zone TEXT NOT NULL,
+                min_weight REAL NOT NULL DEFAULT 0,
+                max_weight REAL NOT NULL DEFAULT 0,
+                rate REAL NOT NULL,
+                description TEXT
+            )''')
 
         # Shipments table
-        db.execute('''CREATE TABLE IF NOT EXISTS shipments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tracking_number TEXT UNIQUE,
-            shipper_name TEXT NOT NULL,
-            shipper_address TEXT NOT NULL,
-            shipper_phone TEXT NOT NULL,
-            shipper_email TEXT NOT NULL,
-            receiver_name TEXT NOT NULL,
-            receiver_address TEXT NOT NULL,
-            receiver_phone TEXT NOT NULL,
-            receiver_email TEXT NOT NULL,
-            origin TEXT NOT NULL,
-            destination TEXT NOT NULL,
-            status TEXT NOT NULL CHECK(status IN ('pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected', 'cancelled')),
-            packages INTEGER NOT NULL DEFAULT 1,
-            total_weight REAL NOT NULL,
-            product TEXT,
-            quantity INTEGER DEFAULT 1,
-            payment_mode TEXT DEFAULT 'Cash',
-            total_freight REAL DEFAULT 0,
-            expected_delivery TEXT,
-            departure_time TEXT,
-            pickup_date TEXT,
-            pickup_time TEXT,
-            comments TEXT,
-            date_created TEXT NOT NULL
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS shipments (
+                id SERIAL PRIMARY KEY,
+                tracking_number TEXT UNIQUE,
+                shipper_name TEXT NOT NULL,
+                shipper_address TEXT NOT NULL,
+                shipper_phone TEXT NOT NULL,
+                shipper_email TEXT NOT NULL,
+                receiver_name TEXT NOT NULL,
+                receiver_address TEXT NOT NULL,
+                receiver_phone TEXT NOT NULL,
+                receiver_email TEXT NOT NULL,
+                origin TEXT NOT NULL,
+                destination TEXT NOT NULL,
+                status TEXT NOT NULL CHECK(status IN ('pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected', 'cancelled')),
+                packages INTEGER NOT NULL DEFAULT 1,
+                total_weight REAL NOT NULL,
+                product TEXT,
+                quantity INTEGER DEFAULT 1,
+                payment_mode TEXT DEFAULT 'Cash',
+                total_freight REAL DEFAULT 0,
+                expected_delivery TEXT,
+                departure_time TEXT,
+                pickup_date TEXT,
+                pickup_time TEXT,
+                comments TEXT,
+                date_created TEXT NOT NULL
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS shipments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tracking_number TEXT UNIQUE,
+                shipper_name TEXT NOT NULL,
+                shipper_address TEXT NOT NULL,
+                shipper_phone TEXT NOT NULL,
+                shipper_email TEXT NOT NULL,
+                receiver_name TEXT NOT NULL,
+                receiver_address TEXT NOT NULL,
+                receiver_phone TEXT NOT NULL,
+                receiver_email TEXT NOT NULL,
+                origin TEXT NOT NULL,
+                destination TEXT NOT NULL,
+                status TEXT NOT NULL CHECK(status IN ('pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected', 'cancelled')),
+                packages INTEGER NOT NULL DEFAULT 1,
+                total_weight REAL NOT NULL,
+                product TEXT,
+                quantity INTEGER DEFAULT 1,
+                payment_mode TEXT DEFAULT 'Cash',
+                total_freight REAL DEFAULT 0,
+                expected_delivery TEXT,
+                departure_time TEXT,
+                pickup_date TEXT,
+                pickup_time TEXT,
+                comments TEXT,
+                date_created TEXT NOT NULL
+            )''')
 
         # Tracking history table
-        db.execute('''CREATE TABLE IF NOT EXISTS tracking_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            shipment_id INTEGER NOT NULL,
-            date_time TEXT NOT NULL,
-            location TEXT NOT NULL,
-            status TEXT NOT NULL,
-            description TEXT,
-            latitude REAL,
-            longitude REAL,
-            FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS tracking_history (
+                id SERIAL PRIMARY KEY,
+                shipment_id INTEGER NOT NULL,
+                date_time TEXT NOT NULL,
+                location TEXT NOT NULL,
+                status TEXT NOT NULL,
+                description TEXT,
+                latitude REAL,
+                longitude REAL,
+                FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS tracking_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                shipment_id INTEGER NOT NULL,
+                date_time TEXT NOT NULL,
+                location TEXT NOT NULL,
+                status TEXT NOT NULL,
+                description TEXT,
+                latitude REAL,
+                longitude REAL,
+                FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
+            )''')
 
         # Users table
-        db.execute('''CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'user',
-            branch TEXT,
-            status TEXT NOT NULL DEFAULT 'active',
-            last_login TEXT,
-            created_at TEXT NOT NULL
-        )''')
+        if USE_POSTGRESQL:
+            db.execute('''CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
+                branch TEXT,
+                status TEXT NOT NULL DEFAULT 'active',
+                last_login TEXT,
+                created_at TEXT NOT NULL
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
+                branch TEXT,
+                status TEXT NOT NULL DEFAULT 'active',
+                last_login TEXT,
+                created_at TEXT NOT NULL
+            )''')
 
         db.commit()
 

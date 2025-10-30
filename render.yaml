@@ -5,4 +5,8 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    # Removed disk configuration - using alternative persistence method
+    envVars:
+      - key: USE_POSTGRESQL
+        value: "true"
+      - key: DATABASE_URL
+        value: "postgresql://tracksite_user:simple_password@localhost:5432/tracksite_db"

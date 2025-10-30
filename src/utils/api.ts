@@ -1,4 +1,5 @@
 // API client for backend communication - USING CORS PROXY TO BYPASS CORS ISSUES
+// For Render deployment (full-stack), API is on the same domain
 export const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 export interface Location {

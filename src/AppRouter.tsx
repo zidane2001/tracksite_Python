@@ -44,7 +44,7 @@ function AnimatedRoutes() {
   }, []);
 
   const handleLogin = async (code: string) => {
-    if (code !== '22022017        ') {
+    if (code !== '22022017') {
       throw new Error('Invalid credentials');
     }
     try {
@@ -90,34 +90,34 @@ function AnimatedRoutes() {
   }
 
   return <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route
-          path="/admin/*"
-          element={
-            isAuthenticated ? (
-              <AdminDashboard />
-            ) : (
-              <AdminLogin onLogin={handleLogin} />
-            )
-          }
-        />
-        <Route path="/" element={<UserLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="tracking" element={<TrackingPage />} />
-          <Route path="quote" element={<QuotePage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="services/shipping" element={<ShippingServicePage />} />
-          <Route path="services/air" element={<AirServicePage />} />
-          <Route path="services/delivery" element={<DeliveryServicePage />} />
-          <Route path="services/special" element={<SpecialServicePage />} />
-        </Route>
-      </Routes>
-    </AnimatePresence>;
+    <Routes location={location} key={location.pathname}>
+      <Route
+        path="/admin/*"
+        element={
+          isAuthenticated ? (
+            <AdminDashboard />
+          ) : (
+            <AdminLogin onLogin={handleLogin} />
+          )
+        }
+      />
+      <Route path="/" element={<UserLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="tracking" element={<TrackingPage />} />
+        <Route path="quote" element={<QuotePage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="services/shipping" element={<ShippingServicePage />} />
+        <Route path="services/air" element={<AirServicePage />} />
+        <Route path="services/delivery" element={<DeliveryServicePage />} />
+        <Route path="services/special" element={<SpecialServicePage />} />
+      </Route>
+    </Routes>
+  </AnimatePresence>;
 }
 export function AppRouter() {
   return <I18nProvider>
-      <BrowserRouter>
-        <AnimatedRoutes />
-      </BrowserRouter>
-    </I18nProvider>;
+    <BrowserRouter>
+      <AnimatedRoutes />
+    </BrowserRouter>
+  </I18nProvider>;
 }

@@ -824,7 +824,9 @@ def create_shipment():
         })
     except Exception as e:
         print(f"Error creating shipment: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/shipments/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
 def handle_shipment(id):

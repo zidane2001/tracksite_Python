@@ -49,6 +49,8 @@ export const ShipmentManagement = () => {
     try {
       const data = await shipmentsApi.getAll();
       setShipments(data);
+      // Save to localStorage as backup
+      saveToStorage(STORAGE_KEYS.shipments, data);
     } catch (error) {
       console.error('Failed to load shipments:', error);
       // Fallback to localStorage
@@ -214,7 +216,8 @@ export const ShipmentManagement = () => {
         setNotification({type: 'success', message: `Expédition créée avec succès. Numéro de suivi: ${result.tracking_number}`});
         setTimeout(() => setNotification(null), 5000);
       } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
     } catch (error) {
       console.error('Failed to create shipment:', error);

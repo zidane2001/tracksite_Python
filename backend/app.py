@@ -737,60 +737,47 @@ def create_shipment():
             status = 'pending_confirmation'
             tracking_number = None
 
+        # Simple approach - just insert and get the ID
         db = get_db()
-        try:
-            if USE_POSTGRESQL:
-                cursor = db.cursor()
-                cursor.execute('''INSERT INTO shipments (
-                    tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
-                    receiver_name, receiver_address, receiver_phone, receiver_email,
-                    origin, destination, status, packages, total_weight, product, quantity,
-                    payment_mode, total_freight, expected_delivery, departure_time,
-                    pickup_date, pickup_time, comments, date_created
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
-                (
-                    tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
-                    data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
-                    data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
-                    data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
-                    data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
-                    datetime.now().strftime('%Y-%m-%d')
-                ))
-                result = cursor.fetchone()
-                if result and len(result) > 0:
-                    shipment_id = result[0]
-                    if shipment_id is None or shipment_id == 0:
-                        # Fallback: get the last inserted id
-                        cursor.execute("SELECT LASTVAL()")
-                        last_id = cursor.fetchone()
-                        shipment_id = last_id[0] if last_id and last_id[0] else None
-                else:
-                    raise Exception("Failed to insert shipment - no result returned")
-            else:
-                cursor = db.execute('''INSERT INTO shipments (
-                    tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
-                    receiver_name, receiver_address, receiver_phone, receiver_email,
-                    origin, destination, status, packages, total_weight, product, quantity,
-                    payment_mode, total_freight, expected_delivery, departure_time,
-                    pickup_date, pickup_time, comments, date_created
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                (
-                    tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
-                    data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
-                    data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
-                    data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
-                    data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
-                    datetime.now().strftime('%Y-%m-%d')
-                ))
-                shipment_id = cursor.lastrowid
+        cursor = db.cursor()
 
-            if shipment_id is None or shipment_id == 0:
-                raise Exception(f"Invalid shipment ID generated: {shipment_id}")
+        if USE_POSTGRESQL:
+            cursor.execute('''INSERT INTO shipments (
+                tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
+                receiver_name, receiver_address, receiver_phone, receiver_email,
+                origin, destination, status, packages, total_weight, product, quantity,
+                payment_mode, total_freight, expected_delivery, departure_time,
+                pickup_date, pickup_time, comments, date_created
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
+            (
+                tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+                data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+                data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
+                data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
+                data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
+                datetime.now().strftime('%Y-%m-%d')
+            ))
+            result = cursor.fetchone()
+            shipment_id = result[0] if result else None
+        else:
+            cursor.execute('''INSERT INTO shipments (
+                tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
+                receiver_name, receiver_address, receiver_phone, receiver_email,
+                origin, destination, status, packages, total_weight, product, quantity,
+                payment_mode, total_freight, expected_delivery, departure_time,
+                pickup_date, pickup_time, comments, date_created
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (
+                tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+                data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+                data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
+                data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
+                data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
+                datetime.now().strftime('%Y-%m-%d')
+            ))
+            shipment_id = cursor.lastrowid
 
-            db.commit()
-        except Exception as db_error:
-            db.rollback()
-            raise Exception(f"Database error: {str(db_error)}")
+        db.commit()
 
         if is_admin_request:
             if USE_POSTGRESQL:

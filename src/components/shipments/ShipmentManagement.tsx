@@ -6,7 +6,7 @@ import { AddressAutocomplete } from './AddressAutocomplete';
 import { toCsv, downloadCsv } from '../../utils/csv';
 import { shipmentsApi, Shipment, API_BASE_URL } from '../../utils/api';
 import { TrackingHistoryManagement } from './TrackingHistoryManagement';
-export const ShipmentManagement: React.FC = () => {
+export const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -154,7 +154,7 @@ export const ShipmentManagement: React.FC = () => {
 
     try {
       // Admin-created shipments go directly to processing status
-      const created = await fetch(`${API_BASE_URL}/api/shipments`, {
+      const response = await fetch(`${API_BASE_URL}/api/shipments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,31 +184,35 @@ export const ShipmentManagement: React.FC = () => {
           comments: newComments,
           date_created: new Date().toISOString().slice(0, 10)
         })
-      }).then(res => res.json());
-      setShipments([created, ...shipments]);
-      setIsAddOpen(false);
-      setNewPackages([{ weightKg: 0, lengthCm: 0, widthCm: 0, heightCm: 0, quantity: 1 }]);
-      setNewOrigin('');
-      setNewDestination('');
-      setNewShipperName('');
-      setNewShipperAddress('');
-      setNewShipperPhone('');
-      setNewShipperEmail('');
-      setNewReceiverName('');
-      setNewReceiverAddress('');
-      setNewReceiverPhone('');
-      setNewReceiverEmail('');
-      setNewProduct('');
-      setNewQuantity(1);
-      setNewPaymentMode('Cash');
-      setNewTotalFreight(0);
-      setNewExpectedDelivery('');
-      setNewDepartureTime('');
-      setNewPickupDate('');
-      setNewPickupTime('');
-      setNewComments('');
-      setNotification({type: 'success', message: 'Expédition créée avec succès et prête pour traitement.'});
-      setTimeout(() => setNotification(null), 5000);
+      });
+
+      if (response.ok) {
+        // Reload shipments from API instead of adding locally
+        await loadShipments();
+        setIsAddOpen(false);
+        setNewPackages([{ weightKg: 0, lengthCm: 0, widthCm: 0, heightCm: 0, quantity: 1 }]);
+        setNewOrigin('');
+        setNewDestination('');
+        setNewShipperName('');
+        setNewShipperAddress('');
+        setNewShipperPhone('');
+        setNewShipperEmail('');
+        setNewReceiverName('');
+        setNewReceiverAddress('');
+        setNewReceiverPhone('');
+        setNewReceiverEmail('');
+        setNewProduct('');
+        setNewQuantity(1);
+        setNewPaymentMode('Cash');
+        setNewTotalFreight(0);
+        setNewExpectedDelivery('');
+        setNewDepartureTime('');
+        setNewPickupDate('');
+        setNewPickupTime('');
+        setNewComments('');
+        setNotification({type: 'success', message: 'Expédition créée avec succès et prête pour traitement.'});
+        setTimeout(() => setNotification(null), 5000);
+      }
     } catch (error) {
       console.error('Failed to create shipment:', error);
       setNotification({type: 'error', message: 'Erreur lors de la création de l\'expédition.'});
@@ -340,7 +344,8 @@ export const ShipmentManagement: React.FC = () => {
     })), ['id', 'trackingNumber', 'origin', 'destination', 'status', 'packages', 'totalWeight', 'dateCreated']);
     downloadCsv('shipments.csv', csv);
   };
-  return <div className="p-4 md:p-6">
+  return (
+    <div className="p-4 md:p-6">
     {notification && (
       <div className="toast toast-top toast-end z-50">
         <div className={`alert ${notification.type === 'success' ? 'alert-success' : 'alert-error'}`}>
@@ -1144,4 +1149,5 @@ export const ShipmentManagement: React.FC = () => {
         </div>
       )}
     </div>
+ );
 };

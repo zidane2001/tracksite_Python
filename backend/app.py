@@ -752,7 +752,11 @@ def create_shipment():
             data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
             datetime.now().strftime('%Y-%m-%d')
         ))
-        shipment_id = cursor.fetchone()[0]
+        result = cursor.fetchone()
+        if result:
+            shipment_id = result[0]
+        else:
+            raise Exception("Failed to insert shipment")
     else:
         cursor = db.execute('''INSERT INTO shipments (
             tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,

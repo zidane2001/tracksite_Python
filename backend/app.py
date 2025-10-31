@@ -403,7 +403,12 @@ def handle_locations():
 
 def get_locations():
     db = get_db()
-    locations = db.execute('SELECT * FROM locations ORDER BY name').fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM locations ORDER BY name')
+        locations = cursor.fetchall()
+    else:
+        locations = db.execute('SELECT * FROM locations ORDER BY name').fetchall()
     return jsonify([dict(row) for row in locations])
 
 def create_location():
@@ -417,10 +422,16 @@ def create_location():
 
     db = get_db()
     try:
-        cursor = db.execute('INSERT INTO locations (name, slug, country) VALUES (?, ?, ?)', (name, slug, country))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO locations (name, slug, country) VALUES (%s, %s, %s)', (name, slug, country))
+            location_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+        else:
+            cursor = db.execute('INSERT INTO locations (name, slug, country) VALUES (?, ?, ?)', (name, slug, country))
+            location_id = cursor.lastrowid
         db.commit()
-        return jsonify({'id': cursor.lastrowid, 'name': name, 'slug': slug, 'country': country})
-    except sqlite3.IntegrityError:
+        return jsonify({'id': location_id, 'name': name, 'slug': slug, 'country': country})
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError):
         return jsonify({'error': 'Location with this slug already exists'}), 400
 
 @app.route('/api/locations/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
@@ -435,14 +446,23 @@ def handle_location(id):
 def update_location(id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE locations SET name = ?, slug = ?, country = ? WHERE id = ?',
-               (data['name'], data['slug'], data['country'], id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE locations SET name = %s, slug = %s, country = %s WHERE id = %s',
+                       (data['name'], data['slug'], data['country'], id))
+    else:
+        db.execute('UPDATE locations SET name = ?, slug = ?, country = ? WHERE id = ?',
+                   (data['name'], data['slug'], data['country'], id))
     db.commit()
     return jsonify({'message': 'Location updated'})
 
 def delete_location(id):
     db = get_db()
-    db.execute('DELETE FROM locations WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM locations WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM locations WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Location deleted'})
 
@@ -457,7 +477,12 @@ def handle_zones():
 
 def get_zones():
     db = get_db()
-    zones = db.execute('SELECT * FROM zones ORDER BY name').fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM zones ORDER BY name')
+        zones = cursor.fetchall()
+    else:
+        zones = db.execute('SELECT * FROM zones ORDER BY name').fetchall()
     return jsonify([dict(row) for row in zones])
 
 def create_zone():
@@ -472,11 +497,18 @@ def create_zone():
 
     db = get_db()
     try:
-        cursor = db.execute('INSERT INTO zones (name, slug, locations, description) VALUES (?, ?, ?, ?)',
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO zones (name, slug, locations, description) VALUES (%s, %s, %s, %s)',
                            (name, slug, locations, description))
+            zone_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+        else:
+            cursor = db.execute('INSERT INTO zones (name, slug, locations, description) VALUES (?, ?, ?, ?)',
+                               (name, slug, locations, description))
+            zone_id = cursor.lastrowid
         db.commit()
-        return jsonify({'id': cursor.lastrowid, 'name': name, 'slug': slug, 'locations': locations, 'description': description})
-    except sqlite3.IntegrityError:
+        return jsonify({'id': zone_id, 'name': name, 'slug': slug, 'locations': locations, 'description': description})
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError):
         return jsonify({'error': 'Zone with this slug already exists'}), 400
 
 @app.route('/api/zones/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
@@ -491,14 +523,23 @@ def handle_zone(id):
 def update_zone(id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE zones SET name = ?, slug = ?, locations = ?, description = ? WHERE id = ?',
-               (data['name'], data['slug'], data['locations'], data['description'], id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE zones SET name = %s, slug = %s, locations = %s, description = %s WHERE id = %s',
+                       (data['name'], data['slug'], data['locations'], data['description'], id))
+    else:
+        db.execute('UPDATE zones SET name = ?, slug = ?, locations = ?, description = ? WHERE id = ?',
+                   (data['name'], data['slug'], data['locations'], data['description'], id))
     db.commit()
     return jsonify({'message': 'Zone updated'})
 
 def delete_zone(id):
     db = get_db()
-    db.execute('DELETE FROM zones WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM zones WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM zones WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Zone deleted'})
 
@@ -513,7 +554,12 @@ def handle_shipping_rates():
 
 def get_shipping_rates():
     db = get_db()
-    rates = db.execute('SELECT * FROM shipping_rates ORDER BY name').fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM shipping_rates ORDER BY name')
+        rates = cursor.fetchall()
+    else:
+        rates = db.execute('SELECT * FROM shipping_rates ORDER BY name').fetchall()
     return jsonify([dict(row) for row in rates])
 
 def create_shipping_rate():
@@ -525,10 +571,17 @@ def create_shipping_rate():
         return jsonify({'error': 'Name and rate are required'}), 400
 
     db = get_db()
-    cursor = db.execute('INSERT INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                        (name, data.get('type', 'flat'), data.get('min_weight', 0), data.get('max_weight', 0), rate, data.get('insurance', 0), data.get('description')))
+        rate_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+    else:
+        cursor = db.execute('INSERT INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                           (name, data.get('type', 'flat'), data.get('min_weight', 0), data.get('max_weight', 0), rate, data.get('insurance', 0), data.get('description')))
+        rate_id = cursor.lastrowid
     db.commit()
-    return jsonify({'id': cursor.lastrowid, 'name': name, 'type': data.get('type', 'flat'), 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'insurance': data.get('insurance', 0), 'description': data.get('description')})
+    return jsonify({'id': rate_id, 'name': name, 'type': data.get('type', 'flat'), 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'insurance': data.get('insurance', 0), 'description': data.get('description')})
 
 @app.route('/api/shipping-rates/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
 def handle_shipping_rate(id):
@@ -542,17 +595,23 @@ def handle_shipping_rate(id):
 def update_shipping_rate(id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE shipping_rates SET name = ?, type = ?, min_weight = ?, max_weight = ?, rate = ?, insurance = ?, description = ? WHERE id = ?',
-               (data['name'], data['type'], data['min_weight'], data['max_weight'], data['rate'], data['insurance'], data['description'], id))
     if USE_POSTGRESQL:
-        db.commit()
+        cursor = db.cursor()
+        cursor.execute('UPDATE shipping_rates SET name = %s, type = %s, min_weight = %s, max_weight = %s, rate = %s, insurance = %s, description = %s WHERE id = %s',
+                       (data['name'], data['type'], data['min_weight'], data['max_weight'], data['rate'], data['insurance'], data['description'], id))
     else:
-        db.commit()
+        db.execute('UPDATE shipping_rates SET name = ?, type = ?, min_weight = ?, max_weight = ?, rate = ?, insurance = ?, description = ? WHERE id = ?',
+                   (data['name'], data['type'], data['min_weight'], data['max_weight'], data['rate'], data['insurance'], data['description'], id))
+    db.commit()
     return jsonify({'message': 'Shipping rate updated'})
 
 def delete_shipping_rate(id):
     db = get_db()
-    db.execute('DELETE FROM shipping_rates WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM shipping_rates WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM shipping_rates WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Shipping rate deleted'})
 
@@ -567,7 +626,12 @@ def handle_pickup_rates():
 
 def get_pickup_rates():
     db = get_db()
-    rates = db.execute('SELECT * FROM pickup_rates ORDER BY zone').fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM pickup_rates ORDER BY zone')
+        rates = cursor.fetchall()
+    else:
+        rates = db.execute('SELECT * FROM pickup_rates ORDER BY zone').fetchall()
     return jsonify([dict(row) for row in rates])
 
 def create_pickup_rate():
@@ -579,10 +643,17 @@ def create_pickup_rate():
         return jsonify({'error': 'Zone and rate are required'}), 400
 
     db = get_db()
-    cursor = db.execute('INSERT INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (?, ?, ?, ?, ?)',
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (%s, %s, %s, %s, %s)',
                        (zone, data.get('min_weight', 0), data.get('max_weight', 0), rate, data.get('description')))
+        rate_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+    else:
+        cursor = db.execute('INSERT INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (?, ?, ?, ?, ?)',
+                           (zone, data.get('min_weight', 0), data.get('max_weight', 0), rate, data.get('description')))
+        rate_id = cursor.lastrowid
     db.commit()
-    return jsonify({'id': cursor.lastrowid, 'zone': zone, 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'description': data.get('description')})
+    return jsonify({'id': rate_id, 'zone': zone, 'min_weight': data.get('min_weight', 0), 'max_weight': data.get('max_weight', 0), 'rate': rate, 'description': data.get('description')})
 
 @app.route('/api/pickup-rates/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
 def handle_pickup_rate(id):
@@ -596,14 +667,23 @@ def handle_pickup_rate(id):
 def update_pickup_rate(id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE pickup_rates SET zone = ?, min_weight = ?, max_weight = ?, rate = ?, description = ? WHERE id = ?',
-               (data['zone'], data['min_weight'], data['max_weight'], data['rate'], data['description'], id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE pickup_rates SET zone = %s, min_weight = %s, max_weight = %s, rate = %s, description = %s WHERE id = %s',
+                       (data['zone'], data['min_weight'], data['max_weight'], data['rate'], data['description'], id))
+    else:
+        db.execute('UPDATE pickup_rates SET zone = ?, min_weight = ?, max_weight = ?, rate = ?, description = ? WHERE id = ?',
+                   (data['zone'], data['min_weight'], data['max_weight'], data['rate'], data['description'], id))
     db.commit()
     return jsonify({'message': 'Pickup rate updated'})
 
 def delete_pickup_rate(id):
     db = get_db()
-    db.execute('DELETE FROM pickup_rates WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM pickup_rates WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM pickup_rates WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Pickup rate deleted'})
 
@@ -750,26 +830,47 @@ def handle_shipment(id):
 def update_shipment(id):
     data = request.get_json()
     db = get_db()
-    db.execute('''UPDATE shipments SET
-        shipper_name = ?, shipper_address = ?, shipper_phone = ?, shipper_email = ?,
-        receiver_name = ?, receiver_address = ?, receiver_phone = ?, receiver_email = ?,
-        origin = ?, destination = ?, status = ?, packages = ?, total_weight = ?,
-        product = ?, quantity = ?, payment_mode = ?, total_freight = ?,
-        expected_delivery = ?, departure_time = ?, pickup_date = ?, pickup_time = ?, comments = ?
-        WHERE id = ?''',
-    (
-        data.get('shipper_name', ''), data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
-        data.get('receiver_name', ''), data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
-        data.get('origin', ''), data.get('destination', ''), data.get('status', 'processing'), data.get('packages', 1), data.get('total_weight', 0),
-        data.get('product', ''), data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0),
-        data.get('expected_delivery', ''), data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''), id
-    ))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('''UPDATE shipments SET
+            shipper_name = %s, shipper_address = %s, shipper_phone = %s, shipper_email = %s,
+            receiver_name = %s, receiver_address = %s, receiver_phone = %s, receiver_email = %s,
+            origin = %s, destination = %s, status = %s, packages = %s, total_weight = %s,
+            product = %s, quantity = %s, payment_mode = %s, total_freight = %s,
+            expected_delivery = %s, departure_time = %s, pickup_date = %s, pickup_time = %s, comments = %s
+            WHERE id = %s''',
+        (
+            data.get('shipper_name', ''), data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+            data.get('receiver_name', ''), data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+            data.get('origin', ''), data.get('destination', ''), data.get('status', 'processing'), data.get('packages', 1), data.get('total_weight', 0),
+            data.get('product', ''), data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0),
+            data.get('expected_delivery', ''), data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''), id
+        ))
+    else:
+        db.execute('''UPDATE shipments SET
+            shipper_name = ?, shipper_address = ?, shipper_phone = ?, shipper_email = ?,
+            receiver_name = ?, receiver_address = ?, receiver_phone = ?, receiver_email = ?,
+            origin = ?, destination = ?, status = ?, packages = ?, total_weight = ?,
+            product = ?, quantity = ?, payment_mode = ?, total_freight = ?,
+            expected_delivery = ?, departure_time = ?, pickup_date = ?, pickup_time = ?, comments = ?
+            WHERE id = ?''',
+        (
+            data.get('shipper_name', ''), data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+            data.get('receiver_name', ''), data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+            data.get('origin', ''), data.get('destination', ''), data.get('status', 'processing'), data.get('packages', 1), data.get('total_weight', 0),
+            data.get('product', ''), data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0),
+            data.get('expected_delivery', ''), data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''), id
+        ))
     db.commit()
     return jsonify({'message': 'Shipment updated'})
 
 def delete_shipment(id):
     db = get_db()
-    db.execute('DELETE FROM shipments WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM shipments WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM shipments WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Shipment deleted'})
 
@@ -784,7 +885,12 @@ def handle_users():
 
 def get_users():
     db = get_db()
-    users = db.execute('SELECT * FROM users ORDER BY name').fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM users ORDER BY name')
+        users = cursor.fetchall()
+    else:
+        users = db.execute('SELECT * FROM users ORDER BY name').fetchall()
     return jsonify([dict(row) for row in users])
 
 def create_user():
@@ -798,11 +904,18 @@ def create_user():
 
     db = get_db()
     try:
-        cursor = db.execute('INSERT INTO users (name, email, password, role, branch, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO users (name, email, password, role, branch, status, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                            (name, email, password, data.get('role', 'user'), data.get('branch', ''), data.get('status', 'active'), datetime.now().isoformat()))
+            user_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+        else:
+            cursor = db.execute('INSERT INTO users (name, email, password, role, branch, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                               (name, email, password, data.get('role', 'user'), data.get('branch', ''), data.get('status', 'active'), datetime.now().isoformat()))
+            user_id = cursor.lastrowid
         db.commit()
-        return jsonify({'id': cursor.lastrowid, 'name': name, 'email': email, 'role': data.get('role', 'user'), 'branch': data.get('branch', ''), 'status': data.get('status', 'active'), 'created_at': datetime.now().isoformat()})
-    except sqlite3.IntegrityError:
+        return jsonify({'id': user_id, 'name': name, 'email': email, 'role': data.get('role', 'user'), 'branch': data.get('branch', ''), 'status': data.get('status', 'active'), 'created_at': datetime.now().isoformat()})
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError):
         return jsonify({'error': 'User with this email already exists'}), 400
 
 @app.route('/api/users/<int:id>', methods=['PUT', 'DELETE', 'OPTIONS'])
@@ -817,14 +930,23 @@ def handle_user(id):
 def update_user(id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE users SET name = ?, email = ?, password = ?, role = ?, branch = ?, status = ? WHERE id = ?',
-               (data['name'], data['email'], data.get('password', ''), data['role'], data['branch'], data['status'], id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE users SET name = %s, email = %s, password = %s, role = %s, branch = %s, status = %s WHERE id = %s',
+                       (data['name'], data['email'], data.get('password', ''), data['role'], data['branch'], data['status'], id))
+    else:
+        db.execute('UPDATE users SET name = ?, email = ?, password = ?, role = ?, branch = ?, status = ? WHERE id = ?',
+                   (data['name'], data['email'], data.get('password', ''), data['role'], data['branch'], data['status'], id))
     db.commit()
     return jsonify({'message': 'User updated'})
 
 def delete_user(id):
     db = get_db()
-    db.execute('DELETE FROM users WHERE id = ?', (id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM users WHERE id = %s', (id,))
+    else:
+        db.execute('DELETE FROM users WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'User deleted'})
 
@@ -841,10 +963,19 @@ def login():
         return jsonify({'error': 'Email and password are required'}), 400
 
     db = get_db()
-    user = db.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password)).fetchone()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s', (email, password))
+        user = cursor.fetchone()
+    else:
+        user = db.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password)).fetchone()
 
     if user:
-        db.execute('UPDATE users SET last_login = ? WHERE id = ?', (datetime.now().isoformat(), user['id']))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('UPDATE users SET last_login = %s WHERE id = %s', (datetime.now().isoformat(), user['id']))
+        else:
+            db.execute('UPDATE users SET last_login = ? WHERE id = ?', (datetime.now().isoformat(), user['id']))
         db.commit()
         return jsonify({
             'id': user['id'],
@@ -872,17 +1003,24 @@ def register():
 
     db = get_db()
     try:
-        cursor = db.execute('INSERT INTO users (name, email, password, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO users (name, email, password, role, status, created_at) VALUES (%s, %s, %s, %s, %s, %s)',
                            (name, email, password, 'user', 'active', datetime.now().isoformat()))
+            user_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+        else:
+            cursor = db.execute('INSERT INTO users (name, email, password, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+                               (name, email, password, 'user', 'active', datetime.now().isoformat()))
+            user_id = cursor.lastrowid
         db.commit()
         return jsonify({
-            'id': cursor.lastrowid,
+            'id': user_id,
             'name': name,
             'email': email,
             'role': 'user',
             'status': 'active'
         })
-    except sqlite3.IntegrityError:
+    except (sqlite3.IntegrityError, psycopg2.IntegrityError):
         return jsonify({'error': 'User with this email already exists'}), 400
 
 @app.route('/api/track/<tracking_number>', methods=['GET', 'OPTIONS'])
@@ -891,11 +1029,21 @@ def track_shipment(tracking_number):
         return jsonify({'status': 'success'}), 200
     
     db = get_db()
-    shipment = db.execute('SELECT * FROM shipments WHERE tracking_number = ?', (tracking_number,)).fetchone()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM shipments WHERE tracking_number = %s', (tracking_number,))
+        shipment = cursor.fetchone()
+    else:
+        shipment = db.execute('SELECT * FROM shipments WHERE tracking_number = ?', (tracking_number,)).fetchone()
     if not shipment:
         return jsonify({'error': 'Shipment not found'}), 404
 
-    history = db.execute('SELECT date_time, location, status, description, latitude, longitude FROM tracking_history WHERE shipment_id = ? ORDER BY date_time DESC', (shipment['id'],)).fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT date_time, location, status, description, latitude, longitude FROM tracking_history WHERE shipment_id = %s ORDER BY date_time DESC', (shipment['id'],))
+        history = cursor.fetchall()
+    else:
+        history = db.execute('SELECT date_time, location, status, description, latitude, longitude FROM tracking_history WHERE shipment_id = ? ORDER BY date_time DESC', (shipment['id'],)).fetchall()
 
     return jsonify({
         'shipment': dict(shipment),
@@ -913,7 +1061,12 @@ def handle_tracking_history(shipment_id):
 
 def get_tracking_history(shipment_id):
     db = get_db()
-    history = db.execute('SELECT * FROM tracking_history WHERE shipment_id = ? ORDER BY date_time DESC', (shipment_id,)).fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM tracking_history WHERE shipment_id = %s ORDER BY date_time DESC', (shipment_id,))
+        history = cursor.fetchall()
+    else:
+        history = db.execute('SELECT * FROM tracking_history WHERE shipment_id = ? ORDER BY date_time DESC', (shipment_id,)).fetchall()
     return jsonify([dict(row) for row in history])
 
 def add_tracking_history(shipment_id):
@@ -929,15 +1082,26 @@ def add_tracking_history(shipment_id):
         return jsonify({'error': 'Location and status are required'}), 400
 
     db = get_db()
-    cursor = db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                        (shipment_id, date_time, location, status, description, latitude, longitude))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                       (shipment_id, date_time, location, status, description, latitude, longitude))
+        history_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+    else:
+        cursor = db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                           (shipment_id, date_time, location, status, description, latitude, longitude))
+        history_id = cursor.lastrowid
     db.commit()
 
     if status in ['pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected']:
-        db.execute('UPDATE shipments SET status = ? WHERE id = ?', (status, shipment_id))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('UPDATE shipments SET status = %s WHERE id = %s', (status, shipment_id))
+        else:
+            db.execute('UPDATE shipments SET status = ? WHERE id = ?', (status, shipment_id))
         db.commit()
 
-    return jsonify({'id': cursor.lastrowid, 'shipment_id': shipment_id, 'date_time': date_time, 'location': location, 'status': status, 'description': description, 'latitude': latitude, 'longitude': longitude})
+    return jsonify({'id': history_id, 'shipment_id': shipment_id, 'date_time': date_time, 'location': location, 'status': status, 'description': description, 'latitude': latitude, 'longitude': longitude})
 
 @app.route('/api/tracking-history/<int:history_id>', methods=['PUT', 'DELETE', 'OPTIONS'])
 def handle_tracking_history_item(history_id):
@@ -951,20 +1115,35 @@ def handle_tracking_history_item(history_id):
 def update_tracking_history(history_id):
     data = request.get_json()
     db = get_db()
-    db.execute('UPDATE tracking_history SET date_time = ?, location = ?, status = ?, description = ?, latitude = ?, longitude = ? WHERE id = ?',
-               (data['date_time'], data['location'], data['status'], data['description'], data.get('latitude'), data.get('longitude'), history_id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE tracking_history SET date_time = %s, location = %s, status = %s, description = %s, latitude = %s, longitude = %s WHERE id = %s',
+                       (data['date_time'], data['location'], data['status'], data['description'], data.get('latitude'), data.get('longitude'), history_id))
+    else:
+        db.execute('UPDATE tracking_history SET date_time = ?, location = ?, status = ?, description = ?, latitude = ?, longitude = ? WHERE id = ?',
+                   (data['date_time'], data['location'], data['status'], data['description'], data.get('latitude'), data.get('longitude'), history_id))
     db.commit()
 
     if 'status' in data and data['status'] in ['pending_confirmation', 'processing', 'picked_up', 'in_transit', 'delivered', 'delayed', 'rejected']:
-        shipment_id = db.execute('SELECT shipment_id FROM tracking_history WHERE id = ?', (history_id,)).fetchone()['shipment_id']
-        db.execute('UPDATE shipments SET status = ? WHERE id = ?', (data['status'], shipment_id))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('SELECT shipment_id FROM tracking_history WHERE id = %s', (history_id,))
+            shipment_id = cursor.fetchone()['shipment_id']
+            cursor.execute('UPDATE shipments SET status = %s WHERE id = %s', (data['status'], shipment_id))
+        else:
+            shipment_id = db.execute('SELECT shipment_id FROM tracking_history WHERE id = ?', (history_id,)).fetchone()['shipment_id']
+            db.execute('UPDATE shipments SET status = ? WHERE id = ?', (data['status'], shipment_id))
         db.commit()
 
     return jsonify({'message': 'Tracking history updated'})
 
 def delete_tracking_history(history_id):
     db = get_db()
-    db.execute('DELETE FROM tracking_history WHERE id = ?', (history_id,))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM tracking_history WHERE id = %s', (history_id,))
+    else:
+        db.execute('DELETE FROM tracking_history WHERE id = ?', (history_id,))
     db.commit()
     return jsonify({'message': 'Tracking history deleted'})
 
@@ -979,18 +1158,34 @@ def confirm_shipment(id):
     import random
     tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
 
-    db.execute('''UPDATE shipments SET
-        tracking_number = ?,
-        status = 'processing',
-        total_freight = ?,
-        expected_delivery = ?,
-        comments = ?
-        WHERE id = ?''',
-        (tracking_number, data.get('total_freight', 0), data.get('expected_delivery', ''), data.get('comments', ''), id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('''UPDATE shipments SET
+            tracking_number = %s,
+            status = 'processing',
+            total_freight = %s,
+            expected_delivery = %s,
+            comments = %s
+            WHERE id = %s''',
+            (tracking_number, data.get('total_freight', 0), data.get('expected_delivery', ''), data.get('comments', ''), id))
+    else:
+        db.execute('''UPDATE shipments SET
+            tracking_number = ?,
+            status = 'processing',
+            total_freight = ?,
+            expected_delivery = ?,
+            comments = ?
+            WHERE id = ?''',
+            (tracking_number, data.get('total_freight', 0), data.get('expected_delivery', ''), data.get('comments', ''), id))
     db.commit()
 
-    db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-               (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment confirmed and being processed', 48.8566, 2.3522))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                       (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment confirmed and being processed', 48.8566, 2.3522))
+    else:
+        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment confirmed and being processed', 48.8566, 2.3522))
     db.commit()
 
     print(f"EMAIL NOTIFICATION: Shipment {id} confirmed with tracking number {tracking_number}. Email to shipper.")
@@ -1006,12 +1201,22 @@ def reject_shipment(id):
     reason = data.get('reason', 'No reason provided')
     db = get_db()
 
-    db.execute('UPDATE shipments SET status = ?, comments = ? WHERE id = ?',
-               ('rejected', f'Rejected: {reason}', id))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('UPDATE shipments SET status = %s, comments = %s WHERE id = %s',
+                       ('rejected', f'Rejected: {reason}', id))
+    else:
+        db.execute('UPDATE shipments SET status = ?, comments = ? WHERE id = ?',
+                   ('rejected', f'Rejected: {reason}', id))
     db.commit()
 
-    db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-               (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'rejected', f'Shipment rejected: {reason}', 48.8566, 2.3522))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                       (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'rejected', f'Shipment rejected: {reason}', 48.8566, 2.3522))
+    else:
+        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   (id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'rejected', f'Shipment rejected: {reason}', 48.8566, 2.3522))
     db.commit()
 
     print(f"EMAIL NOTIFICATION: Shipment {id} rejected. Reason: {reason}. Email to shipper.")

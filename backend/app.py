@@ -619,10 +619,18 @@ def handle_shipments():
 def get_shipments():
     status = request.args.get('status')
     db = get_db()
-    if status and status != 'all':
-        shipments = db.execute('SELECT * FROM shipments WHERE status = ? ORDER BY date_created DESC', (status,)).fetchall()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        if status and status != 'all':
+            cursor.execute('SELECT * FROM shipments WHERE status = %s ORDER BY date_created DESC', (status,))
+        else:
+            cursor.execute('SELECT * FROM shipments ORDER BY date_created DESC')
+        shipments = cursor.fetchall()
     else:
-        shipments = db.execute('SELECT * FROM shipments ORDER BY date_created DESC').fetchall()
+        if status and status != 'all':
+            shipments = db.execute('SELECT * FROM shipments WHERE status = ? ORDER BY date_created DESC', (status,)).fetchall()
+        else:
+            shipments = db.execute('SELECT * FROM shipments ORDER BY date_created DESC').fetchall()
     return jsonify([dict(row) for row in shipments])
 
 def create_shipment():
@@ -644,31 +652,62 @@ def create_shipment():
         tracking_number = None
 
     db = get_db()
-    cursor = db.execute('''INSERT INTO shipments (
-        tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
-        receiver_name, receiver_address, receiver_phone, receiver_email,
-        origin, destination, status, packages, total_weight, product, quantity,
-        payment_mode, total_freight, expected_delivery, departure_time,
-        pickup_date, pickup_time, comments, date_created
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-    (
-        tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
-        data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
-        data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
-        data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
-        data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
-        datetime.now().strftime('%Y-%m-%d')
-    ))
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('''INSERT INTO shipments (
+            tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
+            receiver_name, receiver_address, receiver_phone, receiver_email,
+            origin, destination, status, packages, total_weight, product, quantity,
+            payment_mode, total_freight, expected_delivery, departure_time,
+            pickup_date, pickup_time, comments, date_created
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+        (
+            tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+            data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+            data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
+            data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
+            data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
+            datetime.now().strftime('%Y-%m-%d')
+        ))
+    else:
+        cursor = db.execute('''INSERT INTO shipments (
+            tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
+            receiver_name, receiver_address, receiver_phone, receiver_email,
+            origin, destination, status, packages, total_weight, product, quantity,
+            payment_mode, total_freight, expected_delivery, departure_time,
+            pickup_date, pickup_time, comments, date_created
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+        (
+            tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
+            data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
+            data['origin'], data.get('destination', ''), status, data.get('packages', 1), data.get('total_weight', 0), data.get('product', ''),
+            data.get('quantity', 1), data.get('payment_mode', 'Cash'), data.get('total_freight', 0), data.get('expected_delivery', ''),
+            data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
+            datetime.now().strftime('%Y-%m-%d')
+        ))
 
-    shipment_id = cursor.lastrowid
+    if USE_POSTGRESQL:
+        shipment_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
+    else:
+        shipment_id = cursor.lastrowid
     db.commit()
 
     if is_admin_request:
-        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                   (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment created by admin and ready for processing', 48.8566, 2.3522))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                           (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment created by admin and ready for processing', 48.8566, 2.3522))
+        else:
+            db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                       (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Admin Office', 'processing', 'Shipment created by admin and ready for processing', 48.8566, 2.3522))
     else:
-        db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                   (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Origin Facility', 'pending_confirmation', 'Package received and awaiting admin confirmation', 48.8566, 2.3522))
+        if USE_POSTGRESQL:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                           (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Origin Facility', 'pending_confirmation', 'Package received and awaiting admin confirmation', 48.8566, 2.3522))
+        else:
+            db.execute('INSERT INTO tracking_history (shipment_id, date_time, location, status, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                       (shipment_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Origin Facility', 'pending_confirmation', 'Package received and awaiting admin confirmation', 48.8566, 2.3522))
     db.commit()
 
     return jsonify({

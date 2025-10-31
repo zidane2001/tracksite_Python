@@ -187,6 +187,7 @@ export const ShipmentManagement = () => {
       });
 
       if (response.ok) {
+        const result = await response.json();
         // Reload shipments from API instead of adding locally
         await loadShipments();
         setIsAddOpen(false);
@@ -210,8 +211,10 @@ export const ShipmentManagement = () => {
         setNewPickupDate('');
         setNewPickupTime('');
         setNewComments('');
-        setNotification({type: 'success', message: 'Expédition créée avec succès et prête pour traitement.'});
+        setNotification({type: 'success', message: `Expédition créée avec succès. Numéro de suivi: ${result.tracking_number}`});
         setTimeout(() => setNotification(null), 5000);
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Failed to create shipment:', error);

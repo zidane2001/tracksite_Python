@@ -306,11 +306,14 @@ def insert_default_data(db):
 
     for loc in locations:
         try:
-            if USE_POSTGRESQL:
-                cursor = db.cursor()
-                cursor.execute('INSERT INTO locations (name, slug, country) VALUES (%s, %s, %s) ON CONFLICT (slug) DO NOTHING', loc)
-            else:
-                db.execute('INSERT OR IGNORE INTO locations (name, slug, country) VALUES (?, ?, ?)', loc)
+            try:
+                if USE_POSTGRESQL:
+                    cursor = db.cursor()
+                    cursor.execute('INSERT INTO locations (name, slug, country) VALUES (%s, %s, %s) ON CONFLICT (slug) DO NOTHING', loc)
+                else:
+                    db.execute('INSERT OR IGNORE INTO locations (name, slug, country) VALUES (?, ?, ?)', loc)
+            except Exception as e:
+                print(f"Error inserting location {loc}: {e}")
         except (sqlite3.IntegrityError, psycopg2.IntegrityError):
             pass
 
@@ -329,8 +332,8 @@ def insert_default_data(db):
                 cursor.execute('INSERT INTO zones (name, slug, locations, description) VALUES (%s, %s, %s, %s) ON CONFLICT (slug) DO NOTHING', zone)
             else:
                 db.execute('INSERT OR IGNORE INTO zones (name, slug, locations, description) VALUES (?, ?, ?, ?)', zone)
-        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
-            pass
+        except Exception as e:
+            print(f"Error inserting zone {zone}: {e}")
 
     # Default shipping rates
     shipping_rates = [
@@ -347,8 +350,8 @@ def insert_default_data(db):
                 cursor.execute('INSERT INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING', rate)
             else:
                 db.execute('INSERT OR IGNORE INTO shipping_rates (name, type, min_weight, max_weight, rate, insurance, description) VALUES (?, ?, ?, ?, ?, ?, ?)', rate)
-        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
-            pass
+        except Exception as e:
+            print(f"Error inserting shipping rate {rate}: {e}")
 
     # Default pickup rates
     pickup_rates = [
@@ -366,8 +369,8 @@ def insert_default_data(db):
                 cursor.execute('INSERT INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING', rate)
             else:
                 db.execute('INSERT OR IGNORE INTO pickup_rates (zone, min_weight, max_weight, rate, description) VALUES (?, ?, ?, ?, ?)', rate)
-        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
-            pass
+        except Exception as e:
+            print(f"Error inserting pickup rate {rate}: {e}")
 
     # Default users
     users = [
@@ -385,8 +388,8 @@ def insert_default_data(db):
                 cursor.execute('INSERT INTO users (name, email, password, role, branch, status, last_login, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (email) DO NOTHING', user)
             else:
                 db.execute('INSERT OR IGNORE INTO users (name, email, password, role, branch, status, last_login, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', user)
-        except (sqlite3.IntegrityError, psycopg2.IntegrityError):
-            pass
+        except Exception as e:
+            print(f"Error inserting user {user}: {e}")
 
     db.commit()
 
@@ -740,7 +743,7 @@ def create_shipment():
             origin, destination, status, packages, total_weight, product, quantity,
             payment_mode, total_freight, expected_delivery, departure_time,
             pickup_date, pickup_time, comments, date_created
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
         (
             tracking_number, data['shipper_name'], data.get('shipper_address', ''), data.get('shipper_phone', ''), data.get('shipper_email', ''),
             data['receiver_name'], data.get('receiver_address', ''), data.get('receiver_phone', ''), data.get('receiver_email', ''),
@@ -749,6 +752,7 @@ def create_shipment():
             data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
             datetime.now().strftime('%Y-%m-%d')
         ))
+        shipment_id = cursor.fetchone()[0]
     else:
         cursor = db.execute('''INSERT INTO shipments (
             tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
@@ -765,10 +769,6 @@ def create_shipment():
             data.get('departure_time', ''), data.get('pickup_date', ''), data.get('pickup_time', ''), data.get('comments', ''),
             datetime.now().strftime('%Y-%m-%d')
         ))
-
-    if USE_POSTGRESQL:
-        shipment_id = cursor.fetchone()[0] if cursor.description else cursor.lastrowid
-    else:
         shipment_id = cursor.lastrowid
     db.commit()
 

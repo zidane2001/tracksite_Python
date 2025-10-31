@@ -758,7 +758,7 @@ def create_shipment():
                 datetime.now().strftime('%Y-%m-%d')
             ))
             result = cursor.fetchone()
-            shipment_id = result[0] if result else None
+            shipment_id = result['id'] if result else None
         else:
             cursor.execute('''INSERT INTO shipments (
                 tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,

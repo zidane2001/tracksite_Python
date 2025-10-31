@@ -719,28 +719,28 @@ def get_shipments():
     return jsonify([dict(row) for row in shipments])
 
 def create_shipment():
+    data = request.get_json()
+
+    required_fields = ['shipper_name', 'shipper_email', 'shipper_phone', 'receiver_name', 'origin', 'destination']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'{field} is required'}), 400
+
+    is_admin_request = request.headers.get('X-Admin-Request', 'false').lower() == 'true'
+
+    if is_admin_request:
+        status = 'processing'
+        import random
+        tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
+    else:
+        status = 'pending_confirmation'
+        tracking_number = None
+
+    # Simple approach - just insert and get the ID
+    db = get_db()
+    cursor = db.cursor()
+
     try:
-        data = request.get_json()
-
-        required_fields = ['shipper_name', 'shipper_email', 'shipper_phone', 'receiver_name', 'origin', 'destination']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'{field} is required'}), 400
-
-        is_admin_request = request.headers.get('X-Admin-Request', 'false').lower() == 'true'
-
-        if is_admin_request:
-            status = 'processing'
-            import random
-            tracking_number = f'SHIP{random.randint(100000000000, 999999999999)}-COLISSELECT'
-        else:
-            status = 'pending_confirmation'
-            tracking_number = None
-
-        # Simple approach - just insert and get the ID
-        db = get_db()
-        cursor = db.cursor()
-
         if USE_POSTGRESQL:
             cursor.execute('''INSERT INTO shipments (
                 tracking_number, shipper_name, shipper_address, shipper_phone, shipper_email,
@@ -825,6 +825,7 @@ def create_shipment():
             'date_created': datetime.now().strftime('%Y-%m-%d')
         })
     except Exception as e:
+        db.rollback()
         print(f"Error creating shipment: {e}")
         import traceback
         traceback.print_exc()

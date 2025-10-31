@@ -70,7 +70,7 @@ def handle_preflight_request():
         return response, 200
 
 # Database configuration - supports both SQLite (local) and PostgreSQL (production)
-USE_POSTGRESQL = os.environ.get('USE_POSTGRESQL', 'false').lower() == 'true'
+USE_POSTGRESQL = os.environ.get('USE_POSTGRESQL', 'true').lower() == 'true'  # Default to true for Railway
 
 if USE_POSTGRESQL:
     # PostgreSQL configuration for production

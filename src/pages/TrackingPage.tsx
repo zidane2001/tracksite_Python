@@ -21,7 +21,7 @@ export const TrackingPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim()) {
-      setError('Please enter a tracking number');
+      setError('Veuillez entrer un numéro de suivi');
       return;
     }
     setIsLoading(true);
@@ -31,7 +31,7 @@ export const TrackingPage: React.FC = () => {
       const result = await trackingApi.track(trackingNumber.trim());
       setTrackingResult(result);
     } catch (err) {
-      setError('Tracking number not found. Please check and try again.');
+      setError('Numéro de suivi introuvable. Veuillez vérifier et réessayer.');
       setTrackingResult(null);
     } finally {
       setIsLoading(false);
@@ -118,12 +118,12 @@ export const TrackingPage: React.FC = () => {
                   <span>{error}</span>
                 </div>}
                 <p className="mt-1 text-xs text-base-content/60">
-                  For testing, use tracking number: SHIP065364729622-COLISSELECT
+                  Pour tester, utilisez le numéro: SHIP873128135455-COLISSELECT
                 </p>
               </div>
               <div className="md:self-end">
                 <button type="submit" className={`btn btn-primary ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
-                  {isLoading ? 'Loading...' : 'Track'}
+                  {isLoading ? 'Chargement...' : 'Suivre'}
                 </button>
               </div>
             </div>
@@ -158,7 +158,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipper Information */}
           <div className="card-body border-b">
-            <h3 className="card-title">Shipper Information</h3>
+            <h3 className="card-title">Informations Expéditeur</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium text-base-content">{trackingResult.shipment.shipper_name}</p>
@@ -171,7 +171,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Receiver Information */}
           <div className="card-body border-b">
-            <h3 className="card-title">Receiver Information</h3>
+            <h3 className="card-title">Informations Destinataire</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium text-base-content">{trackingResult.shipment.receiver_name}</p>
@@ -184,7 +184,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipment Status */}
           <div className="card-body border-b bg-base-200">
-            <h3 className="card-title">Shipment Status</h3>
+            <h3 className="card-title">Statut de l'expédition</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-base-content/60">Origin</p>
@@ -203,7 +203,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Shipment Information */}
           <div className="card-body border-b">
-            <h3 className="card-title">Shipment Information</h3>
+            <h3 className="card-title">Informations de l'expédition</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <p className="text-sm text-base-content/60">Product</p>
@@ -236,7 +236,7 @@ export const TrackingPage: React.FC = () => {
 
           {/* Packages Table */}
           <div className="card-body border-b">
-            <h3 className="card-title">Packages</h3>
+            <h3 className="card-title">Colis</h3>
             <div className="overflow-x-auto">
               <table className="table table-zebra">
                 <thead>
@@ -274,7 +274,7 @@ export const TrackingPage: React.FC = () => {
         {/* Tracking History */}
         <div className="card bg-base-100 shadow-lg overflow-hidden">
           <div className="card-body border-b">
-            <h3 className="card-title">Shipment History</h3>
+            <h3 className="card-title">Historique de suivi</h3>
             <div className="overflow-x-auto">
               <table className="table table-zebra">
                 <thead>
@@ -312,7 +312,7 @@ export const TrackingPage: React.FC = () => {
           <div className="card-body border-b">
             <h3 className="card-title flex items-center">
               <MapIcon className="h-5 w-5 mr-2" />
-              Route Tracking
+              Suivi de l'itinéraire
             </h3>
           </div>
           <div className="card-body">
@@ -352,11 +352,11 @@ export const TrackingPage: React.FC = () => {
           <div className="card bg-base-100 shadow-lg">
             <div className="card-body">
               <h2 className="card-title">
-                Need Help?
+                Besoin d'aide ?
               </h2>
               <p className="text-base-content/70 mb-4">
-                If you have questions about your package or encounter issues with
-                tracking, our customer service team is here to help you.
+                Si vous avez des questions sur votre colis ou rencontrez des problèmes
+                avec le suivi, notre équipe de service client est là pour vous aider.
               </p>
               <div className="space-y-3">
                 <div className="flex items-center">
@@ -370,7 +370,7 @@ export const TrackingPage: React.FC = () => {
               </div>
               <div className="card-actions justify-end">
                 <button className="btn btn-primary">
-                  Contact Support
+                  Contacter le support
                 </button>
               </div>
             </div>
@@ -378,7 +378,7 @@ export const TrackingPage: React.FC = () => {
           <div className="card bg-base-100 shadow-lg">
             <div className="card-body">
               <h2 className="card-title">
-                Tracking FAQ
+                FAQ Suivi
               </h2>
               <div className="space-y-4">
                 <div>

@@ -115,6 +115,15 @@ const UserDashboard: React.FC<UserDashboardProps> = ({
                         <button className="text-blue-600 hover:text-blue-800 p-1" title="Voir détails">
                           <EyeIcon size={16} />
                         </button>
+                        {shipment.tracking_number && (
+                          <button
+                            className="text-green-600 hover:text-green-800 p-1"
+                            title="Suivre le colis"
+                            onClick={() => window.open(`/tracking?number=${shipment.tracking_number}`, '_blank')}
+                          >
+                            <HistoryIcon size={16} />
+                          </button>
+                        )}
                         {shipment.status === 'pending_confirmation' && (
                           <button
                             className="text-red-600 hover:text-red-800 p-1"
@@ -949,6 +958,15 @@ export const QuotePage: React.FC = () => {
                               <button className="text-blue-600 hover:text-blue-800 p-1" title="Voir détails">
                                 <EyeIcon size={16} />
                               </button>
+                              {shipment.tracking_number && (
+                                <button
+                                  className="text-green-600 hover:text-green-800 p-1"
+                                  title="Suivre le colis"
+                                  onClick={() => window.open(`/tracking?number=${shipment.tracking_number}`, '_blank')}
+                                >
+                                  <HistoryIcon size={16} />
+                                </button>
+                              )}
                               {shipment.status === 'pending_confirmation' && (
                                 <button
                                   className="text-red-600 hover:text-red-800 p-1"

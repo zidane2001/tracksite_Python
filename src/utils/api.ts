@@ -263,7 +263,12 @@ export const authApi = {
 // Tracking API
 export const trackingApi = {
   track: async (trackingNumber: string): Promise<TrackingResult> => {
-    const response = await fetch(`${API_BASE_URL}/api/track/${trackingNumber}`);
+    const response = await fetch(`${API_BASE_URL}/api/track/${trackingNumber}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Colis non trouvé');

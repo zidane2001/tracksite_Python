@@ -75,9 +75,11 @@ USE_POSTGRESQL = os.environ.get('USE_POSTGRESQL', 'false').lower() == 'true'
 if USE_POSTGRESQL:
     # PostgreSQL configuration for production
     DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/tracksite')
+    print(f"Using PostgreSQL: {DATABASE_URL}")
 else:
     # SQLite fallback for local development
     DATABASE = os.environ.get('DATABASE_PATH', 'database.db')
+    print(f"Using SQLite: {DATABASE}")
 
 def get_db():
     if USE_POSTGRESQL:

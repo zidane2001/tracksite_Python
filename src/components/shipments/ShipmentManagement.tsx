@@ -592,284 +592,356 @@ export const ShipmentManagement = () => {
         </div>
       </div>
       {isAddOpen && <div className="modal modal-open">
-        <div className="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
-          <h3 className="font-bold text-lg">Create Shipment</h3>
-          <div className="py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Origin (Coordinates)</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded-lg text-sm md:text-base"
-                  value={newOrigin}
-                  onChange={(e) => setNewOrigin(e.target.value)}
-                  placeholder="Use format: 12°46'50.4N 77°29'50.2E or 12.780667, 77.497278"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Destination (Coordinates)</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded-lg text-sm md:text-base"
-                  value={newDestination}
-                  onChange={(e) => setNewDestination(e.target.value)}
-                  placeholder="e.g. 12°46'50.4N 77°29'50.2E or 12.780667, 77.497278"
-                />
-              </div>
+        <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <PackageIcon className="w-5 h-5 text-primary" />
             </div>
-            {calculatedDistance && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="text-sm text-blue-800">
-                  <strong>Distance calculée:</strong> {calculatedDistance.toFixed(2)} km
-                  <br />
-                  <strong>Livraison estimée:</strong> {new Date(Date.now() + (calculatedDistance ? calculateDeliveryTime(calculatedDistance) : 0) * 60 * 60 * 1000).toISOString().split('T')[0]}
-                </div>
-              </div>
-            )}
+            <div>
+              <h3 className="font-bold text-xl">Nouveau Colis</h3>
+              <p className="text-sm text-base-content/60">Créer un nouvel envoi</p>
+            </div>
+          </div>
 
-            {/* Shipper Information */}
-            <div className="mb-4 md:mb-6">
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4">Informations Expéditeur</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm text-gray-700 mb-1">Nom *</label>
+          <div className="space-y-6">
+            {/* Route Section */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">📍</span>
+                </div>
+                <h4 className="font-semibold text-base">Itinéraire</h4>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Origine *</span>
+                  </label>
                   <input
                     type="text"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="input input-bordered input-sm"
+                    value={newOrigin}
+                    onChange={(e) => setNewOrigin(e.target.value)}
+                    placeholder="12°46'50.4N 77°29'50.2E"
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Destination *</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered input-sm"
+                    value={newDestination}
+                    onChange={(e) => setNewDestination(e.target.value)}
+                    placeholder="12°46'50.4N 77°29'50.2E"
+                  />
+                </div>
+              </div>
+              {calculatedDistance && (
+                <div className="mt-3 p-3 bg-success/10 border border-success/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-success">
+                    <span className="text-lg">📏</span>
+                    <div className="text-sm">
+                      <div className="font-medium">Distance: {calculatedDistance.toFixed(1)} km</div>
+                      <div className="text-xs opacity-75">Livraison estimée: {new Date(Date.now() + (calculatedDistance ? calculateDeliveryTime(calculatedDistance) : 0) * 60 * 60 * 1000).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sender Section */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">👤</span>
+                </div>
+                <h4 className="font-semibold text-base">Expéditeur</h4>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Nom complet *</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered input-sm"
                     value={newShipperName}
                     onChange={(e) => setNewShipperName(e.target.value)}
-                    placeholder="Nom de l'expéditeur"
+                    placeholder="Jean Dupont"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Téléphone</label>
-                  <input
-                    type="tel"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newShipperPhone}
-                    onChange={(e) => setNewShipperPhone(e.target.value)}
-                    placeholder="+33 1 23 45 67 89"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newShipperEmail}
-                    onChange={(e) => setNewShipperEmail(e.target.value)}
-                    placeholder="email@exemple.com"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm text-gray-700 mb-1">Adresse</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newShipperAddress}
-                    onChange={(e) => setNewShipperAddress(e.target.value)}
-                    placeholder="Adresse complète"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Téléphone</span>
+                    </label>
+                    <input
+                      type="tel"
+                      className="input input-bordered input-sm"
+                      value={newShipperPhone}
+                      onChange={(e) => setNewShipperPhone(e.target.value)}
+                      placeholder="+33 6 12 34 56 78"
+                    />
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      className="input input-bordered input-sm"
+                      value={newShipperEmail}
+                      onChange={(e) => setNewShipperEmail(e.target.value)}
+                      placeholder="jean@email.com"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Receiver Information */}
-            <div className="mb-4 md:mb-6">
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4">Informations Destinataire</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm text-gray-700 mb-1">Nom *</label>
+            {/* Receiver Section */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">📦</span>
+                </div>
+                <h4 className="font-semibold text-base">Destinataire</h4>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Nom complet *</span>
+                  </label>
                   <input
                     type="text"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="input input-bordered input-sm"
                     value={newReceiverName}
                     onChange={(e) => setNewReceiverName(e.target.value)}
-                    placeholder="Nom du destinataire"
+                    placeholder="Marie Martin"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Téléphone</label>
-                  <input
-                    type="tel"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newReceiverPhone}
-                    onChange={(e) => setNewReceiverPhone(e.target.value)}
-                    placeholder="+33 6 12 34 56 78"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newReceiverEmail}
-                    onChange={(e) => setNewReceiverEmail(e.target.value)}
-                    placeholder="email@exemple.com"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm text-gray-700 mb-1">Adresse</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newReceiverAddress}
-                    onChange={(e) => setNewReceiverAddress(e.target.value)}
-                    placeholder="Adresse complète de livraison"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Téléphone</span>
+                    </label>
+                    <input
+                      type="tel"
+                      className="input input-bordered input-sm"
+                      value={newReceiverPhone}
+                      onChange={(e) => setNewReceiverPhone(e.target.value)}
+                      placeholder="+33 6 12 34 56 78"
+                    />
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      className="input input-bordered input-sm"
+                      value={newReceiverEmail}
+                      onChange={(e) => setNewReceiverEmail(e.target.value)}
+                      placeholder="marie@email.com"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Shipment Details */}
-            <div className="mb-4 md:mb-6">
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4">Détails de l'expédition</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <label className="block text-sm text-gray-700 mb-1">Produit</label>
+            {/* Package Details */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">📋</span>
+                </div>
+                <h4 className="font-semibold text-base">Détails du Colis</h4>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Description</span>
+                  </label>
                   <input
                     type="text"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="input input-bordered input-sm"
                     value={newProduct}
                     onChange={(e) => setNewProduct(e.target.value)}
-                    placeholder="Description du produit"
+                    placeholder="Documents, Électronique..."
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Quantité</label>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Quantité</span>
+                  </label>
                   <input
                     type="number"
                     min="1"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="input input-bordered input-sm"
                     value={newQuantity}
                     onChange={(e) => setNewQuantity(parseInt(e.target.value) || 1)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Mode de paiement</label>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Paiement</span>
+                  </label>
                   <select
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="select select-bordered select-sm"
                     value={newPaymentMode}
                     onChange={(e) => setNewPaymentMode(e.target.value)}
                   >
-                    <option value="Cash">Espèces</option>
-                    <option value="Card">Carte bancaire</option>
-                    <option value="Transfer">Virement</option>
-                    <option value="Check">Chèque</option>
+                    <option value="Cash">💰 Espèces</option>
+                    <option value="Card">💳 Carte</option>
+                    <option value="Transfer">🏦 Virement</option>
+                    <option value="Check">📄 Chèque</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Frais de port (€)</label>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Frais (€)</span>
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
+                    className="input input-bordered input-sm"
                     value={newTotalFreight}
                     onChange={(e) => setNewTotalFreight(parseFloat(e.target.value) || 0)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Date de livraison estimée</label>
-                  <input
-                    type="date"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newExpectedDelivery}
-                    onChange={(e) => setNewExpectedDelivery(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Heure de départ</label>
-                  <input
-                    type="datetime-local"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newDepartureTime}
-                    onChange={(e) => setNewDepartureTime(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Date de ramassage</label>
-                  <input
-                    type="date"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newPickupDate}
-                    onChange={(e) => setNewPickupDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Heure de ramassage</label>
-                  <input
-                    type="time"
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newPickupTime}
-                    onChange={(e) => setNewPickupTime(e.target.value)}
-                  />
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <label className="block text-sm text-gray-700 mb-1">Commentaires</label>
-                  <textarea
-                    className="w-full p-2 border rounded-lg text-sm md:text-base"
-                    value={newComments}
-                    onChange={(e) => setNewComments(e.target.value)}
-                    placeholder="Commentaires supplémentaires"
-                    rows={3}
-                  />
-                </div>
               </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm text-gray-700 mb-1">Diviseur volumétrique</label>
-              <input type="number" className="w-40 p-2 border rounded-lg text-sm md:text-base" value={divisor} onChange={e => setDivisor(parseInt(e.target.value) || 5000)} />
-              <span className="text-xs text-gray-500 ml-2">Par défaut 5000 (air), 6000 (certains transporteurs)</span>
-            </div>
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">Packages</h3>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded-lg" onClick={addPackageRow}>Add Package</button>
+
+            {/* Package Dimensions */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">📏</span>
+                  </div>
+                  <h4 className="font-semibold text-base">Dimensions</h4>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-xs"
+                  onClick={addPackageRow}
+                >
+                  + Ajouter
+                </button>
               </div>
               <div className="space-y-3">
-                {newPackages.map((pkg, idx) => <div key={idx} className="grid grid-cols-6 gap-2 items-end">
-                  <div>
-                    <label className="block text-xs text-gray-600">Weight (kg)</label>
-                    <input type="number" step="0.01" className="w-full p-2 border rounded-lg" value={pkg.weightKg} onChange={e => updatePackageRow(idx, 'weightKg', parseFloat(e.target.value) || 0)} />
+                {newPackages.map((pkg, idx) => (
+                  <div key={idx} className="bg-base-100 rounded-lg p-3 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Colis {idx + 1}</span>
+                      {newPackages.length > 1 && (
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-xs text-error"
+                          onClick={() => removePackageRow(idx)}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text text-xs">Poids (kg)</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="input input-bordered input-xs"
+                          value={pkg.weightKg}
+                          onChange={e => updatePackageRow(idx, 'weightKg', parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text text-xs">Long. (cm)</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="input input-bordered input-xs"
+                          value={pkg.lengthCm}
+                          onChange={e => updatePackageRow(idx, 'lengthCm', parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text text-xs">Larg. (cm)</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="input input-bordered input-xs"
+                          value={pkg.widthCm}
+                          onChange={e => updatePackageRow(idx, 'widthCm', parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text text-xs">Haut. (cm)</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="input input-bordered input-xs"
+                          value={pkg.heightCm}
+                          onChange={e => updatePackageRow(idx, 'heightCm', parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text text-xs">Qté</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          className="input input-bordered input-xs"
+                          value={pkg.quantity}
+                          onChange={e => updatePackageRow(idx, 'quantity', parseInt(e.target.value) || 1)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">L (cm)</label>
-                    <input type="number" step="0.1" className="w-full p-2 border rounded-lg" value={pkg.lengthCm} onChange={e => updatePackageRow(idx, 'lengthCm', parseFloat(e.target.value) || 0)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">W (cm)</label>
-                    <input type="number" step="0.1" className="w-full p-2 border rounded-lg" value={pkg.widthCm} onChange={e => updatePackageRow(idx, 'widthCm', parseFloat(e.target.value) || 0)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">H (cm)</label>
-                    <input type="number" step="0.1" className="w-full p-2 border rounded-lg" value={pkg.heightCm} onChange={e => updatePackageRow(idx, 'heightCm', parseFloat(e.target.value) || 0)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">Qty</label>
-                    <input type="number" min="1" className="w-full p-2 border rounded-lg" value={pkg.quantity} onChange={e => updatePackageRow(idx, 'quantity', parseInt(e.target.value) || 1)} />
-                  </div>
-                  <div className="flex items-end">
-                    <button className="px-3 py-2 border rounded-lg text-red-600" onClick={() => removePackageRow(idx)}>Remove</button>
-                  </div>
-                </div>)}
+                ))}
               </div>
-              <div className="mt-3 text-sm text-gray-600">
+              <div className="mt-3 text-sm text-base-content/70 bg-base-100 rounded-lg p-2">
                 {(() => {
                   const w = calculateShipmentWeights(newPackages, divisor);
-                  return <span>Actual: {w.actualWeightKg} kg • Volumetric: {w.volumetricWeightKg} kg • Taxed: <strong>{w.taxedWeightKg} kg</strong></span>;
+                  return (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">⚖️</span>
+                      <span>Poids réel: <strong>{w.actualWeightKg.toFixed(2)} kg</strong> • Volumétrique: <strong>{w.volumetricWeightKg.toFixed(2)} kg</strong> • Facturé: <strong className="text-primary">{w.taxedWeightKg.toFixed(2)} kg</strong></span>
+                    </div>
+                  );
                 })()}
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4 md:mt-6">
-              <button className="btn btn-ghost order-2 sm:order-1" onClick={() => setIsAddOpen(false)}>Annuler</button>
-              <button className="btn btn-primary order-1 sm:order-2" onClick={handleCreateShipment}>Créer le colis</button>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <button
+                type="button"
+                className="btn btn-ghost order-2 sm:order-1"
+                onClick={() => setIsAddOpen(false)}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary order-1 sm:order-2"
+                onClick={handleCreateShipment}
+              >
+                🚀 Créer le Colis
+              </button>
             </div>
-          </div>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn" onClick={() => setIsAddOpen(false)}>Close</button>
-            </form>
           </div>
         </div>
       </div>}

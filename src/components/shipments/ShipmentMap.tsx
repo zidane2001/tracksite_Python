@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Shipment } from '../../utils/api';
-import { parseCoordinates, calculateDistance } from '../../utils/coordinates';
+import { parseCoordinates, calculateDistance, calculateDeliveryTime } from '../../utils/coordinates';
 
 interface ShipmentMapProps {
   shipment: Shipment;
@@ -9,129 +9,259 @@ interface ShipmentMapProps {
 
 export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = '' }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [currentPackagePosition, setCurrentPackagePosition] = useState<{ lat: number; lng: number } | null>(null);
   const [progress, setProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
 
   useEffect(() => {
     // Parse coordinates from shipment
-    const originCoords = parseCoordinates(shipment.origin);
-    const destCoords = parseCoordinates(shipment.destination);
+    const origin = parseCoordinates(shipment.origin);
+    const dest = parseCoordinates(shipment.destination);
 
-    if (originCoords && destCoords) {
-      // Calculate current position based on shipment status and time
-      const statusProgress = getStatusProgress(shipment.status);
-      const distance = calculateDistance(originCoords, destCoords);
+    if (origin && dest) {
+      setOriginCoords({ lat: origin.latitude, lng: origin.longitude });
+      setDestCoords({ lat: dest.latitude, lng: dest.longitude });
 
-      // Interpolate position between origin and destination
-      const currentLat = originCoords.latitude + (destCoords.latitude - originCoords.latitude) * statusProgress;
-      const currentLng = originCoords.longitude + (destCoords.longitude - originCoords.longitude) * statusProgress;
+      // Calculate automatic progress based on time and status
+      const currentProgress = calculateTimeBasedProgress(shipment, origin, dest);
+      setProgress(currentProgress);
 
-      setCurrentPosition({ lat: currentLat, lng: currentLng });
-      setProgress(statusProgress * 100);
+      // Calculate current package position
+      const currentLat = origin.latitude + (dest.latitude - origin.latitude) * (currentProgress / 100);
+      const currentLng = origin.longitude + (dest.longitude - origin.longitude) * (currentProgress / 100);
+      setCurrentPackagePosition({ lat: currentLat, lng: currentLng });
+
+      // Calculate time remaining
+      const totalTime = calculateDeliveryTime(calculateDistance(origin, dest));
+      const elapsedTime = (currentProgress / 100) * totalTime;
+      const remainingHours = Math.max(0, totalTime - elapsedTime);
+      setTimeRemaining(formatTimeRemaining(remainingHours));
     }
   }, [shipment]);
 
-  const getStatusProgress = (status: string): number => {
-    switch (status) {
-      case 'pending_confirmation': return 0;
-      case 'processing': return 0.1;
-      case 'picked_up': return 0.3;
-      case 'in_transit': return 0.7;
-      case 'delivered': return 1;
-      case 'delayed': return 0.5;
-      default: return 0;
+  const calculateTimeBasedProgress = (shipment: Shipment, origin: any, dest: any): number => {
+    const now = new Date();
+    const created = new Date(shipment.date_created);
+    const expectedDelivery = shipment.expected_delivery ? new Date(shipment.expected_delivery) : null;
+
+    if (!expectedDelivery) return 0;
+
+    const totalDuration = expectedDelivery.getTime() - created.getTime();
+    const elapsedDuration = now.getTime() - created.getTime();
+
+    // Base progress on time elapsed
+    let timeProgress = Math.min(100, (elapsedDuration / totalDuration) * 100);
+
+    // Adjust based on status
+    switch (shipment.status) {
+      case 'pending_confirmation':
+        timeProgress = Math.min(timeProgress, 5);
+        break;
+      case 'processing':
+        timeProgress = Math.min(Math.max(timeProgress, 5), 20);
+        break;
+      case 'picked_up':
+        timeProgress = Math.min(Math.max(timeProgress, 20), 40);
+        break;
+      case 'in_transit':
+        timeProgress = Math.min(Math.max(timeProgress, 40), 90);
+        break;
+      case 'delivered':
+        timeProgress = 100;
+        break;
+      case 'delayed':
+        timeProgress = Math.min(timeProgress, 70);
+        break;
+      default:
+        timeProgress = Math.min(timeProgress, 10);
     }
+
+    return Math.max(0, Math.min(100, timeProgress));
   };
 
-  if (!currentPosition) {
+  const formatTimeRemaining = (hours: number): string => {
+    if (hours <= 0) return 'Livré';
+    if (hours < 1) return 'Moins d\'1h';
+    if (hours < 24) return `${Math.round(hours)}h`;
+    const days = Math.floor(hours / 24);
+    const remainingHours = Math.round(hours % 24);
+    return `${days}j ${remainingHours}h`;
+  };
+
+  // Convert lat/lng to pixel coordinates on our mini-map
+  const latLngToPixel = (lat: number, lng: number) => {
+    if (!originCoords || !destCoords) return { x: 0, y: 0 };
+
+    // Simple linear interpolation for our mini-map
+    const mapWidth = 300; // Approximate map width
+    const mapHeight = 200; // Approximate map height
+
+    const latRange = destCoords.lat - originCoords.lat;
+    const lngRange = destCoords.lng - originCoords.lng;
+
+    const x = ((lng - originCoords.lng) / lngRange) * (mapWidth - 40) + 20;
+    const y = ((lat - originCoords.lat) / latRange) * (mapHeight - 40) + 20;
+
+    return { x: Math.max(10, Math.min(mapWidth - 10, x)), y: Math.max(10, Math.min(mapHeight - 10, y)) };
+  };
+
+  if (!originCoords || !destCoords) {
     return (
-      <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
+      <div className={`bg-gray-100 rounded-lg flex items-center justify-center h-64 ${className}`}>
         <div className="text-center text-gray-500">
           <div className="text-4xl mb-2">🗺️</div>
           <div className="text-sm">Carte non disponible</div>
+          <div className="text-xs mt-1">Coordonnées invalides</div>
         </div>
       </div>
     );
   }
 
+  const originPixel = latLngToPixel(originCoords.lat, originCoords.lng);
+  const destPixel = latLngToPixel(destCoords.lat, destCoords.lng);
+  const packagePixel = currentPackagePosition ? latLngToPixel(currentPackagePosition.lat, currentPackagePosition.lng) : originPixel;
+
   return (
     <div className={`bg-white rounded-lg border-2 border-gray-200 overflow-hidden ${className}`}>
-      {/* Simple SVG Map Representation */}
-      <div className="relative h-48 bg-gradient-to-b from-blue-100 to-green-100">
-        {/* Origin Point */}
-        <div className="absolute top-4 left-4 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-lg">
-          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700 whitespace-nowrap">
-            📍 Départ
-          </div>
-        </div>
-
-        {/* Destination Point */}
-        <div className="absolute top-4 right-4 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-lg">
-          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700 whitespace-nowrap">
-            🎯 Arrivée
-          </div>
+      {/* Map Container */}
+      <div className="relative h-64 bg-gradient-to-br from-blue-50 via-white to-green-50">
+        {/* World Map Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg viewBox="0 0 400 300" className="w-full h-full">
+            <path d="M50,100 Q100,80 150,90 T250,85 Q300,95 350,100" stroke="#3B82F6" strokeWidth="1" fill="none" opacity="0.3"/>
+            <path d="M60,120 Q120,110 180,115 T280,110 Q320,120 360,125" stroke="#3B82F6" strokeWidth="1" fill="none" opacity="0.3"/>
+            <path d="M40,140 Q90,135 140,140 T240,135 Q290,145 340,150" stroke="#3B82F6" strokeWidth="1" fill="none" opacity="0.3"/>
+            <circle cx="200" cy="150" r="80" stroke="#10B981" strokeWidth="1" fill="none" opacity="0.2"/>
+            <circle cx="200" cy="150" r="120" stroke="#10B981" strokeWidth="1" fill="none" opacity="0.1"/>
+          </svg>
         </div>
 
         {/* Route Line */}
-        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 2 }}>
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7"
+             refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+            </marker>
+          </defs>
           <line
-            x1="20"
-            y1="20"
-            x2="calc(100% - 20px)"
-            y2="20"
+            x1={originPixel.x}
+            y1={originPixel.y}
+            x2={destPixel.x}
+            y2={destPixel.y}
             stroke="#3B82F6"
             strokeWidth="3"
-            strokeDasharray="5,5"
+            strokeDasharray="8,4"
+            markerEnd="url(#arrowhead)"
           />
         </svg>
 
-        {/* Moving Package */}
+        {/* Origin Point */}
         <div
-          className="absolute top-3 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white shadow-lg transition-all duration-1000 ease-linear"
+          className="absolute w-6 h-6 bg-red-500 rounded-full border-3 border-white shadow-xl flex items-center justify-center"
           style={{
-            left: `${16 + (progress / 100) * (100 - 32)}%`,
-            transform: 'translateX(-50%)'
+            left: `${originPixel.x - 12}px`,
+            top: `${originPixel.y - 12}px`,
+            zIndex: 3
           }}
         >
-          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700 whitespace-nowrap">
-            📦 En cours
-          </div>
+          <span className="text-white text-xs font-bold">🏠</span>
+        </div>
+        <div className="absolute bg-white px-2 py-1 rounded shadow-lg text-xs font-medium"
+             style={{
+               left: `${originPixel.x + 15}px`,
+               top: `${originPixel.y - 25}px`,
+               zIndex: 4
+             }}>
+          📍 Départ
         </div>
 
-        {/* Progress Bar */}
-        <div className="absolute bottom-2 left-4 right-4">
-          <div className="bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
+        {/* Destination Point */}
+        <div
+          className="absolute w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-xl flex items-center justify-center"
+          style={{
+            left: `${destPixel.x - 12}px`,
+            top: `${destPixel.y - 12}px`,
+            zIndex: 3
+          }}
+        >
+          <span className="text-white text-xs font-bold">🎯</span>
+        </div>
+        <div className="absolute bg-white px-2 py-1 rounded shadow-lg text-xs font-medium"
+             style={{
+               left: `${destPixel.x + 15}px`,
+               top: `${destPixel.y - 25}px`,
+               zIndex: 4
+             }}>
+          🎯 Arrivée
+        </div>
+
+        {/* Moving Package */}
+        <div
+          className="absolute w-5 h-5 bg-yellow-400 rounded-full border-2 border-white shadow-xl flex items-center justify-center animate-pulse"
+          style={{
+            left: `${packagePixel.x - 10}px`,
+            top: `${packagePixel.y - 10}px`,
+            zIndex: 5,
+            transition: 'all 2s ease-in-out'
+          }}
+        >
+          <span className="text-xs">📦</span>
+        </div>
+        <div className="absolute bg-yellow-100 border border-yellow-300 px-2 py-1 rounded shadow-lg text-xs font-medium"
+             style={{
+               left: `${packagePixel.x + 12}px`,
+               top: `${packagePixel.y - 30}px`,
+               zIndex: 6
+             }}>
+          🚚 En transit
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur rounded-lg p-3 shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">Progression</span>
+            <span className="text-sm font-bold text-blue-600">{Math.round(progress)}%</span>
           </div>
-          <div className="text-xs text-gray-600 mt-1 text-center">
-            Progression: {Math.round(progress)}%
+          <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full transition-all duration-1000 ease-out relative"
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>Temps restant: {timeRemaining}</span>
+            <span>Distance: {calculateDistance(
+              { latitude: originCoords.lat, longitude: originCoords.lng },
+              { latitude: destCoords.lat, longitude: destCoords.lng }
+            ).toFixed(0)} km</span>
           </div>
         </div>
       </div>
 
       {/* Status Info */}
-      <div className="p-3 bg-gray-50">
-        <div className="flex items-center justify-between text-sm">
+      <div className="p-4 bg-gray-50 border-t">
+        <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium">Statut:</span>
-            <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+            <span className="font-medium text-gray-700">Statut:</span>
+            <div className={`mt-1 px-3 py-1 rounded-full text-xs font-medium inline-block ${
               shipment.status === 'delivered' ? 'bg-green-100 text-green-800' :
               shipment.status === 'in_transit' ? 'bg-blue-100 text-blue-800' :
               shipment.status === 'picked_up' ? 'bg-purple-100 text-purple-800' :
               'bg-yellow-100 text-yellow-800'
             }`}>
               {shipment.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </span>
+            </div>
           </div>
-          <div className="text-gray-600">
-            {shipment.expected_delivery && (
-              <div className="text-xs">
-                Livraison: {new Date(shipment.expected_delivery).toLocaleDateString()}
-              </div>
-            )}
+          <div>
+            <span className="font-medium text-gray-700">Livraison prévue:</span>
+            <div className="mt-1 text-xs text-gray-600">
+              {shipment.expected_delivery ? new Date(shipment.expected_delivery).toLocaleDateString('fr-FR') : 'Non définie'}
+            </div>
           </div>
         </div>
       </div>

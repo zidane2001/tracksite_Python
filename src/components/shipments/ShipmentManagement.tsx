@@ -815,6 +815,51 @@ export const ShipmentManagement = () => {
               </div>
             </div>
 
+            {/* Schedule Section */}
+            <div className="bg-base-200/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">🕒</span>
+                </div>
+                <h4 className="font-semibold text-base">Planning</h4>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Date de ramassage</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="input input-bordered input-sm"
+                    value={newPickupDate}
+                    onChange={(e) => setNewPickupDate(e.target.value)}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Heure de ramassage</span>
+                  </label>
+                  <input
+                    type="time"
+                    className="input input-bordered input-sm"
+                    value={newPickupTime}
+                    onChange={(e) => setNewPickupTime(e.target.value)}
+                  />
+                </div>
+                <div className="form-control sm:col-span-2">
+                  <label className="label">
+                    <span className="label-text font-medium">Heure de départ</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="input input-bordered input-sm"
+                    value={newDepartureTime}
+                    onChange={(e) => setNewDepartureTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Package Dimensions */}
             <div className="bg-base-200/50 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
@@ -929,14 +974,14 @@ export const ShipmentManagement = () => {
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
               <button
                 type="button"
-                className="btn btn-ghost order-2 sm:order-1"
+                className="btn btn-outline btn-error order-2 sm:order-1"
                 onClick={() => setIsAddOpen(false)}
               >
-                Annuler
+                ❌ Annuler
               </button>
               <button
                 type="button"
-                className="btn btn-primary order-1 sm:order-2"
+                className="btn btn-success order-1 sm:order-2"
                 onClick={handleCreateShipment}
               >
                 🚀 Créer le Colis

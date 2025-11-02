@@ -438,138 +438,300 @@ export const ShipmentManagement = () => {
         </div>
       </div>
     </div>
-    <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th>Tracking #</th>
-              <th className="hidden sm:table-cell">Requester</th>
-              <th>Origin</th>
-              <th>Destination</th>
-              <th>Status</th>
-              <th className="hidden md:table-cell">Packages</th>
-              <th className="hidden lg:table-cell">Weight</th>
-              <th className="hidden xl:table-cell">Date Created</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedShipments.map(shipment => <tr key={shipment.id}>
-              <td className="font-medium">
-                <div className="max-w-20 md:max-w-none truncate">{shipment.tracking_number}</div>
-              </td>
-              <td className="hidden sm:table-cell">
-                <div>
-                  <div className="font-medium truncate max-w-24 md:max-w-none">{shipment.shipper_name}</div>
-                  <div className="text-base-content/60 text-xs truncate max-w-24 md:max-w-none">{shipment.shipper_email}</div>
-                </div>
-              </td>
-              <td className="truncate max-w-16 md:max-w-none">{shipment.origin}</td>
-              <td className="truncate max-w-16 md:max-w-none">{shipment.destination}</td>
-              <td>
-                <div className={`badge ${getStatusBadgeClass(shipment.status)} badge-sm`}>
-                  {formatStatus(shipment.status)}
-                </div>
-              </td>
-              <td className="hidden md:table-cell">
-                <div className="flex items-center gap-1">
-                  <PackageIcon size={14} />
-                  <span>{shipment.packages}</span>
-                </div>
-              </td>
-              <td className="hidden lg:table-cell">
-                {shipment.total_weight} kg
-              </td>
-              <td className="hidden xl:table-cell">{shipment.date_created}</td>
-              <td>
-                <div className="flex flex-wrap gap-1 justify-end">
-                  <button
-                    className="btn btn-ghost btn-xs btn-circle"
-                    title="View Details & Copy Tracking"
-                    onClick={() => {
-                      // Copy tracking number to clipboard
-                      const copyToClipboard = (text: string) => {
-                        if (navigator.clipboard && window.isSecureContext) {
-                          navigator.clipboard.writeText(text).then(() => {
-                            showCopyNotification();
-                          }).catch(() => {
-                            fallbackCopy(text);
-                          });
-                        } else {
-                          fallbackCopy(text);
-                        }
-                      };
+    {/* Desktop Table View */}
+    <div className="hidden md:block overflow-x-auto">
+       <table className="table table-zebra w-full">
+         <thead>
+           <tr>
+             <th>Tracking #</th>
+             <th>Requester</th>
+             <th>Origin</th>
+             <th>Destination</th>
+             <th>Status</th>
+             <th>Packages</th>
+             <th>Weight</th>
+             <th>Date Created</th>
+             <th className="text-right">Actions</th>
+           </tr>
+         </thead>
+         <tbody>
+           {paginatedShipments.map(shipment => <tr key={shipment.id}>
+             <td className="font-medium">
+               <div className="max-w-32 truncate">{shipment.tracking_number}</div>
+             </td>
+             <td>
+               <div>
+                 <div className="font-medium truncate max-w-32">{shipment.shipper_name}</div>
+                 <div className="text-base-content/60 text-xs truncate max-w-32">{shipment.shipper_email}</div>
+               </div>
+             </td>
+             <td className="truncate max-w-24">{shipment.origin}</td>
+             <td className="truncate max-w-24">{shipment.destination}</td>
+             <td>
+               <div className={`badge ${getStatusBadgeClass(shipment.status)} badge-sm`}>
+                 {formatStatus(shipment.status)}
+               </div>
+             </td>
+             <td>
+               <div className="flex items-center gap-1">
+                 <PackageIcon size={14} />
+                 <span>{shipment.packages}</span>
+               </div>
+             </td>
+             <td>
+               {shipment.total_weight} kg
+             </td>
+             <td>{shipment.date_created}</td>
+             <td>
+               <div className="flex flex-wrap gap-1 justify-end">
+                 <button
+                   className="btn btn-ghost btn-xs btn-circle"
+                   title="View Details & Copy Tracking"
+                   onClick={() => {
+                     // Copy tracking number to clipboard
+                     const copyToClipboard = (text: string) => {
+                       if (navigator.clipboard && window.isSecureContext) {
+                         navigator.clipboard.writeText(text).then(() => {
+                           showCopyNotification();
+                         }).catch(() => {
+                           fallbackCopy(text);
+                         });
+                       } else {
+                         fallbackCopy(text);
+                       }
+                     };
 
-                      const fallbackCopy = (text: string) => {
-                        const textArea = document.createElement('textarea');
-                        textArea.value = text;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        showCopyNotification();
-                      };
+                     const fallbackCopy = (text: string) => {
+                       const textArea = document.createElement('textarea');
+                       textArea.value = text;
+                       document.body.appendChild(textArea);
+                       textArea.select();
+                       document.execCommand('copy');
+                       document.body.removeChild(textArea);
+                       showCopyNotification();
+                     };
 
-                      const showCopyNotification = () => {
-                        setNotification({type: 'success', message: 'Copié !'});
-                        setTimeout(() => setNotification(null), 1500);
-                      };
+                     const showCopyNotification = () => {
+                       setNotification({type: 'success', message: 'Copié !'});
+                       setTimeout(() => setNotification(null), 1500);
+                     };
 
-                      copyToClipboard(shipment.tracking_number);
-                    }}
-                  >
-                    <EyeIcon size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-xs btn-circle"
-                    title="Tracking History"
-                    onClick={() => openTrackingModal(shipment)}
-                  >
-                    <HistoryIcon size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-xs btn-circle"
-                    title="Edit Shipment"
-                    onClick={() => openEditModal(shipment)}
-                  >
-                    <PencilIcon size={16} />
-                  </button>
-                  {shipment.status === 'pending_confirmation' && (
-                    <>
-                      <button
-                        className="btn btn-success btn-xs btn-circle"
-                        title="Confirm Shipment"
-                        onClick={() => handleConfirmShipment(shipment.id)}
-                      >
-                        ✓
-                      </button>
-                      <button
-                        className="btn btn-error btn-xs btn-circle"
-                        title="Reject Shipment"
-                        onClick={() => handleRejectShipment(shipment.id)}
-                      >
-                        ✗
-                      </button>
-                    </>
-                  )}
-                  <button
-                    className="btn btn-ghost btn-xs btn-circle text-error"
-                    title="Delete Shipment"
-                    onClick={() => handleDeleteShipment(shipment.id)}
-                  >
-                    <TrashIcon size={16} />
-                  </button>
-                </div>
-              </td>
-            </tr>)}
-            {filteredShipments.length === 0 && <tr>
-              <td colSpan={9} className="text-center py-8 text-base-content/60">
-                No shipments found
-              </td>
-            </tr>}
-          </tbody>
-        </table>
-      </div>
+                     copyToClipboard(shipment.tracking_number);
+                   }}
+                 >
+                   <EyeIcon size={16} />
+                 </button>
+                 <button
+                   className="btn btn-ghost btn-xs btn-circle"
+                   title="Tracking History"
+                   onClick={() => openTrackingModal(shipment)}
+                 >
+                   <HistoryIcon size={16} />
+                 </button>
+                 <button
+                   className="btn btn-ghost btn-xs btn-circle"
+                   title="Edit Shipment"
+                   onClick={() => openEditModal(shipment)}
+                 >
+                   <PencilIcon size={16} />
+                 </button>
+                 {shipment.status === 'pending_confirmation' && (
+                   <>
+                     <button
+                       className="btn btn-success btn-xs btn-circle"
+                       title="Confirm Shipment"
+                       onClick={() => handleConfirmShipment(shipment.id)}
+                     >
+                       ✓
+                     </button>
+                     <button
+                       className="btn btn-error btn-xs btn-circle"
+                       title="Reject Shipment"
+                       onClick={() => handleRejectShipment(shipment.id)}
+                     >
+                       ✗
+                     </button>
+                   </>
+                 )}
+                 <button
+                   className="btn btn-ghost btn-xs btn-circle text-error"
+                   title="Delete Shipment"
+                   onClick={() => handleDeleteShipment(shipment.id)}
+                 >
+                   <TrashIcon size={16} />
+                 </button>
+               </div>
+             </td>
+           </tr>)}
+           {filteredShipments.length === 0 && <tr>
+             <td colSpan={9} className="text-center py-8 text-base-content/60">
+               No shipments found
+             </td>
+           </tr>}
+         </tbody>
+       </table>
+     </div>
+
+     {/* Mobile Card View */}
+     <div className="md:hidden space-y-4">
+       {paginatedShipments.map(shipment => (
+         <div key={shipment.id} className="card bg-base-100 shadow-lg border">
+           <div className="card-body p-4">
+             {/* Header with tracking and status */}
+             <div className="flex items-center justify-between mb-3">
+               <div className="flex items-center gap-2">
+                 <PackageIcon className="w-5 h-5 text-primary" />
+                 <span className="font-bold text-sm">{shipment.tracking_number}</span>
+               </div>
+               <div className={`badge ${getStatusBadgeClass(shipment.status)} badge-sm`}>
+                 {formatStatus(shipment.status)}
+               </div>
+             </div>
+
+             {/* Route info */}
+             <div className="bg-base-200/50 rounded-lg p-3 mb-3">
+               <div className="flex items-center gap-2 mb-2">
+                 <span className="text-lg">📍</span>
+                 <span className="text-sm font-medium">Itinéraire</span>
+               </div>
+               <div className="grid grid-cols-2 gap-2 text-sm">
+                 <div>
+                   <span className="text-base-content/60">De:</span>
+                   <div className="font-medium truncate">{shipment.origin}</div>
+                 </div>
+                 <div>
+                   <span className="text-base-content/60">À:</span>
+                   <div className="font-medium truncate">{shipment.destination}</div>
+                 </div>
+               </div>
+             </div>
+
+             {/* Shipper info */}
+             <div className="bg-base-200/50 rounded-lg p-3 mb-3">
+               <div className="flex items-center gap-2 mb-2">
+                 <span className="text-lg">👤</span>
+                 <span className="text-sm font-medium">Expéditeur</span>
+               </div>
+               <div className="text-sm">
+                 <div className="font-medium">{shipment.shipper_name}</div>
+                 <div className="text-base-content/60 truncate">{shipment.shipper_email}</div>
+               </div>
+             </div>
+
+             {/* Package details */}
+             <div className="bg-base-200/50 rounded-lg p-3 mb-3">
+               <div className="flex items-center gap-2 mb-2">
+                 <span className="text-lg">📦</span>
+                 <span className="text-sm font-medium">Détails</span>
+               </div>
+               <div className="grid grid-cols-2 gap-4 text-sm">
+                 <div>
+                   <span className="text-base-content/60">Colis:</span>
+                   <div className="font-medium">{shipment.packages}</div>
+                 </div>
+                 <div>
+                   <span className="text-base-content/60">Poids:</span>
+                   <div className="font-medium">{shipment.total_weight} kg</div>
+                 </div>
+               </div>
+               <div className="mt-2 text-xs text-base-content/60">
+                 Créé le {shipment.date_created}
+               </div>
+             </div>
+
+             {/* Action buttons */}
+             <div className="card-actions justify-end pt-2 border-t">
+               <div className="flex flex-wrap gap-2">
+                 <button
+                   className="btn btn-ghost btn-sm btn-circle"
+                   title="Voir détails & copier numéro"
+                   onClick={() => {
+                     const copyToClipboard = (text: string) => {
+                       if (navigator.clipboard && window.isSecureContext) {
+                         navigator.clipboard.writeText(text).then(() => {
+                           showCopyNotification();
+                         }).catch(() => {
+                           fallbackCopy(text);
+                         });
+                       } else {
+                         fallbackCopy(text);
+                       }
+                     };
+
+                     const fallbackCopy = (text: string) => {
+                       const textArea = document.createElement('textarea');
+                       textArea.value = text;
+                       document.body.appendChild(textArea);
+                       textArea.select();
+                       document.execCommand('copy');
+                       document.body.removeChild(textArea);
+                       showCopyNotification();
+                     };
+
+                     const showCopyNotification = () => {
+                       setNotification({type: 'success', message: 'Numéro copié !'});
+                       setTimeout(() => setNotification(null), 1500);
+                     };
+
+                     copyToClipboard(shipment.tracking_number);
+                   }}
+                 >
+                   <EyeIcon size={18} />
+                 </button>
+                 <button
+                   className="btn btn-ghost btn-sm btn-circle"
+                   title="Historique de suivi"
+                   onClick={() => openTrackingModal(shipment)}
+                 >
+                   <HistoryIcon size={18} />
+                 </button>
+                 <button
+                   className="btn btn-ghost btn-sm btn-circle"
+                   title="Modifier"
+                   onClick={() => openEditModal(shipment)}
+                 >
+                   <PencilIcon size={18} />
+                 </button>
+                 {shipment.status === 'pending_confirmation' && (
+                   <>
+                     <button
+                       className="btn btn-success btn-sm btn-circle"
+                       title="Confirmer"
+                       onClick={() => handleConfirmShipment(shipment.id)}
+                     >
+                       ✓
+                     </button>
+                     <button
+                       className="btn btn-error btn-sm btn-circle"
+                       title="Rejeter"
+                       onClick={() => handleRejectShipment(shipment.id)}
+                     >
+                       ✗
+                     </button>
+                   </>
+                 )}
+                 <button
+                   className="btn btn-ghost btn-sm btn-circle text-error"
+                   title="Supprimer"
+                   onClick={() => handleDeleteShipment(shipment.id)}
+                 >
+                   <TrashIcon size={18} />
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+       ))}
+       {filteredShipments.length === 0 && (
+         <div className="card bg-base-100 shadow-lg">
+           <div className="card-body text-center py-12">
+             <div className="text-6xl mb-4">📦</div>
+             <h3 className="font-bold text-lg mb-2">Aucun colis trouvé</h3>
+             <p className="text-base-content/60">Essayez de modifier vos critères de recherche</p>
+           </div>
+         </div>
+       )}
+     </div>
       <div className="card-actions justify-between items-center p-4">
         <div className="text-sm text-base-content/70">
           Showing {paginatedShipments.length} of {filteredShipments.length} shipments (Page {currentPage} of {totalPages})

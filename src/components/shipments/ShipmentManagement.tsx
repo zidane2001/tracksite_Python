@@ -6,6 +6,7 @@ import { AddressAutocomplete } from './AddressAutocomplete';
 import { toCsv, downloadCsv } from '../../utils/csv';
 import { shipmentsApi, Shipment, API_BASE_URL } from '../../utils/api';
 import { TrackingHistoryManagement } from './TrackingHistoryManagement';
+import { parseCoordinates, calculateDistance, calculateDeliveryTime, Coordinates } from '../../utils/coordinates';
 export const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,6 +19,9 @@ export const ShipmentManagement = () => {
   const [newPackages, setNewPackages] = useState<PackageInput[]>([{ weightKg: 0, lengthCm: 0, widthCm: 0, heightCm: 0, quantity: 1 }]);
   const [newOrigin, setNewOrigin] = useState('');
   const [newDestination, setNewDestination] = useState('');
+  const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
+  const [destinationCoords, setDestinationCoords] = useState<Coordinates | null>(null);
+  const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
   const [newShipperName, setNewShipperName] = useState('');
   const [newShipperAddress, setNewShipperAddress] = useState('');
   const [newShipperPhone, setNewShipperPhone] = useState('');
@@ -152,6 +156,25 @@ export const ShipmentManagement = () => {
       return;
     }
 
+    // Parse coordinates
+    const originParsed = parseCoordinates(newOrigin);
+    const destinationParsed = parseCoordinates(newDestination);
+
+    if (!originParsed || !destinationParsed) {
+      setNotification({type: 'error', message: 'Format de coordonnées invalide. Utilisez le format: 12°46\'50.4"N 77°29\'50.2"E ou 12.780667, 77.497278'});
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+
+    setOriginCoords(originParsed);
+    setDestinationCoords(destinationParsed);
+
+    // Calculate distance and delivery time
+    const distance = calculateDistance(originParsed, destinationParsed);
+    setCalculatedDistance(distance);
+    const deliveryTimeHours = calculateDeliveryTime(distance);
+    const expectedDeliveryDate = new Date(Date.now() + deliveryTimeHours * 60 * 60 * 1000).toISOString().split('T')[0];
+
     const { taxedWeightKg } = calculateShipmentWeights(newPackages, divisor);
 
     try {
@@ -189,6 +212,9 @@ export const ShipmentManagement = () => {
       setNewPackages([{ weightKg: 0, lengthCm: 0, widthCm: 0, heightCm: 0, quantity: 1 }]);
       setNewOrigin('');
       setNewDestination('');
+      setOriginCoords(null);
+      setDestinationCoords(null);
+      setCalculatedDistance(null);
       setNewShipperName('');
       setNewShipperAddress('');
       setNewShipperPhone('');
@@ -233,7 +259,7 @@ export const ShipmentManagement = () => {
         quantity: newQuantity,
         payment_mode: newPaymentMode,
         total_freight: newTotalFreight,
-        expected_delivery: newExpectedDelivery,
+        expected_delivery: expectedDeliveryDate,
         departure_time: newDepartureTime,
         pickup_date: newPickupDate,
         pickup_time: newPickupTime,
@@ -571,14 +597,35 @@ export const ShipmentManagement = () => {
           <div className="py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm text-gray-700 mb-1">Origin</label>
-                <AddressAutocomplete placeholder="e.g. Paris, FR" value={newOrigin} onChange={setNewOrigin} />
+                <label className="block text-sm text-gray-700 mb-1">Origin (Coordinates)</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded-lg text-sm md:text-base"
+                  value={newOrigin}
+                  onChange={(e) => setNewOrigin(e.target.value)}
+                  placeholder="Use format: 12°46'50.4N 77°29'50.2E or 12.780667, 77.497278"
+                />
               </div>
               <div>
-                <label className="block text-sm text-gray-700 mb-1">Destination</label>
-                <AddressAutocomplete placeholder="e.g. Lyon, FR" value={newDestination} onChange={setNewDestination} />
+                <label className="block text-sm text-gray-700 mb-1">Destination (Coordinates)</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded-lg text-sm md:text-base"
+                  value={newDestination}
+                  onChange={(e) => setNewDestination(e.target.value)}
+                  placeholder="e.g. 12°46'50.4N 77°29'50.2E or 12.780667, 77.497278"
+                />
               </div>
             </div>
+            {calculatedDistance && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-sm text-blue-800">
+                  <strong>Distance calculée:</strong> {calculatedDistance.toFixed(2)} km
+                  <br />
+                  <strong>Livraison estimée:</strong> {new Date(Date.now() + (calculatedDistance ? calculateDeliveryTime(calculatedDistance) : 0) * 60 * 60 * 1000).toISOString().split('T')[0]}
+                </div>
+              </div>
+            )}
 
             {/* Shipper Information */}
             <div className="mb-4 md:mb-6">

@@ -781,7 +781,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newOrigin}
                     onChange={(e) => setNewOrigin(e.target.value)}
                     placeholder="12°46'50.4N 77°29'50.2E"
@@ -793,7 +793,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newDestination}
                     onChange={(e) => setNewDestination(e.target.value)}
                     placeholder="12°46'50.4N 77°29'50.2E"
@@ -828,7 +828,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newShipperName}
                     onChange={(e) => setNewShipperName(e.target.value)}
                     placeholder="Jean Dupont"
@@ -841,7 +841,7 @@ export const ShipmentManagement = () => {
                     </label>
                     <input
                       type="tel"
-                      className="input input-bordered input-sm"
+                      className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                       value={newShipperPhone}
                       onChange={(e) => setNewShipperPhone(e.target.value)}
                       placeholder="+33 6 12 34 56 78"
@@ -853,7 +853,7 @@ export const ShipmentManagement = () => {
                     </label>
                     <input
                       type="email"
-                      className="input input-bordered input-sm"
+                      className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                       value={newShipperEmail}
                       onChange={(e) => setNewShipperEmail(e.target.value)}
                       placeholder="jean@email.com"
@@ -878,7 +878,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newReceiverName}
                     onChange={(e) => setNewReceiverName(e.target.value)}
                     placeholder="Marie Martin"
@@ -891,7 +891,7 @@ export const ShipmentManagement = () => {
                     </label>
                     <input
                       type="tel"
-                      className="input input-bordered input-sm"
+                      className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                       value={newReceiverPhone}
                       onChange={(e) => setNewReceiverPhone(e.target.value)}
                       placeholder="+33 6 12 34 56 78"
@@ -903,7 +903,7 @@ export const ShipmentManagement = () => {
                     </label>
                     <input
                       type="email"
-                      className="input input-bordered input-sm"
+                      className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                       value={newReceiverEmail}
                       onChange={(e) => setNewReceiverEmail(e.target.value)}
                       placeholder="marie@email.com"
@@ -928,7 +928,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newProduct}
                     onChange={(e) => setNewProduct(e.target.value)}
                     placeholder="Documents, Électronique..."
@@ -941,7 +941,7 @@ export const ShipmentManagement = () => {
                   <input
                     type="number"
                     min="1"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newQuantity}
                     onChange={(e) => setNewQuantity(parseInt(e.target.value) || 1)}
                   />
@@ -951,7 +951,7 @@ export const ShipmentManagement = () => {
                     <span className="label-text font-medium">Paiement</span>
                   </label>
                   <select
-                    className="select select-bordered select-sm"
+                    className="select select-bordered select-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newPaymentMode}
                     onChange={(e) => setNewPaymentMode(e.target.value)}
                   >
@@ -959,6 +959,7 @@ export const ShipmentManagement = () => {
                     <option value="Card">💳 Carte</option>
                     <option value="Transfer">🏦 Virement</option>
                     <option value="Check">📄 Chèque</option>
+                    <option value="Crypto">₿ Cryptomonnaie</option>
                   </select>
                 </div>
                 <div className="form-control">
@@ -969,7 +970,7 @@ export const ShipmentManagement = () => {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newTotalFreight}
                     onChange={(e) => setNewTotalFreight(parseFloat(e.target.value) || 0)}
                   />
@@ -992,7 +993,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="date"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newPickupDate}
                     onChange={(e) => setNewPickupDate(e.target.value)}
                   />
@@ -1003,7 +1004,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="time"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newPickupTime}
                     onChange={(e) => setNewPickupTime(e.target.value)}
                   />
@@ -1014,7 +1015,7 @@ export const ShipmentManagement = () => {
                   </label>
                   <input
                     type="datetime-local"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered input-sm border-2 border-purple-300 focus:border-purple-500"
                     value={newDepartureTime}
                     onChange={(e) => setNewDepartureTime(e.target.value)}
                   />
@@ -1136,14 +1137,14 @@ export const ShipmentManagement = () => {
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
               <button
                 type="button"
-                className="btn btn-outline btn-error order-2 sm:order-1"
+                className="btn btn-outline btn-error order-2 sm:order-1 border-2 border-purple-500 text-purple-600 hover:bg-purple-50"
                 onClick={() => setIsAddOpen(false)}
               >
                 ❌ Annuler
               </button>
               <button
                 type="button"
-                className="btn btn-success order-1 sm:order-2"
+                className="btn btn-primary order-1 sm:order-2 bg-purple-600 hover:bg-purple-700 border-2 border-purple-600"
                 onClick={handleCreateShipment}
               >
                 🚀 Créer le Colis

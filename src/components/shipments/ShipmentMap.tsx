@@ -14,6 +14,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   const [currentPackagePosition, setCurrentPackagePosition] = useState<{ lat: number; lng: number } | null>(null);
   const [progress, setProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [startTime] = useState(Date.now());
 
   useEffect(() => {
     // Parse coordinates from shipment
@@ -23,23 +24,42 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     if (origin && dest) {
       setOriginCoords({ lat: origin.latitude, lng: origin.longitude });
       setDestCoords({ lat: dest.latitude, lng: dest.longitude });
+    }
+  }, [shipment]);
 
-      // Calculate automatic progress based on time and status
-      const currentProgress = calculateTimeBasedProgress(shipment, origin, dest);
+  // Real-time update every second
+  useEffect(() => {
+    if (!originCoords || !destCoords) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsedSeconds = (now - startTime) / 1000;
+
+      // Calculate progress based on real time (simulate movement)
+      const totalDuration = calculateDeliveryTime(calculateDistance(
+        { latitude: originCoords.lat, longitude: originCoords.lng },
+        { latitude: destCoords.lat, longitude: destCoords.lng }
+      )) * 3600; // Convert hours to seconds
+
+      // For demo purposes, make it move faster (every 10 seconds = 1% progress)
+      // In real app, this would be based on actual shipment progress
+      const progressIncrement = (elapsedSeconds / 10) * 0.5; // 0.5% every 10 seconds
+      const currentProgress = Math.min(95, progressIncrement); // Max 95% until actually delivered
+
       setProgress(currentProgress);
 
       // Calculate current package position
-      const currentLat = origin.latitude + (dest.latitude - origin.latitude) * (currentProgress / 100);
-      const currentLng = origin.longitude + (dest.longitude - origin.longitude) * (currentProgress / 100);
+      const currentLat = originCoords.lat + (destCoords.lat - originCoords.lat) * (currentProgress / 100);
+      const currentLng = originCoords.lng + (destCoords.lng - originCoords.lng) * (currentProgress / 100);
       setCurrentPackagePosition({ lat: currentLat, lng: currentLng });
 
       // Calculate time remaining
-      const totalTime = calculateDeliveryTime(calculateDistance(origin, dest));
-      const elapsedTime = (currentProgress / 100) * totalTime;
-      const remainingHours = Math.max(0, totalTime - elapsedTime);
-      setTimeRemaining(formatTimeRemaining(remainingHours));
-    }
-  }, [shipment]);
+      const remainingSeconds = Math.max(0, totalDuration - elapsedSeconds);
+      setTimeRemaining(formatTimeRemaining(remainingSeconds / 3600)); // Convert back to hours
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, [originCoords, destCoords, startTime]);
 
   const calculateTimeBasedProgress = (shipment: Shipment, origin: any, dest: any): number => {
     const now = new Date();
@@ -200,15 +220,16 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
 
         {/* Moving Package */}
         <div
-          className="absolute w-5 h-5 bg-yellow-400 rounded-full border-2 border-white shadow-xl flex items-center justify-center animate-pulse"
+          className="absolute w-6 h-6 bg-yellow-400 rounded-full border-3 border-white shadow-2xl flex items-center justify-center animate-bounce"
           style={{
-            left: `${packagePixel.x - 10}px`,
-            top: `${packagePixel.y - 10}px`,
+            left: `${packagePixel.x - 12}px`,
+            top: `${packagePixel.y - 12}px`,
             zIndex: 5,
-            transition: 'all 2s ease-in-out'
+            transition: 'all 1s ease-in-out',
+            transform: 'translate(-50%, -50%) scale(1.1)'
           }}
         >
-          <span className="text-xs">📦</span>
+          <span className="text-sm animate-pulse">🚚</span>
         </div>
         <div className="absolute bg-yellow-100 border border-yellow-300 px-2 py-1 rounded shadow-lg text-xs font-medium"
              style={{

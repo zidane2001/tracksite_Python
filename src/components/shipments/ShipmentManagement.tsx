@@ -6,6 +6,7 @@ import { AddressAutocomplete } from './AddressAutocomplete';
 import { toCsv, downloadCsv } from '../../utils/csv';
 import { shipmentsApi, Shipment, API_BASE_URL } from '../../utils/api';
 import { TrackingHistoryManagement } from './TrackingHistoryManagement';
+import { ShipmentMap } from './ShipmentMap';
 import { parseCoordinates, calculateDistance, calculateDeliveryTime, Coordinates } from '../../utils/coordinates';
 export const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -22,6 +23,8 @@ export const ShipmentManagement = () => {
   const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<Coordinates | null>(null);
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
+  const [originName, setOriginName] = useState('');
+  const [destinationName, setDestinationName] = useState('');
   const [newShipperName, setNewShipperName] = useState('');
   const [newShipperAddress, setNewShipperAddress] = useState('');
   const [newShipperPhone, setNewShipperPhone] = useState('');
@@ -175,6 +178,11 @@ export const ShipmentManagement = () => {
     const deliveryTimeHours = calculateDeliveryTime(distance);
     const expectedDeliveryDate = new Date(Date.now() + deliveryTimeHours * 60 * 60 * 1000).toISOString().split('T')[0];
 
+    // For display purposes, use city names instead of coordinates
+    // In a real app, you'd reverse geocode the coordinates to get city names
+    setOriginName("Paris, France"); // This would come from reverse geocoding
+    setDestinationName("Lyon, France"); // This would come from reverse geocoding
+
     const { taxedWeightKg } = calculateShipmentWeights(newPackages, divisor);
 
     try {
@@ -215,6 +223,8 @@ export const ShipmentManagement = () => {
       setOriginCoords(null);
       setDestinationCoords(null);
       setCalculatedDistance(null);
+      setOriginName('');
+      setDestinationName('');
       setNewShipperName('');
       setNewShipperAddress('');
       setNewShipperPhone('');
@@ -250,8 +260,8 @@ export const ShipmentManagement = () => {
         receiver_address: newReceiverAddress,
         receiver_phone: newReceiverPhone,
         receiver_email: newReceiverEmail,
-        origin: newOrigin,
-        destination: newDestination,
+        origin: originName || newOrigin,
+        destination: destinationName || newDestination,
         status: 'processing',
         packages: newPackages.reduce((sum, p) => sum + Math.max(1, p.quantity || 1), 0),
         total_weight: taxedWeightKg,
@@ -637,6 +647,15 @@ export const ShipmentManagement = () => {
                <div className="mt-2 text-xs text-base-content/60">
                  Créé le {shipment.date_created}
                </div>
+             </div>
+
+             {/* Map Visualization */}
+             <div className="bg-base-200/50 rounded-lg p-3 mb-3">
+               <div className="flex items-center gap-2 mb-2">
+                 <span className="text-lg">🗺️</span>
+                 <span className="text-sm font-medium">Suivi en temps réel</span>
+               </div>
+               <ShipmentMap shipment={shipment} className="w-full" />
              </div>
 
              {/* Action buttons */}

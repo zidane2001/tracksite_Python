@@ -4,6 +4,7 @@ import { trackingApi, TrackingResult } from '../utils/api';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { ShipmentMap } from '../components/shipments/ShipmentMap';
 
 // Fix for default marker icon in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -307,40 +308,19 @@ export const TrackingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Map Section */}
+        {/* Real-Time Map Section */}
         <div className="card bg-base-100 shadow-lg overflow-hidden">
           <div className="card-body border-b">
             <h3 className="card-title flex items-center">
               <MapIcon className="h-5 w-5 mr-2" />
-              Suivi de l'itinéraire
+              Suivi en temps réel - Mouvement GPS
             </h3>
+            <p className="text-sm text-base-content/70">
+              Le colis se déplace automatiquement à 80 km/h entre le point de départ et d'arrivée
+            </p>
           </div>
           <div className="card-body">
-            <div className="h-96 rounded-lg overflow-hidden border">
-              <MapContainer
-                center={[48.8566, 2.3522]}
-                zoom={5}
-                style={{ height: '100%', width: '100%' }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                {trackingResult.history
-                  .filter(step => step.latitude && step.longitude)
-                  .map((step, index) => (
-                    <Marker key={index} position={[step.latitude!, step.longitude!]}>
-                      <Popup>
-                        <div>
-                          <p className="font-medium">{step.location}</p>
-                          <p className="text-sm text-base-content/70">{step.status}</p>
-                          <p className="text-xs text-base-content/60">{step.date_time}</p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-              </MapContainer>
-            </div>
+            <ShipmentMap shipment={trackingResult.shipment} className="w-full" />
           </div>
         </div>
       </div>}

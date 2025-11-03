@@ -189,7 +189,7 @@ export const TrackingPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-base-content/60">Origin</p>
-                <p className="font-medium text-base-content">{trackingResult.shipment.origin}</p>
+                <p className="font-medium text-base-content">{trackingResult.shipment.shipper_address}</p>
               </div>
               <div>
                 <p className="text-sm text-base-content/60">Status</p>
@@ -197,7 +197,7 @@ export const TrackingPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-base-content/60">Destination</p>
-                <p className="font-medium text-base-content">{trackingResult.shipment.destination}</p>
+                <p className="font-medium text-base-content">{trackingResult.shipment.receiver_address}</p>
               </div>
             </div>
           </div>

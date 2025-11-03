@@ -340,7 +340,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
           <Marker position={[originCoords.lat, originCoords.lng]} icon={houseIcon}>
             <Popup>
               <strong>📍 Départ</strong><br />
-              {shipment.origin}
+              {shipment.shipper_address}
             </Popup>
           </Marker>
 
@@ -348,7 +348,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
           <Marker position={[destCoords.lat, destCoords.lng]} icon={targetIcon}>
             <Popup>
               <strong>🎯 Arrivée</strong><br />
-              {shipment.destination}
+              {shipment.receiver_address}
             </Popup>
           </Marker>
 

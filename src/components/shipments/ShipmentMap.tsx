@@ -27,7 +27,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     }
   }, [shipment]);
 
-  // Real-time update every second based on GPS distance and 80 km/h speed
+  // Real-time update every second based on actual shipment times and distance
   useEffect(() => {
     if (!originCoords || !destCoords) return;
 
@@ -36,17 +36,43 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       { latitude: destCoords.lat, longitude: destCoords.lng }
     );
 
-    // Calculate total time at 80 km/h: time = distance / speed
-    const totalTimeHours = totalDistance / 80; // 80 km/h speed
-    const totalTimeSeconds = totalTimeHours * 3600; // Convert to seconds
+    // Calculate speed based on shipment times: speed = distance / time
+    let calculatedSpeed = 80; // Default fallback
+    let transportMethod = 'truck';
+
+    if (shipment.expected_delivery && shipment.departure_time) {
+      try {
+        const departureTime = new Date(shipment.departure_time);
+        const expectedDelivery = new Date(shipment.expected_delivery);
+        const totalTimeHours = (expectedDelivery.getTime() - departureTime.getTime()) / (1000 * 60 * 60);
+
+        if (totalTimeHours > 0) {
+          calculatedSpeed = totalDistance / totalTimeHours;
+
+          // Determine transport method based on speed
+          if (calculatedSpeed > 800) {
+            transportMethod = 'plane';
+          } else if (calculatedSpeed > 50) {
+            transportMethod = 'truck';
+          } else if (calculatedSpeed > 30) {
+            transportMethod = 'van';
+          } else {
+            transportMethod = 'ship';
+          }
+        }
+      } catch (error) {
+        console.warn('Error calculating speed from shipment times:', error);
+      }
+    }
+
+    const totalTimeSeconds = (totalDistance / calculatedSpeed) * 3600; // Convert hours to seconds
 
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsedSeconds = (now - startTime) / 1000;
 
-      // Calculate progress based on actual time and distance
-      // Distance traveled = speed * time = 80 km/h * (elapsedSeconds / 3600) hours
-      const distanceTraveled = (80 * elapsedSeconds) / 3600; // km
+      // Calculate progress based on actual speed and time
+      const distanceTraveled = (calculatedSpeed * elapsedSeconds) / 3600; // km
       const currentProgress = Math.min(99, (distanceTraveled / totalDistance) * 100);
 
       setProgress(currentProgress);
@@ -56,14 +82,14 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       const currentLng = originCoords.lng + (destCoords.lng - originCoords.lng) * (currentProgress / 100);
       setCurrentPackagePosition({ lat: currentLat, lng: currentLng });
 
-      // Calculate time remaining based on remaining distance
+      // Calculate time remaining based on remaining distance and actual speed
       const remainingDistance = Math.max(0, totalDistance - distanceTraveled);
-      const remainingTimeHours = remainingDistance / 80;
+      const remainingTimeHours = remainingDistance / calculatedSpeed;
       setTimeRemaining(formatTimeRemaining(remainingTimeHours));
     }, 1000); // Update every second
 
     return () => clearInterval(interval);
-  }, [originCoords, destCoords, startTime]);
+  }, [originCoords, destCoords, startTime, shipment]);
 
   const calculateTimeBasedProgress = (shipment: Shipment, origin: any, dest: any): number => {
     const now = new Date();
@@ -233,7 +259,32 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
             transform: 'translate(-50%, -50%) scale(1.1)'
           }}
         >
-          <span className="text-sm animate-pulse">🚚</span>
+          <span className="text-sm animate-pulse">
+            {(() => {
+              // Dynamic transport icon based on calculated speed
+              let transportIcon = '🚚'; // Default truck
+              try {
+                if (shipment.expected_delivery && shipment.departure_time) {
+                  const departureTime = new Date(shipment.departure_time);
+                  const expectedDelivery = new Date(shipment.expected_delivery);
+                  const totalTimeHours = (expectedDelivery.getTime() - departureTime.getTime()) / (1000 * 60 * 60);
+                  const totalDistance = calculateDistance(
+                    { latitude: originCoords.lat, longitude: originCoords.lng },
+                    { latitude: destCoords.lat, longitude: destCoords.lng }
+                  );
+                  const calculatedSpeed = totalDistance / totalTimeHours;
+
+                  if (calculatedSpeed > 800) transportIcon = '✈️';
+                  else if (calculatedSpeed > 50) transportIcon = '🚚';
+                  else if (calculatedSpeed > 30) transportIcon = '🚐';
+                  else transportIcon = '🚢';
+                }
+              } catch (error) {
+                // Keep default icon on error
+              }
+              return transportIcon;
+            })()}
+          </span>
         </div>
         <div className="absolute bg-yellow-100 border border-yellow-300 px-2 py-1 rounded shadow-lg text-xs font-medium"
              style={{
@@ -241,7 +292,30 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
                top: `${packagePixel.y - 30}px`,
                zIndex: 6
              }}>
-          🚚 En transit
+          {(() => {
+            // Dynamic transport method text
+            let transportText = '🚚 Camion';
+            try {
+              if (shipment.expected_delivery && shipment.departure_time) {
+                const departureTime = new Date(shipment.departure_time);
+                const expectedDelivery = new Date(shipment.expected_delivery);
+                const totalTimeHours = (expectedDelivery.getTime() - departureTime.getTime()) / (1000 * 60 * 60);
+                const totalDistance = calculateDistance(
+                  { latitude: originCoords.lat, longitude: originCoords.lng },
+                  { latitude: destCoords.lat, longitude: destCoords.lng }
+                );
+                const calculatedSpeed = totalDistance / totalTimeHours;
+
+                if (calculatedSpeed > 800) transportText = '✈️ Avion';
+                else if (calculatedSpeed > 50) transportText = '🚚 Camion';
+                else if (calculatedSpeed > 30) transportText = '🚐 Fourgonnette';
+                else transportText = '🚢 Bateau';
+              }
+            } catch (error) {
+              // Keep default text on error
+            }
+            return transportText;
+          })()}
         </div>
 
         {/* Progress Indicator */}
@@ -268,6 +342,34 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
               const traveled = (progress / 100) * totalDist;
               return `${traveled.toFixed(1)} / ${totalDist.toFixed(1)} km`;
             })()}</span>
+          </div>
+          <div className="text-xs text-gray-600 mt-1 text-center">
+            {(() => {
+              // Display calculated speed and transport method
+              try {
+                if (shipment.expected_delivery && shipment.departure_time) {
+                  const departureTime = new Date(shipment.departure_time);
+                  const expectedDelivery = new Date(shipment.expected_delivery);
+                  const totalTimeHours = (expectedDelivery.getTime() - departureTime.getTime()) / (1000 * 60 * 60);
+                  const totalDistance = calculateDistance(
+                    { latitude: originCoords.lat, longitude: originCoords.lng },
+                    { latitude: destCoords.lat, longitude: destCoords.lng }
+                  );
+                  const calculatedSpeed = totalDistance / totalTimeHours;
+
+                  let transportName = 'Camion';
+                  if (calculatedSpeed > 800) transportName = 'Avion';
+                  else if (calculatedSpeed > 50) transportName = 'Camion';
+                  else if (calculatedSpeed > 30) transportName = 'Fourgonnette';
+                  else transportName = 'Bateau';
+
+                  return `${transportName} - ${calculatedSpeed.toFixed(0)} km/h`;
+                }
+              } catch (error) {
+                // Return default on error
+              }
+              return 'Camion - 80 km/h';
+            })()}
           </div>
         </div>
       </div>

@@ -198,15 +198,26 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         setDistanceTraveled(0);
         setTimeRemaining('Non commencé');
       } else {
-        // Override avec WebSocket si update reçu
-        if (lastUpdate) {
+        // Priorité au backend progress, puis WebSocket, puis calcul local
+        if (backendProgress) {
+          // Utiliser le progrès du backend (cross-device sync)
+          progress = backendProgress.progress;
+          if (backendProgress.current_lat && backendProgress.current_lng) {
+            setCurrentPosition({ lat: backendProgress.current_lat, lng: backendProgress.current_lng });
+          } else {
+            const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
+            const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
+            setCurrentPosition({ lat, lng });
+          }
+        } else if (lastUpdate) {
+          // Override avec WebSocket si update reçu
           progress = Math.max(progress, lastUpdate.progress);
           const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
           const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
           setCurrentPosition({ lat, lng });
           elapsedMs = lastUpdate.timestamp - startTime;  // Sync temps avec serveur
         } else {
-          // Interpolation locale si pas d'update WS
+          // Interpolation locale si pas d'update WS ni backend
           const elapsedHours = elapsedMs / (1000 * 60 * 60);
           const traveled = Math.min(calculatedSpeed * elapsedHours, totalDistance);
           progress = (traveled / totalDistance) * 100;
@@ -216,11 +227,11 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
           setDistanceTraveled(traveled);
         }
 
-        // Persist progress
+        // Synchroniser avec localStorage
         setCurrentProgress(Math.min(99.9, progress));
 
-        // Sauvegarder dans le backend pour synchronisation cross-device
-        if (currentPosition) {
+        // Sauvegarder dans le backend pour synchronisation cross-device (seulement si pas déjà chargé du backend)
+        if (currentPosition && !backendProgress) {
           try {
             shipmentProgressApi.update(id, {
               progress: Math.min(99.9, progress),
@@ -262,7 +273,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       cancelAnimationFrame(animationId);
       clearInterval(heartbeatInterval);
     };
-  }, [originCoords, destCoords, totalDistance, calculatedSpeed, lastUpdate, startTime, currentProgress, shipment.pickup_date, shipment.pickup_time]);
+  }, [originCoords, destCoords, totalDistance, calculatedSpeed, lastUpdate, startTime, backendProgress, isLoadingProgress, shipment.pickup_date, shipment.pickup_time]);
 
 
   // Polyline positions (route complète)

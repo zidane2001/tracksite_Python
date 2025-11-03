@@ -68,7 +68,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // États persistés via localStorage (fallback)
-  const [startTime] = usePersistedState<number>(`shipment-${id}-startTime`, (() => {
+  const startTime = useMemo(() => {
     // Utiliser la date de départ si disponible, sinon Date.now()
     if (shipment.pickup_date && shipment.pickup_time) {
       try {
@@ -76,10 +76,12 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         return departureDateTime.getTime();
       } catch (e) {
         console.warn('Invalid pickup date/time, using current time', e);
+        return Date.now();
       }
     }
     return Date.now();
-  })());
+  }, [shipment.pickup_date, shipment.pickup_time]);
+
   const [currentProgress, setCurrentProgress] = usePersistedState<number>(`shipment-${id}-progress`, 0);
   const [currentPosition, setCurrentPosition] = usePersistedState<{ lat: number; lng: number } | null>(
     `shipment-${id}-position`,
@@ -100,8 +102,8 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       try {
         const progress = await shipmentProgressApi.get(id);
         setBackendProgress(progress);
-        // Synchroniser avec localStorage seulement si le progrès du backend est plus récent
-        if (progress.progress > currentProgress) {
+        // Toujours synchroniser avec le backend si disponible (priorité au backend)
+        if (progress.progress >= 0) {
           setCurrentProgress(progress.progress);
           if (progress.current_lat && progress.current_lng) {
             setCurrentPosition({ lat: progress.current_lat, lng: progress.current_lng });
@@ -115,7 +117,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     };
 
     loadBackendProgress();
-  }, [id, currentProgress]);
+  }, [id]);
 
   // WebSocket pour updates live
   const { lastUpdate, readyState, sendHeartbeat } = useShipmentWebSocket(id);
@@ -232,8 +234,8 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         // Synchroniser avec localStorage
         setCurrentProgress(Math.min(99.9, progress));
 
-        // Sauvegarder dans le backend pour synchronisation cross-device seulement si le shipment a commencé et le progrès est supérieur
-        if (currentPosition && hasStarted && (backendProgress === null || progress > backendProgress.progress)) {
+        // Sauvegarder dans le backend pour synchronisation cross-device seulement si le shipment a commencé
+        if (currentPosition && hasStarted) {
           try {
             shipmentProgressApi.update(id, {
               progress: Math.min(99.9, progress),

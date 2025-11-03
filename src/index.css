@@ -4,6 +4,11 @@
 @import 'tailwindcss/utilities';
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
 
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+/* Fix icons pour Leaflet */
+.leaflet-container { height: 100%; }
+
 /* Mobile-first responsive improvements */
 * {
   box-sizing: border-box;

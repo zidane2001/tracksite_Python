@@ -179,7 +179,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
 
   // Animation en temps réel + intégration WebSocket
   useEffect(() => {
-    if (!originCoords || !destCoords || totalDistance === 0) return;
+    if (!originCoords || !destCoords || totalDistance === 0 || isLoadingProgress) return;
 
     let animationId: number;
     const animate = () => {
@@ -230,13 +230,16 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         // Synchroniser avec localStorage
         setCurrentProgress(Math.min(99.9, progress));
 
-        // Sauvegarder dans le backend pour synchronisation cross-device (seulement si pas déjà chargé du backend)
-        if (currentPosition && !backendProgress) {
+        // Sauvegarder dans le backend pour synchronisation cross-device
+        if (currentPosition) {
           try {
             shipmentProgressApi.update(id, {
               progress: Math.min(99.9, progress),
               current_lat: currentPosition.lat,
               current_lng: currentPosition.lng,
+            }).then(updatedProgress => {
+              // Mettre à jour le backendProgress local après sauvegarde
+              setBackendProgress(updatedProgress);
             }).catch(error => console.warn('Failed to save progress to backend:', error));
           } catch (error) {
             console.warn('Failed to update backend progress:', error);

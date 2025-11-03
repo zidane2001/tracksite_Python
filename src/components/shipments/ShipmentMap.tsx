@@ -58,7 +58,18 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   const mapRef = useRef<L.Map>(null);
 
   // États persistés via localStorage
-  const [startTime] = usePersistedState<number>(`shipment-${id}-startTime`, Date.now());
+  const [startTime] = usePersistedState<number>(`shipment-${id}-startTime`, (() => {
+    // Utiliser la date de départ si disponible, sinon Date.now()
+    if (shipment.pickup_date && shipment.pickup_time) {
+      try {
+        const departureDateTime = new Date(`${shipment.pickup_date}T${shipment.pickup_time}`);
+        return departureDateTime.getTime();
+      } catch (e) {
+        console.warn('Invalid pickup date/time, using current time', e);
+      }
+    }
+    return Date.now();
+  })());
   const [currentProgress, setCurrentProgress] = usePersistedState<number>(`shipment-${id}-progress`, 0);
   const [currentPosition, setCurrentPosition] = usePersistedState<{ lat: number; lng: number } | null>(
     `shipment-${id}-position`,
@@ -145,31 +156,43 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       let elapsedMs = now - startTime;
       let progress = currentProgress;
 
-      // Override avec WebSocket si update reçu
-      if (lastUpdate) {
-        progress = Math.max(progress, lastUpdate.progress);
-        const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
-        const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
-        setCurrentPosition({ lat, lng });
-        elapsedMs = lastUpdate.timestamp - startTime;  // Sync temps avec serveur
+      // Vérifier si le shipment a déjà commencé (basé sur la date de départ)
+      const hasStarted = shipment.pickup_date && shipment.pickup_time &&
+        new Date(`${shipment.pickup_date}T${shipment.pickup_time}`).getTime() <= now;
+
+      if (!hasStarted) {
+        // Le shipment n'a pas encore commencé, rester à 0%
+        progress = 0;
+        setCurrentPosition(originCoords);
+        setDistanceTraveled(0);
+        setTimeRemaining('Non commencé');
       } else {
-        // Interpolation locale si pas d'update WS
-        const elapsedHours = elapsedMs / (1000 * 60 * 60);
-        const traveled = Math.min(calculatedSpeed * elapsedHours, totalDistance);
-        progress = (traveled / totalDistance) * 100;
-        const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
-        const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
-        setCurrentPosition({ lat, lng });
-        setDistanceTraveled(traveled);
+        // Override avec WebSocket si update reçu
+        if (lastUpdate) {
+          progress = Math.max(progress, lastUpdate.progress);
+          const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
+          const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
+          setCurrentPosition({ lat, lng });
+          elapsedMs = lastUpdate.timestamp - startTime;  // Sync temps avec serveur
+        } else {
+          // Interpolation locale si pas d'update WS
+          const elapsedHours = elapsedMs / (1000 * 60 * 60);
+          const traveled = Math.min(calculatedSpeed * elapsedHours, totalDistance);
+          progress = (traveled / totalDistance) * 100;
+          const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * (progress / 100);
+          const lng = originCoords.lng + (destCoords.lng - originCoords.lng) * (progress / 100);
+          setCurrentPosition({ lat, lng });
+          setDistanceTraveled(traveled);
+        }
+
+        // Persist progress
+        setCurrentProgress(Math.min(99.9, progress));
+
+        // Temps restant
+        const remainingDistance = totalDistance - (progress / 100) * totalDistance;
+        const remainingHours = remainingDistance / calculatedSpeed;
+        setTimeRemaining(formatTimeRemaining(remainingHours));
       }
-
-      // Persist progress
-      setCurrentProgress(Math.min(99.9, progress));
-
-      // Temps restant
-      const remainingDistance = totalDistance - (progress / 100) * totalDistance;
-      const remainingHours = remainingDistance / calculatedSpeed;
-      setTimeRemaining(formatTimeRemaining(remainingHours));
 
       // Zoom automatique pour montrer tout le trajet (départ, position actuelle, arrivée)
       if (mapRef.current && originCoords && destCoords) {
@@ -195,7 +218,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       cancelAnimationFrame(animationId);
       clearInterval(heartbeatInterval);
     };
-  }, [originCoords, destCoords, totalDistance, calculatedSpeed, lastUpdate, startTime, currentProgress]);
+  }, [originCoords, destCoords, totalDistance, calculatedSpeed, lastUpdate, startTime, currentProgress, shipment.pickup_date, shipment.pickup_time]);
 
 
   // Polyline positions (route complète)

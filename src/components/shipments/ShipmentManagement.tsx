@@ -172,10 +172,27 @@ export const ShipmentManagement = () => {
     setOriginCoords(originParsed);
     setDestinationCoords(destinationParsed);
 
-    // Calculate distance and delivery time
+    // Calculate distance and delivery time based on user input
     const distance = calculateDistance(originParsed, destinationParsed);
     setCalculatedDistance(distance);
-    const deliveryTimeHours = calculateDeliveryTime(distance);
+
+    // Calculate speed based on user-provided departure and arrival times
+    let calculatedSpeed = 80; // default fallback
+    if (newPickupDate && newPickupTime && newDepartureTime) {
+      try {
+        const departureDateTime = new Date(`${newPickupDate}T${newPickupTime}`);
+        const arrivalDateTime = new Date(newDepartureTime);
+        const travelTimeHours = (arrivalDateTime.getTime() - departureDateTime.getTime()) / (1000 * 60 * 60);
+        if (travelTimeHours > 0 && distance > 0) {
+          calculatedSpeed = distance / travelTimeHours;
+        }
+      } catch (e) {
+        console.warn('Error calculating speed:', e);
+      }
+    }
+
+    // Use calculated speed for delivery time estimation
+    const deliveryTimeHours = distance / calculatedSpeed;
     const expectedDeliveryDate = new Date(Date.now() + deliveryTimeHours * 60 * 60 * 1000).toISOString().split('T')[0];
 
     // For display purposes, use city names instead of coordinates
@@ -206,7 +223,7 @@ export const ShipmentManagement = () => {
         quantity: newQuantity,
         payment_mode: newPaymentMode,
         total_freight: newTotalFreight,
-        expected_delivery: newExpectedDelivery,
+        expected_delivery: expectedDeliveryDate,
         departure_time: newDepartureTime,
         pickup_date: newPickupDate,
         pickup_time: newPickupTime,
@@ -269,7 +286,7 @@ export const ShipmentManagement = () => {
         quantity: newQuantity,
         payment_mode: newPaymentMode,
         total_freight: newTotalFreight,
-        expected_delivery: expectedDeliveryDate,
+        expected_delivery: newExpectedDelivery || expectedDeliveryDate,
         departure_time: newDepartureTime,
         pickup_date: newPickupDate,
         pickup_time: newPickupTime,
@@ -825,7 +842,29 @@ export const ShipmentManagement = () => {
                     <span className="text-lg">📏</span>
                     <div className="text-sm">
                       <div className="font-medium">Distance: {calculatedDistance.toFixed(1)} km</div>
-                      <div className="text-xs opacity-75">Livraison estimée: {new Date(Date.now() + (calculatedDistance ? calculateDeliveryTime(calculatedDistance) : 0) * 60 * 60 * 1000).toLocaleDateString()}</div>
+                      <div className="text-xs opacity-75">
+                        {(() => {
+                          let speedText = 'Vitesse calculée: ';
+                          if (newPickupDate && newPickupTime && newDepartureTime) {
+                            try {
+                              const departureDateTime = new Date(`${newPickupDate}T${newPickupTime}`);
+                              const arrivalDateTime = new Date(newDepartureTime);
+                              const travelTimeHours = (arrivalDateTime.getTime() - departureDateTime.getTime()) / (1000 * 60 * 60);
+                              if (travelTimeHours > 0 && calculatedDistance > 0) {
+                                const speed = calculatedDistance / travelTimeHours;
+                                speedText += `${speed.toFixed(1)} km/h`;
+                              } else {
+                                speedText += 'Non calculable';
+                              }
+                            } catch (e) {
+                              speedText += 'Erreur de calcul';
+                            }
+                          } else {
+                            speedText += 'Saisir dates pour calcul';
+                          }
+                          return speedText;
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>

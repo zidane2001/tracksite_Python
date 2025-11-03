@@ -7,7 +7,7 @@ import { toCsv, downloadCsv } from '../../utils/csv';
 import { shipmentsApi, Shipment, API_BASE_URL } from '../../utils/api';
 import { TrackingHistoryManagement } from './TrackingHistoryManagement';
 import { ShipmentMap } from './ShipmentMap';
-import { parseCoordinates, calculateDistance, calculateDeliveryTime, Coordinates } from '../../utils/coordinates';
+import { parseCoordinates, calculateDistance, calculateDeliveryTime, reverseGeocode, Coordinates } from '../../utils/coordinates';
 export const ShipmentManagement = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +23,8 @@ export const ShipmentManagement = () => {
   const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<Coordinates | null>(null);
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
+  const [originLocationName, setOriginLocationName] = useState<string>('');
+  const [destinationLocationName, setDestinationLocationName] = useState<string>('');
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
   const [newShipperName, setNewShipperName] = useState('');
@@ -195,10 +197,20 @@ export const ShipmentManagement = () => {
     const deliveryTimeHours = distance / calculatedSpeed;
     const expectedDeliveryDate = new Date(Date.now() + deliveryTimeHours * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    // For display purposes, use city names instead of coordinates
-    // In a real app, you'd reverse geocode the coordinates to get city names
-    setOriginName("Paris, France"); // This would come from reverse geocoding
-    setDestinationName("Lyon, France"); // This would come from reverse geocoding
+    // Reverse geocode coordinates to get location names
+    try {
+      const [originName, destName] = await Promise.all([
+        reverseGeocode(originParsed),
+        reverseGeocode(destinationParsed)
+      ]);
+      setOriginLocationName(originName);
+      setDestinationLocationName(destName);
+    } catch (error) {
+      console.warn('Failed to reverse geocode locations:', error);
+      // Fallback to coordinates if geocoding fails
+      setOriginLocationName(`${originParsed.latitude.toFixed(4)}, ${originParsed.longitude.toFixed(4)}`);
+      setDestinationLocationName(`${destinationParsed.latitude.toFixed(4)}, ${destinationParsed.longitude.toFixed(4)}`);
+    }
 
     const { taxedWeightKg } = calculateShipmentWeights(newPackages, divisor);
 
@@ -240,8 +252,8 @@ export const ShipmentManagement = () => {
       setOriginCoords(null);
       setDestinationCoords(null);
       setCalculatedDistance(null);
-      setOriginName('');
-      setDestinationName('');
+      setOriginLocationName('');
+      setDestinationLocationName('');
       setNewShipperName('');
       setNewShipperAddress('');
       setNewShipperPhone('');
@@ -277,8 +289,8 @@ export const ShipmentManagement = () => {
         receiver_address: newReceiverAddress,
         receiver_phone: newReceiverPhone,
         receiver_email: newReceiverEmail,
-        origin: originName || newOrigin,
-        destination: destinationName || newDestination,
+        origin: originLocationName || newOrigin,
+        destination: destinationLocationName || newDestination,
         status: 'processing',
         packages: newPackages.reduce((sum, p) => sum + Math.max(1, p.quantity || 1), 0),
         total_weight: taxedWeightKg,

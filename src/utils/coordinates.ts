@@ -96,3 +96,50 @@ export function getTransportMethod(speedKmh: number, distanceKm: number, travelT
 export function formatCoordinates(coords: Coordinates): string {
   return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
 }
+
+// Reverse geocoding function to get location names from coordinates
+export async function reverseGeocode(coords: Coordinates): Promise<string> {
+  try {
+    // Using Nominatim API (OpenStreetMap) for reverse geocoding
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10&addressdetails=1`,
+      {
+        headers: {
+          'User-Agent': 'TracsitePython/1.0'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Reverse geocoding failed');
+    }
+
+    const data = await response.json();
+
+    // Extract meaningful location information
+    if (data && data.display_name) {
+      // Try to get city/state/country in a readable format
+      const address = data.address || {};
+      const city = address.city || address.town || address.village || address.municipality;
+      const state = address.state || address.region;
+      const country = address.country;
+
+      if (city && state && country) {
+        return `${city}, ${state}, ${country}`;
+      } else if (city && country) {
+        return `${city}, ${country}`;
+      } else if (state && country) {
+        return `${state}, ${country}`;
+      } else {
+        // Fallback to a shortened version of display_name
+        const parts = data.display_name.split(', ');
+        return parts.slice(0, 3).join(', '); // Take first 3 parts for readability
+      }
+    }
+
+    return `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`; // Fallback to coordinates
+  } catch (error) {
+    console.warn('Reverse geocoding failed:', error);
+    return `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`; // Fallback to coordinates
+  }
+}

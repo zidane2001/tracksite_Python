@@ -832,8 +832,13 @@ export const ShipmentManagement = () => {
                     className="input input-bordered input-sm border-2 border-black focus:border-gray-600 shadow-sm"
                     value={newOrigin}
                     onChange={(e) => setNewOrigin(e.target.value)}
-                    placeholder="12°46'50.4N 77°29'50.2E"
+                    placeholder="Coordonnées GPS (ex: 40.7128, -74.0060)"
                   />
+                  {originLocationName && (
+                    <div className="mt-1 text-sm text-green-600 font-medium">
+                      📍 {originLocationName}
+                    </div>
+                  )}
                 </div>
                 <div className="form-control">
                   <label className="label">
@@ -844,8 +849,13 @@ export const ShipmentManagement = () => {
                     className="input input-bordered input-sm border-2 border-black focus:border-gray-600 shadow-sm"
                     value={newDestination}
                     onChange={(e) => setNewDestination(e.target.value)}
-                    placeholder="12°46'50.4N 77°29'50.2E"
+                    placeholder="Coordonnées GPS (ex: 40.7128, -74.0060)"
                   />
+                  {destinationLocationName && (
+                    <div className="mt-1 text-sm text-green-600 font-medium">
+                      🎯 {destinationLocationName}
+                    </div>
+                  )}
                 </div>
               </div>
               {calculatedDistance && (

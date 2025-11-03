@@ -100,10 +100,12 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       try {
         const progress = await shipmentProgressApi.get(id);
         setBackendProgress(progress);
-        // Synchroniser avec localStorage
-        setCurrentProgress(progress.progress);
-        if (progress.current_lat && progress.current_lng) {
-          setCurrentPosition({ lat: progress.current_lat, lng: progress.current_lng });
+        // Synchroniser avec localStorage seulement si le progrès du backend est plus récent
+        if (progress.progress > currentProgress) {
+          setCurrentProgress(progress.progress);
+          if (progress.current_lat && progress.current_lng) {
+            setCurrentPosition({ lat: progress.current_lat, lng: progress.current_lng });
+          }
         }
       } catch (error) {
         console.warn('Failed to load backend progress, using localStorage', error);
@@ -113,7 +115,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     };
 
     loadBackendProgress();
-  }, [id]);
+  }, [id, currentProgress]);
 
   // WebSocket pour updates live
   const { lastUpdate, readyState, sendHeartbeat } = useShipmentWebSocket(id);
@@ -199,7 +201,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         setTimeRemaining('Non commencé');
       } else {
         // Priorité au backend progress, puis WebSocket, puis calcul local
-        if (backendProgress) {
+        if (backendProgress && backendProgress.progress > 0) {
           // Utiliser le progrès du backend (cross-device sync)
           progress = backendProgress.progress;
           if (backendProgress.current_lat && backendProgress.current_lng) {
@@ -230,8 +232,8 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
         // Synchroniser avec localStorage
         setCurrentProgress(Math.min(99.9, progress));
 
-        // Sauvegarder dans le backend pour synchronisation cross-device
-        if (currentPosition) {
+        // Sauvegarder dans le backend pour synchronisation cross-device seulement si le shipment a commencé et le progrès est supérieur
+        if (currentPosition && hasStarted && (backendProgress === null || progress > backendProgress.progress)) {
           try {
             shipmentProgressApi.update(id, {
               progress: Math.min(99.9, progress),

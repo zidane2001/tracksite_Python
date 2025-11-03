@@ -225,7 +225,10 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
                top: `${originPixel.y - 25}px`,
                zIndex: 4
              }}>
-          📍 Départ
+          📍 Départ<br/>
+          <span className="text-gray-600 text-xs">
+            {originCoords.lat.toFixed(4)}, {originCoords.lng.toFixed(4)}
+          </span>
         </div>
 
         {/* Destination Point */}
@@ -245,7 +248,10 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
                top: `${destPixel.y - 25}px`,
                zIndex: 4
              }}>
-          🎯 Arrivée
+          🎯 Arrivée<br/>
+          <span className="text-gray-600 text-xs">
+            {destCoords.lat.toFixed(4)}, {destCoords.lng.toFixed(4)}
+          </span>
         </div>
 
         {/* Moving Package */}
@@ -315,7 +321,10 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
               // Keep default text on error
             }
             return transportText;
-          })()}
+          })()}<br/>
+          <span className="text-gray-600 text-xs">
+            {currentPackagePosition ? `${currentPackagePosition.lat.toFixed(4)}, ${currentPackagePosition.lng.toFixed(4)}` : ''}
+          </span>
         </div>
 
         {/* Progress Indicator */}
@@ -393,6 +402,82 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
             <div className="mt-1 text-xs text-gray-600">
               {shipment.expected_delivery ? new Date(shipment.expected_delivery).toLocaleDateString('fr-FR') : 'Non définie'}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alternative Progress Bar Section */}
+      <div className="p-4 bg-white border-t">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Progression Alternative</h4>
+        <div className="space-y-3">
+          {/* Progress Bar */}
+          <div className="bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full transition-all duration-1000 ease-out relative"
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Progress Details */}
+          <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
+            <div>
+              <span className="font-medium">Progression:</span> {Math.round(progress)}%
+            </div>
+            <div>
+              <span className="font-medium">Temps restant:</span> {timeRemaining}
+            </div>
+          </div>
+
+          {/* Distance and Speed Info */}
+          <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
+            <div>
+              <span className="font-medium">Distance:</span> {(() => {
+                const totalDist = calculateDistance(
+                  { latitude: originCoords.lat, longitude: originCoords.lng },
+                  { latitude: destCoords.lat, longitude: destCoords.lng }
+                );
+                const traveled = (progress / 100) * totalDist;
+                return `${traveled.toFixed(1)} / ${totalDist.toFixed(1)} km`;
+              })()}
+            </div>
+            <div>
+              <span className="font-medium">Transport:</span> {(() => {
+                try {
+                  if (shipment.expected_delivery && shipment.departure_time) {
+                    const departureTime = new Date(shipment.departure_time);
+                    const expectedDelivery = new Date(shipment.expected_delivery);
+                    const totalTimeHours = (expectedDelivery.getTime() - departureTime.getTime()) / (1000 * 60 * 60);
+                    const totalDistance = calculateDistance(
+                      { latitude: originCoords.lat, longitude: originCoords.lng },
+                      { latitude: destCoords.lat, longitude: destCoords.lng }
+                    );
+                    const calculatedSpeed = totalDistance / totalTimeHours;
+
+                    let transportName = 'Camion';
+                    if (calculatedSpeed > 800) transportName = 'Avion';
+                    else if (calculatedSpeed > 50) transportName = 'Camion';
+                    else if (calculatedSpeed > 30) transportName = 'Fourgonnette';
+                    else transportName = 'Bateau';
+
+                    return `${transportName} (${calculatedSpeed.toFixed(0)} km/h)`;
+                  }
+                } catch (error) {
+                  // Return default on error
+                }
+                return 'Camion (80 km/h)';
+              })()}
+            </div>
+          </div>
+
+          {/* Current Position */}
+          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+            <span className="font-medium">Position actuelle:</span><br/>
+            {currentPackagePosition ?
+              `${currentPackagePosition.lat.toFixed(4)}, ${currentPackagePosition.lng.toFixed(4)}` :
+              'Calcul en cours...'
+            }
           </div>
         </div>
       </div>

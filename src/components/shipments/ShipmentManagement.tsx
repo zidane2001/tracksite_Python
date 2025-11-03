@@ -1008,7 +1008,7 @@ export const ShipmentManagement = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Date de ramassage</span>
+                    <span className="label-text font-medium">Date de départ</span>
                   </label>
                   <input
                     type="date"
@@ -1019,7 +1019,7 @@ export const ShipmentManagement = () => {
                 </div>
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Heure de ramassage</span>
+                    <span className="label-text font-medium">Heure de départ</span>
                   </label>
                   <input
                     type="time"
@@ -1030,7 +1030,7 @@ export const ShipmentManagement = () => {
                 </div>
                 <div className="form-control sm:col-span-2">
                   <label className="label">
-                    <span className="label-text font-medium">Heure de départ</span>
+                    <span className="label-text font-medium">Date et heure d'arrivée</span>
                   </label>
                   <input
                     type="datetime-local"
@@ -1368,7 +1368,7 @@ export const ShipmentManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">Heure de départ</label>
+                    <label className="block text-sm text-gray-700 mb-1">Date et heure d'arrivée</label>
                     <input
                       type="datetime-local"
                       className="w-full p-2 border rounded-lg text-sm md:text-base"
@@ -1377,7 +1377,7 @@ export const ShipmentManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">Date de ramassage</label>
+                    <label className="block text-sm text-gray-700 mb-1">Date de départ</label>
                     <input
                       type="date"
                       className="w-full p-2 border rounded-lg text-sm md:text-base"
@@ -1386,7 +1386,7 @@ export const ShipmentManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">Heure de ramassage</label>
+                    <label className="block text-sm text-gray-700 mb-1">Heure de départ</label>
                     <input
                       type="time"
                       className="w-full p-2 border rounded-lg text-sm md:text-base"

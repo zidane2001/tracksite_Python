@@ -104,7 +104,7 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     }
   }, [parsed]);
 
-  // Calcul vitesse & distance
+  // Calcul vitesse & distance basée sur le temps de trajet réel (départ - arrivée)
   const { totalDistance, calculatedSpeed } = useMemo(() => {
     if (!originCoords || !destCoords) return { totalDistance: 0, calculatedSpeed: 80 };
 
@@ -114,18 +114,21 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     );
 
     let speed = 80;
-    if (shipment.departure_time && shipment.expected_delivery) {
+    if (shipment.pickup_date && shipment.pickup_time && shipment.departure_time) {
       try {
-        const start = new Date(shipment.departure_time).getTime();
-        const end = new Date(shipment.expected_delivery).getTime();
-        const hours = (end - start) / (1000 * 60 * 60);
+        // Créer la date/heure de départ
+        const departureDateTime = new Date(`${shipment.pickup_date}T${shipment.pickup_time}`);
+        // Créer la date/heure d'arrivée depuis departure_time (qui contient maintenant la date et heure d'arrivée)
+        const arrivalDateTime = new Date(shipment.departure_time.replace(' ', 'T'));
+
+        const hours = (arrivalDateTime.getTime() - departureDateTime.getTime()) / (1000 * 60 * 60);
         if (hours > 0 && distance > 0) speed = distance / hours;
       } catch (e) {
         console.warn('Invalid shipment times', e);
       }
     }
     return { totalDistance: distance, calculatedSpeed: speed };
-  }, [originCoords, destCoords, shipment.departure_time, shipment.expected_delivery]);
+  }, [originCoords, destCoords, shipment.pickup_date, shipment.pickup_time, shipment.departure_time]);
 
   useEffect(() => {
     const info = getTransportInfo(calculatedSpeed);
@@ -169,9 +172,16 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
       const remainingHours = remainingDistance / calculatedSpeed;
       setTimeRemaining(formatTimeRemaining(remainingHours));
 
-      // Zoom sur position actuelle
-      if (mapRef.current && currentPosition) {
-        mapRef.current.setView([currentPosition.lat, currentPosition.lng], 10);
+      // Zoom automatique pour montrer tout le trajet (départ, position actuelle, arrivée)
+      if (mapRef.current && originCoords && destCoords) {
+        const bounds = L.latLngBounds([
+          [originCoords.lat, originCoords.lng],
+          [destCoords.lat, destCoords.lng]
+        ]);
+        if (currentPosition) {
+          bounds.extend([currentPosition.lat, currentPosition.lng]);
+        }
+        mapRef.current.fitBounds(bounds, { padding: [20, 20] });
       }
 
       animationId = requestAnimationFrame(animate);
@@ -215,13 +225,20 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
 
   return (
     <div className={`bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 ${className}`}>
-      {/* Carte Leaflet */}
+      {/* Carte Leaflet - Zoomable complète */}
       <div className="relative h-96">
         <MapContainer
           center={center as [number, number]}
-          zoom={6}
+          zoom={4}
           ref={mapRef}
           style={{ height: '100%', width: '100%' }}
+          zoomControl={true}
+          scrollWheelZoom={true}
+          doubleClickZoom={true}
+          boxZoom={true}
+          keyboard={true}
+          dragging={true}
+          touchZoom={true}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

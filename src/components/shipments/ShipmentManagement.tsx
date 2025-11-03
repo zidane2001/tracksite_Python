@@ -924,7 +924,6 @@ export const ShipmentManagement = () => {
                       <div className="font-medium">Distance: {calculatedDistance.toFixed(1)} km</div>
                       <div className="text-xs opacity-75">
                         {(() => {
-                          let speedText = 'Vitesse calculée: ';
                           if (newPickupDate && newPickupTime && newDepartureTime) {
                             try {
                               const departureDateTime = new Date(`${newPickupDate}T${newPickupTime}`);
@@ -932,17 +931,13 @@ export const ShipmentManagement = () => {
                               const travelTimeHours = (arrivalDateTime.getTime() - departureDateTime.getTime()) / (1000 * 60 * 60);
                               if (travelTimeHours > 0 && calculatedDistance > 0) {
                                 const speed = calculatedDistance / travelTimeHours;
-                                speedText += `${speed.toFixed(1)} km/h`;
-                              } else {
-                                speedText += 'Non calculable';
+                                return `Vitesse: ${speed.toFixed(1)} km/h`;
                               }
                             } catch (e) {
-                              speedText += 'Erreur de calcul';
+                              // Ignore errors
                             }
-                          } else {
-                            speedText += 'Saisir dates pour calcul';
                           }
-                          return speedText;
+                          return 'Saisir dates pour calcul de vitesse';
                         })()}
                       </div>
                     </div>

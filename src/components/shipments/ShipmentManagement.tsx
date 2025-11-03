@@ -25,6 +25,8 @@ export const ShipmentManagement = () => {
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
   const [originLocationName, setOriginLocationName] = useState<string>('');
   const [destinationLocationName, setDestinationLocationName] = useState<string>('');
+  const [isGeocodingOrigin, setIsGeocodingOrigin] = useState(false);
+  const [isGeocodingDestination, setIsGeocodingDestination] = useState(false);
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
   const [newShipperName, setNewShipperName] = useState('');
@@ -153,6 +155,69 @@ export const ShipmentManagement = () => {
     copy[index] = { ...copy[index], [field]: value } as PackageInput;
     setNewPackages(copy);
   };
+  // Function to handle coordinate input changes and automatic geocoding
+  const handleOriginChange = async (value: string) => {
+    setNewOrigin(value);
+    if (value.trim()) {
+      const coords = parseCoordinates(value);
+      if (coords) {
+        setOriginCoords(coords);
+        setIsGeocodingOrigin(true);
+        try {
+          const locationName = await reverseGeocode(coords);
+          setOriginLocationName(locationName);
+        } catch (error) {
+          console.warn('Failed to geocode origin:', error);
+          setOriginLocationName(`${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
+        } finally {
+          setIsGeocodingOrigin(false);
+        }
+      } else {
+        setOriginCoords(null);
+        setOriginLocationName('');
+      }
+    } else {
+      setOriginCoords(null);
+      setOriginLocationName('');
+    }
+  };
+
+  const handleDestinationChange = async (value: string) => {
+    setNewDestination(value);
+    if (value.trim()) {
+      const coords = parseCoordinates(value);
+      if (coords) {
+        setDestinationCoords(coords);
+        setIsGeocodingDestination(true);
+        try {
+          const locationName = await reverseGeocode(coords);
+          setDestinationLocationName(locationName);
+        } catch (error) {
+          console.warn('Failed to geocode destination:', error);
+          setDestinationLocationName(`${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
+        } finally {
+          setIsGeocodingDestination(false);
+        }
+      } else {
+        setDestinationCoords(null);
+        setDestinationLocationName('');
+      }
+    } else {
+      setDestinationCoords(null);
+      setDestinationLocationName('');
+    }
+  };
+
+  // Update distance calculation when coordinates change
+  useEffect(() => {
+    if (originCoords && destinationCoords) {
+      const distance = calculateDistance(originCoords, destinationCoords);
+      setCalculatedDistance(distance);
+    } else {
+      setCalculatedDistance(null);
+    }
+  }, [originCoords, destinationCoords]);
+
   const handleCreateShipment = async () => {
     // Validation
     if (!newShipperName || !newShipperEmail || !newShipperPhone || !newReceiverName || !newOrigin || !newDestination) {
@@ -171,12 +236,8 @@ export const ShipmentManagement = () => {
       return;
     }
 
-    setOriginCoords(originParsed);
-    setDestinationCoords(destinationParsed);
-
     // Calculate distance and delivery time based on user input
     const distance = calculateDistance(originParsed, destinationParsed);
-    setCalculatedDistance(distance);
 
     // Calculate speed based on user-provided departure and arrival times
     let calculatedSpeed = 80; // default fallback
@@ -196,21 +257,6 @@ export const ShipmentManagement = () => {
     // Use calculated speed for delivery time estimation
     const deliveryTimeHours = distance / calculatedSpeed;
     const expectedDeliveryDate = new Date(Date.now() + deliveryTimeHours * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    // Reverse geocode coordinates to get location names
-    try {
-      const [originName, destName] = await Promise.all([
-        reverseGeocode(originParsed),
-        reverseGeocode(destinationParsed)
-      ]);
-      setOriginLocationName(originName);
-      setDestinationLocationName(destName);
-    } catch (error) {
-      console.warn('Failed to reverse geocode locations:', error);
-      // Fallback to coordinates if geocoding fails
-      setOriginLocationName(`${originParsed.latitude.toFixed(4)}, ${originParsed.longitude.toFixed(4)}`);
-      setDestinationLocationName(`${destinationParsed.latitude.toFixed(4)}, ${destinationParsed.longitude.toFixed(4)}`);
-    }
 
     const { taxedWeightKg } = calculateShipmentWeights(newPackages, divisor);
 
@@ -254,6 +300,8 @@ export const ShipmentManagement = () => {
       setCalculatedDistance(null);
       setOriginLocationName('');
       setDestinationLocationName('');
+      setIsGeocodingOrigin(false);
+      setIsGeocodingDestination(false);
       setNewShipperName('');
       setNewShipperAddress('');
       setNewShipperPhone('');
@@ -831,10 +879,15 @@ export const ShipmentManagement = () => {
                     type="text"
                     className="input input-bordered input-sm border-2 border-black focus:border-gray-600 shadow-sm"
                     value={newOrigin}
-                    onChange={(e) => setNewOrigin(e.target.value)}
+                    onChange={(e) => handleOriginChange(e.target.value)}
                     placeholder="Coordonnées GPS (ex: 40.7128, -74.0060)"
                   />
-                  {originLocationName && (
+                  {isGeocodingOrigin && (
+                    <div className="mt-1 text-sm text-blue-600 font-medium">
+                      🔍 Recherche de l'emplacement...
+                    </div>
+                  )}
+                  {originLocationName && !isGeocodingOrigin && (
                     <div className="mt-1 text-sm text-green-600 font-medium">
                       📍 {originLocationName}
                     </div>
@@ -848,10 +901,15 @@ export const ShipmentManagement = () => {
                     type="text"
                     className="input input-bordered input-sm border-2 border-black focus:border-gray-600 shadow-sm"
                     value={newDestination}
-                    onChange={(e) => setNewDestination(e.target.value)}
+                    onChange={(e) => handleDestinationChange(e.target.value)}
                     placeholder="Coordonnées GPS (ex: 40.7128, -74.0060)"
                   />
-                  {destinationLocationName && (
+                  {isGeocodingDestination && (
+                    <div className="mt-1 text-sm text-blue-600 font-medium">
+                      🔍 Recherche de l'emplacement...
+                    </div>
+                  )}
+                  {destinationLocationName && !isGeocodingDestination && (
                     <div className="mt-1 text-sm text-green-600 font-medium">
                       🎯 {destinationLocationName}
                     </div>

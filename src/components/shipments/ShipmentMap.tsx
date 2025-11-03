@@ -10,6 +10,7 @@ import 'leaflet-defaulticon-compatibility';
 
 import { usePersistedState } from '../../hooks/usePersistedState';
 import { useShipmentWebSocket } from '../../hooks/useShipmentWebSocket';
+import { shipmentProgressApi } from '../../utils/api';
 
 import { LatLngExpression } from 'leaflet';
 
@@ -57,7 +58,16 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   const { id } = shipment;  // Utilise l'ID du shipment pour la clé localStorage
   const mapRef = useRef<L.Map>(null);
 
-  // États persistés via localStorage
+  // États pour la persistance cross-device via backend
+  const [backendProgress, setBackendProgress] = useState<{
+    progress: number;
+    current_lat?: number;
+    current_lng?: number;
+    last_updated: string;
+  } | null>(null);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+
+  // États persistés via localStorage (fallback)
   const [startTime] = usePersistedState<number>(`shipment-${id}-startTime`, (() => {
     // Utiliser la date de départ si disponible, sinon Date.now()
     if (shipment.pickup_date && shipment.pickup_time) {
@@ -83,6 +93,27 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   const [distanceTraveled, setDistanceTraveled] = useState(0);
   const [speed, setSpeed] = useState(80);
   const [transport, setTransport] = useState({ icon: '🚚', name: 'Camion', color: 'bg-blue-100 text-blue-800' });
+
+  // Charger le progrès depuis le backend au montage
+  useEffect(() => {
+    const loadBackendProgress = async () => {
+      try {
+        const progress = await shipmentProgressApi.get(id);
+        setBackendProgress(progress);
+        // Synchroniser avec localStorage
+        setCurrentProgress(progress.progress);
+        if (progress.current_lat && progress.current_lng) {
+          setCurrentPosition({ lat: progress.current_lat, lng: progress.current_lng });
+        }
+      } catch (error) {
+        console.warn('Failed to load backend progress, using localStorage', error);
+      } finally {
+        setIsLoadingProgress(false);
+      }
+    };
+
+    loadBackendProgress();
+  }, [id]);
 
   // WebSocket pour updates live
   const { lastUpdate, readyState, sendHeartbeat } = useShipmentWebSocket(id);
@@ -187,6 +218,19 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
 
         // Persist progress
         setCurrentProgress(Math.min(99.9, progress));
+
+        // Sauvegarder dans le backend pour synchronisation cross-device
+        if (currentPosition) {
+          try {
+            shipmentProgressApi.update(id, {
+              progress: Math.min(99.9, progress),
+              current_lat: currentPosition.lat,
+              current_lng: currentPosition.lng,
+            }).catch(error => console.warn('Failed to save progress to backend:', error));
+          } catch (error) {
+            console.warn('Failed to update backend progress:', error);
+          }
+        }
 
         // Temps restant
         const remainingDistance = totalDistance - (progress / 100) * totalDistance;

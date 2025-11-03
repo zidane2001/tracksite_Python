@@ -294,3 +294,22 @@ export const trackingHistoryApi = {
     method: 'DELETE',
   }),
 };
+
+// Shipment Progress API for cross-device persistence
+export const shipmentProgressApi = {
+  get: (shipmentId: number) => apiRequest<{
+    shipment_id: number;
+    progress: number;
+    current_lat?: number;
+    current_lng?: number;
+    last_updated: string;
+  }>(`/api/shipments/${shipmentId}/progress`),
+  update: (shipmentId: number, data: {
+    progress: number;
+    current_lat?: number;
+    current_lng?: number;
+  }) => apiRequest<{ message: string; progress: number }>(`/api/shipments/${shipmentId}/progress`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+};

@@ -260,6 +260,28 @@ def init_db():
                 FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
             )''')
 
+        # Shipment progress table for cross-device persistence
+        if USE_POSTGRESQL:
+            cursor.execute('''CREATE TABLE IF NOT EXISTS shipment_progress (
+                id SERIAL PRIMARY KEY,
+                shipment_id INTEGER NOT NULL,
+                progress REAL NOT NULL DEFAULT 0,
+                current_lat REAL,
+                current_lng REAL,
+                last_updated TEXT NOT NULL,
+                FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS shipment_progress (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                shipment_id INTEGER NOT NULL,
+                progress REAL NOT NULL DEFAULT 0,
+                current_lat REAL,
+                current_lng REAL,
+                last_updated TEXT NOT NULL,
+                FOREIGN KEY (shipment_id) REFERENCES shipments (id) ON DELETE CASCADE
+            )''')
+
         # Users table
         if USE_POSTGRESQL:
             cursor.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -691,6 +713,15 @@ def delete_pickup_rate(id):
         db.execute('DELETE FROM pickup_rates WHERE id = ?', (id,))
     db.commit()
     return jsonify({'message': 'Pickup rate deleted'})
+
+@app.route('/api/shipments/<int:shipment_id>/progress', methods=['GET', 'PUT', 'OPTIONS'])
+def handle_shipment_progress(shipment_id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    elif request.method == 'GET':
+        return get_shipment_progress(shipment_id)
+    elif request.method == 'PUT':
+        return update_shipment_progress(shipment_id)
 
 @app.route('/api/shipments', methods=['GET', 'POST', 'OPTIONS'])
 def handle_shipments():
@@ -1159,6 +1190,64 @@ def delete_tracking_history(history_id):
         db.execute('DELETE FROM tracking_history WHERE id = ?', (history_id,))
     db.commit()
     return jsonify({'message': 'Tracking history deleted'})
+
+def get_shipment_progress(shipment_id):
+    db = get_db()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM shipment_progress WHERE shipment_id = %s ORDER BY last_updated DESC LIMIT 1', (shipment_id,))
+        progress = cursor.fetchone()
+    else:
+        progress = db.execute('SELECT * FROM shipment_progress WHERE shipment_id = ? ORDER BY last_updated DESC LIMIT 1', (shipment_id,)).fetchone()
+
+    if progress:
+        return jsonify(dict(progress))
+    else:
+        # Return default progress if none exists
+        return jsonify({
+            'shipment_id': shipment_id,
+            'progress': 0,
+            'current_lat': None,
+            'current_lng': None,
+            'last_updated': datetime.now().isoformat()
+        })
+
+def update_shipment_progress(shipment_id):
+    data = request.get_json()
+    progress = data.get('progress', 0)
+    current_lat = data.get('current_lat')
+    current_lng = data.get('current_lng')
+
+    db = get_db()
+    if USE_POSTGRESQL:
+        cursor = db.cursor()
+        # Insert or update progress
+        cursor.execute('''
+            INSERT INTO shipment_progress (shipment_id, progress, current_lat, current_lng, last_updated)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (shipment_id) DO UPDATE SET
+                progress = EXCLUDED.progress,
+                current_lat = EXCLUDED.current_lat,
+                current_lng = EXCLUDED.current_lng,
+                last_updated = EXCLUDED.last_updated
+        ''', (shipment_id, progress, current_lat, current_lng, datetime.now().isoformat()))
+    else:
+        # For SQLite, we need to handle upsert differently
+        existing = db.execute('SELECT id FROM shipment_progress WHERE shipment_id = ?', (shipment_id,)).fetchone()
+        if existing:
+            db.execute('''
+                UPDATE shipment_progress SET
+                    progress = ?, current_lat = ?, current_lng = ?, last_updated = ?
+                WHERE shipment_id = ?
+            ''', (progress, current_lat, current_lng, datetime.now().isoformat(), shipment_id))
+        else:
+            db.execute('''
+                INSERT INTO shipment_progress (shipment_id, progress, current_lat, current_lng, last_updated)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (shipment_id, progress, current_lat, current_lng, datetime.now().isoformat()))
+
+    db.commit()
+    return jsonify({'message': 'Progress updated', 'progress': progress})
 
 @app.route('/api/shipments/<int:id>/confirm', methods=['POST', 'OPTIONS'])
 def confirm_shipment(id):

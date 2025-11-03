@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Shipment } from '../../utils/api';
-import { parseCoordinates, calculateDistance, calculateDeliveryTime } from '../../utils/coordinates';
+import { parseCoordinates, calculateDistance, calculateDeliveryTime, getTransportMethod } from '../../utils/coordinates';
 import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
@@ -49,11 +49,8 @@ const formatTimeRemaining = (hours: number): string => {
   return `${days}j ${remainingHours}h`;
 };
 
-const getTransportInfo = (speed: number) => {
-  if (speed > 800) return { icon: '✈️', name: 'Avion', color: 'bg-purple-100 text-purple-800' };
-  if (speed > 50) return { icon: '🚚', name: 'Camion', color: 'bg-blue-100 text-blue-800' };
-  if (speed > 30) return { icon: '🚐', name: 'Fourgonnette', color: 'bg-yellow-100 text-yellow-800' };
-  return { icon: '🚢', name: 'Bateau', color: 'bg-teal-100 text-teal-800' };
+const getTransportInfo = (speed: number, distance: number, travelTimeHours: number) => {
+  return getTransportMethod(speed, distance, travelTimeHours);
 };
 
 export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = '' }) => {
@@ -131,7 +128,9 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
   }, [originCoords, destCoords, shipment.pickup_date, shipment.pickup_time, shipment.departure_time]);
 
   useEffect(() => {
-    const info = getTransportInfo(calculatedSpeed);
+    const travelTimeHours = (shipment.departure_time && shipment.pickup_date && shipment.pickup_time) ?
+      (new Date(shipment.departure_time).getTime() - new Date(`${shipment.pickup_date}T${shipment.pickup_time}`).getTime()) / (1000 * 60 * 60) : 0;
+    const info = getTransportInfo(calculatedSpeed, totalDistance, travelTimeHours);
     setSpeed(calculatedSpeed);
     setTransport(info);
   }, [calculatedSpeed]);

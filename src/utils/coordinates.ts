@@ -69,6 +69,30 @@ export function calculateDeliveryTime(distanceKm: number, averageSpeedKmh: numbe
   return travelTimeHours + processingTimeHours + bufferHours;
 }
 
+export function getTransportMethod(speedKmh: number, distanceKm: number, travelTimeHours: number): { icon: string, name: string, color: string, maxSpeed: number } {
+  // For intercontinental distances (>3000km) or very long travel times (>72 hours)
+  if (distanceKm > 3000 || travelTimeHours > 72) {
+    if (travelTimeHours > 72) {
+      return { icon: '🚢', name: 'Bateau', color: 'bg-teal-100 text-teal-800', maxSpeed: 30 };
+    } else {
+      return { icon: '✈️', name: 'Avion', color: 'bg-purple-100 text-purple-800', maxSpeed: 900 };
+    }
+  }
+
+  // For continental distances with reasonable travel times
+  if (speedKmh > 250) {
+    return { icon: '✈️', name: 'Avion', color: 'bg-purple-100 text-purple-800', maxSpeed: 900 };
+  } else if (speedKmh > 120) {
+    return { icon: '🚄', name: 'Train rapide', color: 'bg-indigo-100 text-indigo-800', maxSpeed: 250 };
+  } else if (speedKmh > 80) {
+    return { icon: '🚚', name: 'Camion', color: 'bg-blue-100 text-blue-800', maxSpeed: 120 };
+  } else if (speedKmh > 30) {
+    return { icon: '🚐', name: 'Fourgonnette', color: 'bg-yellow-100 text-yellow-800', maxSpeed: 80 };
+  } else {
+    return { icon: '🚢', name: 'Bateau', color: 'bg-teal-100 text-teal-800', maxSpeed: 30 };
+  }
+}
+
 export function formatCoordinates(coords: Coordinates): string {
   return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
 }

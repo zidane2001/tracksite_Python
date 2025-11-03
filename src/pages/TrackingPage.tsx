@@ -316,7 +316,7 @@ export const TrackingPage: React.FC = () => {
               Suivi en temps réel - Mouvement GPS
             </h3>
             <p className="text-sm text-base-content/70">
-              Le colis se déplace automatiquement à 80 km/h entre le point de départ et d'arrivée
+              Suivez le mouvement de votre colis en temps réel sur la carte ci-dessous
             </p>
           </div>
           <div className="card-body">

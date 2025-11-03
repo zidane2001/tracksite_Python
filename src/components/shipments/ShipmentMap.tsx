@@ -27,35 +27,39 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
     }
   }, [shipment]);
 
-  // Real-time update every second
+  // Real-time update every second based on GPS distance and 80 km/h speed
   useEffect(() => {
     if (!originCoords || !destCoords) return;
+
+    const totalDistance = calculateDistance(
+      { latitude: originCoords.lat, longitude: originCoords.lng },
+      { latitude: destCoords.lat, longitude: destCoords.lng }
+    );
+
+    // Calculate total time at 80 km/h: time = distance / speed
+    const totalTimeHours = totalDistance / 80; // 80 km/h speed
+    const totalTimeSeconds = totalTimeHours * 3600; // Convert to seconds
 
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsedSeconds = (now - startTime) / 1000;
 
-      // Calculate progress based on real time (simulate movement)
-      const totalDuration = calculateDeliveryTime(calculateDistance(
-        { latitude: originCoords.lat, longitude: originCoords.lng },
-        { latitude: destCoords.lat, longitude: destCoords.lng }
-      )) * 3600; // Convert hours to seconds
-
-      // For demo purposes, make it move faster (every 10 seconds = 1% progress)
-      // In real app, this would be based on actual shipment progress
-      const progressIncrement = (elapsedSeconds / 10) * 0.5; // 0.5% every 10 seconds
-      const currentProgress = Math.min(95, progressIncrement); // Max 95% until actually delivered
+      // Calculate progress based on actual time and distance
+      // Distance traveled = speed * time = 80 km/h * (elapsedSeconds / 3600) hours
+      const distanceTraveled = (80 * elapsedSeconds) / 3600; // km
+      const currentProgress = Math.min(99, (distanceTraveled / totalDistance) * 100);
 
       setProgress(currentProgress);
 
-      // Calculate current package position
+      // Calculate current package position using GPS interpolation
       const currentLat = originCoords.lat + (destCoords.lat - originCoords.lat) * (currentProgress / 100);
       const currentLng = originCoords.lng + (destCoords.lng - originCoords.lng) * (currentProgress / 100);
       setCurrentPackagePosition({ lat: currentLat, lng: currentLng });
 
-      // Calculate time remaining
-      const remainingSeconds = Math.max(0, totalDuration - elapsedSeconds);
-      setTimeRemaining(formatTimeRemaining(remainingSeconds / 3600)); // Convert back to hours
+      // Calculate time remaining based on remaining distance
+      const remainingDistance = Math.max(0, totalDistance - distanceTraveled);
+      const remainingTimeHours = remainingDistance / 80;
+      setTimeRemaining(formatTimeRemaining(remainingTimeHours));
     }, 1000); // Update every second
 
     return () => clearInterval(interval);
@@ -256,10 +260,14 @@ export const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipment, className = 
           </div>
           <div className="flex justify-between text-xs text-gray-600 mt-1">
             <span>Temps restant: {timeRemaining}</span>
-            <span>Distance: {calculateDistance(
-              { latitude: originCoords.lat, longitude: originCoords.lng },
-              { latitude: destCoords.lat, longitude: destCoords.lng }
-            ).toFixed(0)} km</span>
+            <span>Distance: {(() => {
+              const totalDist = calculateDistance(
+                { latitude: originCoords.lat, longitude: originCoords.lng },
+                { latitude: destCoords.lat, longitude: destCoords.lng }
+              );
+              const traveled = (progress / 100) * totalDist;
+              return `${traveled.toFixed(1)} / ${totalDist.toFixed(1)} km`;
+            })()}</span>
           </div>
         </div>
       </div>

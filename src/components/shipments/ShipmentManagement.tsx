@@ -226,8 +226,8 @@ export const ShipmentManagement = () => {
         receiver_address: newReceiverAddress,
         receiver_phone: newReceiverPhone,
         receiver_email: newReceiverEmail,
-        origin: newOrigin,
-        destination: newDestination,
+        origin: originLocationName || newOrigin,
+        destination: destinationLocationName || newDestination,
         status: 'processing', // Admin-created shipments go directly to processing status
         packages: newPackages.reduce((sum, p) => sum + Math.max(1, p.quantity || 1), 0),
         total_weight: taxedWeightKg,
